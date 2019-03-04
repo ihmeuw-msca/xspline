@@ -1,7 +1,8 @@
-import numpy as np
-import copy
+# define the bspline objective class
 
 class bspline:
+	import numpy as np
+	import copy
 	# constructor
 	# -------------------------------------------------------------------------
 	def __init__(self, knots):
@@ -74,16 +75,47 @@ class bspline:
 
 	# design matrix
 	# -------------------------------------------------------------------------
-	def designMat(self, i, x, extrapolate=False):
+	def designMat(self, p, x, extrapolate=False):
+		assert isinstance(p, int) and p>=0,\
+			'p: p must be non-negative integer.'
 		k = self.k
-		X = np.zeros((x.size, i+k))
-		for j in range(i+k):
-			X[:,j] = self.splineF(i, j+1, x, extrapolate=extrapolate)
+		X = np.zeros((x.size, p+k))
+		for j in range(p+k):
+			X[:,j] = self.splineF(p, j+1, x, extrapolate=extrapolate)
 		#
 		return X
-		
+
+	# derivative matrix
+	# -------------------------------------------------------------------------
+	def derivativeMat(self, i, p):
+		assert isinstance(p, int) and p>=0,\
+			'p: p must be non-negative integer.'
+		assert isinstance(i, int) and 0<=i<=p,\
+			'i: i must be integer that between 0 and p.'
+		#
+		D = self.seqDervMat(p)
+		for j in range(p-1, i-1, -1):
+			D = self.seqDervMat(j).dot(D)
+		#
+		return D
+
 	# utilities
 	# -------------------------------------------------------------------------
+	def seqDervMat(self, i):
+		k = self.k
+		t = self.t
+		#
+		if i == 0: return np.eye(k)
+		#
+		D = self.seqDiffMat(k + i)
+		#
+		cl = np.repeat(t[:k], [i] + [1]*(k-1))
+		cr = np.repeat(t[1:], [1]*(k-1) + [i])
+		#
+		D *= (cr - cl).reshape(i + k - 1, 1)
+		#
+		return D
+
 	def seqDiffMat(self, n):
 		assert n>=2 and isinstance(n, int), \
 			'n: n must be interger that greater or equal than 2.'
