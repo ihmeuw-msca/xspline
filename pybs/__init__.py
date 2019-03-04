@@ -2,13 +2,12 @@
 
 class bspline:
 	import numpy as np
-	import copy
 	# constructor
 	# -------------------------------------------------------------------------
 	def __init__(self, knots):
 		# check the input
 		knots = list(set(knots))
-		knots = np.sort(np.array(knots))
+		knots = self.np.sort(self.np.array(knots))
 		#
 		self.k = knots.size - 1
 		assert self.k>=1, 'knots: must include starting and ending points.'
@@ -27,8 +26,8 @@ class bspline:
 		cl = t[max(j-i-1, 0)]
 		cr = t[min(  j  , k)]
 		#
-		if j ==  1  and extrapolate: cl = -np.inf
-		if j == i+k and extrapolate: cr =  np.inf
+		if j ==  1  and extrapolate: cl = -self.np.inf
+		if j == i+k and extrapolate: cr =  self.np.inf
 		#
 		return [cl, cr]
 
@@ -79,7 +78,7 @@ class bspline:
 		assert isinstance(p, int) and p>=0,\
 			'p: p must be non-negative integer.'
 		k = self.k
-		X = np.zeros((x.size, p+k))
+		X = self.np.zeros((x.size, p+k))
 		for j in range(p+k):
 			X[:,j] = self.splineF(p, j+1, x, extrapolate=extrapolate)
 		#
@@ -105,12 +104,12 @@ class bspline:
 		k = self.k
 		t = self.t
 		#
-		if i == 0: return np.eye(k)
+		if i == 0: return self.np.eye(k)
 		#
 		D = self.seqDiffMat(k + i)
 		#
-		cl = np.repeat(t[:k], [i] + [1]*(k-1))
-		cr = np.repeat(t[1:], [1]*(k-1) + [i])
+		cl = self.np.repeat(t[:k], [i] + [1]*(k-1))
+		cr = self.np.repeat(t[1:], [1]*(k-1) + [i])
 		#
 		D *= (cr - cl).reshape(i + k - 1, 1)
 		#
@@ -119,8 +118,8 @@ class bspline:
 	def seqDiffMat(self, n):
 		assert n>=2 and isinstance(n, int), \
 			'n: n must be interger that greater or equal than 2.'
-		M = np.zeros((n-1, n))
-		id_d0 = np.diag_indices(n-1)
+		M = self.np.zeros((n-1, n))
+		id_d0 = self.np.diag_indices(n-1)
 		id_d1 = (id_d0[0], id_d0[1]+1)
 		#
 		M[id_d0] = -1.0
@@ -145,5 +144,5 @@ class bspline:
 		if include_r: r = t <= c[1]
 		else:         r = t <  c[1]
 		#
-		if np.isscalar(t): return float(l&r)
-		else:              return (l&r).astype(np.double)
+		if self.np.isscalar(t): return float(l&r)
+		else:                   return (l&r).astype(self.np.double)

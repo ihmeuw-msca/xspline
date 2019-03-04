@@ -1,7 +1,5 @@
 import numpy as np
-import sys
-sys.path.append('../src/')
-from bspy import *
+from pybs import bspline
 
 ok = True
 # create object
