@@ -31,7 +31,7 @@ class bspline:
 		#
 		return [cl, cr]
 
-	# create sbpline functions
+	# bpline functions
 	# -------------------------------------------------------------------------
 	def splineF(self, i, j, x, extrapolate=False):
 		# check the input
@@ -66,6 +66,43 @@ class bspline:
 		#
 		return l + r
 
+	# bpline derivative functions
+	# -------------------------------------------------------------------------
+	def splineDF(self, i, j, x, extrapolate=False):
+		# check the input
+		self.check(i, j)
+		#
+		k = self.k
+		t = self.t
+		#
+		# bottom level when degree i is 0
+		if i == 0: return self.np.zeros(x.size)
+		#
+		# special cases
+		if j == 1:
+			y = self.indiFunc(x, self.splineC(0, 1, extrapolate=extrapolate))
+			z = self.linFuncL(x, self.splineC(0, 1))
+			return y*i*(z**(i-1))/(t[0] - t[1])
+
+		if j == k + i:
+			y = self.indiFunc(x, self.splineC(0, k, extrapolate=extrapolate),
+				include_r=True)
+			z = self.linFuncR(x, self.splineC(0, k))
+			return y*i*(z**(i-1))/(t[k] - t[k-1])
+		#
+		# other levels
+		C1 = self.splineC(i-1, j-1)
+		C2 = self.splineC(i-1,  j )
+		#
+		l = self.splineDF(i-1, j-1, x)*self.linFuncR(x, C1) + \
+			self.splineF(i-1, j-1, x)/(C1[1] - C1[0])
+		r = self.splineDF(i-1,  j , x)*self.linFuncL(x, C2) + \
+			self.splineF(i-1,  j , x)/(C2[0] - C2[1])
+		#
+		return l + r
+
+	# check function
+	# -------------------------------------------------------------------------
 	def check(self, i, j):
 		assert isinstance(i,int) and i>=0,\
 			'i: i must be an non-negative integer.'
