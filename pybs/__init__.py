@@ -59,45 +59,49 @@ class bspline:
 			return y*(z**i)
 		#
 		# other levels
-		l = self.splineF(i-1, j-1, x)*self.linFuncR(x,
-			self.splineC(i-1, j-1, extrapolate=extrapolate))
-		r = self.splineF(i-1,  j , x)*self.linFuncL(x,
-			self.splineC(i-1,  j , extrapolate=extrapolate))
+		l = self.splineF(i-1, j-1, x)*self.linFuncR(x, self.splineC(i-1, j-1))
+		r = self.splineF(i-1,  j , x)*self.linFuncL(x, self.splineC(i-1,  j ))
 		#
 		return l + r
 
 	# bpline derivative functions
 	# -------------------------------------------------------------------------
-	def splineDF(self, i, j, x, extrapolate=False):
+	def splineDF(self, i, j, n, x, extrapolate=False):
 		# check the input
 		self.check(i, j)
+		assert isinstance(n, int) and n>=0, 'n: n must be a non-negative num.'
 		#
 		k = self.k
 		t = self.t
 		#
+		if n == 0: return self.splineF(i, j, x, extrapolate=extrapolate)
+		#
+		if n > i: return self.np.zeros(x.size)
+		#
 		# bottom level when degree i is 0
-		if i == 0: return self.np.zeros(x.size)
+		if i == 0:
+			f = self.indiFunc(x, self.splineC(i, j, extrapolate=extrapolate),
+				include_r=(j==k))
+			return f
 		#
 		# special cases
 		if j == 1:
-			y = self.indiFunc(x, self.splineC(0, 1, extrapolate=extrapolate))
-			z = self.linFuncL(x, self.splineC(0, 1))
-			return y*i*(z**(i-1))/(t[0] - t[1])
-
+			r = 0.0
+		else:
+			c = self.splineC(i-1, j-1)
+			d = c[1] - c[0]
+			f = (x - c[0])/d
+			r = self.splineDF(i-1, j-1,  n , x)*f + n*\
+				self.splineDF(i-1, j-1, n-1, x)/d
+		#
 		if j == k + i:
-			y = self.indiFunc(x, self.splineC(0, k, extrapolate=extrapolate),
-				include_r=True)
-			z = self.linFuncR(x, self.splineC(0, k))
-			return y*i*(z**(i-1))/(t[k] - t[k-1])
-		#
-		# other levels
-		C1 = self.splineC(i-1, j-1)
-		C2 = self.splineC(i-1,  j )
-		#
-		l = self.splineDF(i-1, j-1, x)*self.linFuncR(x, C1) + \
-			self.splineF(i-1, j-1, x)/(C1[1] - C1[0])
-		r = self.splineDF(i-1,  j , x)*self.linFuncL(x, C2) + \
-			self.splineF(i-1,  j , x)/(C2[0] - C2[1])
+			l = 0.0
+		else:
+			c = self.splineC(i-1,  j )
+			d = c[0] - c[1]
+			f = (x - c[1])/d
+			l = self.splineDF(i-1, j,  n , x)*f + n*\
+				self.splineDF(i-1, j, n-1, x)/d
 		#
 		return l + r
 

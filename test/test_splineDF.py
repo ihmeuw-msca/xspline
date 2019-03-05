@@ -26,7 +26,7 @@ for j in range(dmat.shape[1]):
 # splineDF calculate derivative
 my_df = np.zeros((2, dmat.shape[1]))
 for j in range(dmat.shape[1]):
-	my_df[:,j] = bs.splineDF(d, j+1, np.array([0.0, 1.0]), extrapolate=True)
+	my_df[:,j] = bs.splineDF(d, j+1, 1, np.array([0.0, 1.0]), extrapolate=True)
 
 err = np.linalg.norm(my_df - fd_df)
 #
