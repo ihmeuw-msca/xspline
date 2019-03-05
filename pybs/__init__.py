@@ -1,5 +1,7 @@
 # define the bspline objective class
 
+# main class
+# =============================================================================
 class bspline:
 	import numpy as np
 	# constructor
@@ -133,9 +135,9 @@ class bspline:
 		assert isinstance(i, int) and 0<=i<=p,\
 			'i: i must be integer that between 0 and p.'
 		#
-		D = self.seqDervMat(p)
-		for j in range(p-1, i-1, -1):
-			D = self.seqDervMat(j).dot(D)
+		D = p*self.seqDervMat(p)
+		for j in range(p-1, p-i, -1):
+			D = j*self.seqDervMat(j).dot(D)
 		#
 		return D
 
@@ -152,7 +154,7 @@ class bspline:
 		cl = self.np.repeat(t[:k], [i] + [1]*(k-1))
 		cr = self.np.repeat(t[1:], [1]*(k-1) + [i])
 		#
-		D *= (cr - cl).reshape(i + k - 1, 1)
+		D /= (cr - cl).reshape(i + k - 1, 1)
 		#
 		return D
 
@@ -178,6 +180,9 @@ class bspline:
 		u = c[1]
 		return (t - l)/(u - l)
 
+	def linExten(self, t, t0, f0, df0):
+		return f0 + df0*(t - t0)
+
 	def indiFunc(self, t, c, include_l=True, include_r=False):
 		if include_l: l = t >= c[0]
 		else:         l = t >  c[0]
@@ -187,3 +192,43 @@ class bspline:
 		#
 		if self.np.isscalar(t): return float(l&r)
 		else:                   return (l&r).astype(self.np.double)
+
+
+# general function design matrix
+# =============================================================================
+def designMat(x, knots, degree, l_linear=False, r_linear=False):
+	import numpy as np
+	#
+	knots = np.sort(np.array(list(set(knots))))
+	# check the input
+	assert knots.size>=2+l_linear+r_linear, \
+		'knots: wrong number of knots.'
+	assert isinstance(degree, int) and degree>=0, \
+		'degree: degree must be non-negative integer.'
+	#
+	# extrac the inner and outer region
+	a = 0
+	b = knots.size
+	if l_linear: a += 1
+	if r_linear: b -= 1
+	#
+	bs = bspline(knots[a:b])
+	#
+	lx = x[x < bs.t[0]]
+	ix = x[(bs.t[0] <= x) & (x <= bs.t[-1])]
+	rx = x[x > bs.t[-1]]
+	#
+	# design matrix of different parts
+	iM = bs.designMat(degree, ix)
+	lM = np.zeros((lx.size, iM.shape[1]))
+	rM = np.zeros((rx.size, iM.shape[1]))
+	for j in range(iM.shape[1]):
+		lf = bs.splineF(degree, j+1, bs.t[ 0])
+		rf = bs.splineF(degree, j+1, bs.t[-1])
+		dlf = bs.splineDF(degree, j+1, 1, bs.t[ 0])
+		drf = bs.splineDF(degree, j+1, 1, bs.t[-1])
+		# 
+		lM[:,j] = bs.linExten(lx, bs.t[ 0], lf, dlf)
+		rM[:,j] = bs.linExten(rx, bs.t[-1], rf, drf)
+	#
+	return np.vstack((lM, iM, rM)), bs
