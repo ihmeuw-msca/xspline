@@ -107,6 +107,55 @@ class bspline:
 		#
 		return l + r
 
+	# bpline derivative functions
+	# -------------------------------------------------------------------------
+	def splineIF(self, i, j, n, x, extrapolate=False, start=None):
+		# check the input
+		self.check(i, j)
+		assert isinstance(n, int) and n>=0, 'n: n must be a non-negative num.'
+		#
+		if start is None: start = self.t[0]
+		#
+		k = self.k
+		t = self.t
+		#
+		if n == 0: return self.splineF(i, j, x, extrapolate=extrapolate)
+		#
+		# bottom level when degree i is 0
+		if i == 0: return self.splineIF0(j, n, x, extrapolate, start)
+		#
+		# special cases
+		if j == 1:
+			r = 0.0
+		else:
+			c = self.splineC(i-1, j-1)
+			d = c[1] - c[0]
+			f = (x - c[0])/d
+			r = self.splineIF(i-1, j-1,  n , x)*f - n*\
+				self.splineIF(i-1, j-1, n+1, x)/d
+		#
+		if j == k + i:
+			l = 0.0
+		else:
+			c = self.splineC(i-1,  j )
+			d = c[0] - c[1]
+			f = (x - c[1])/d
+			l = self.splineIF(i-1,  j ,  n , x)*f - n*\
+				self.splineIF(i-1,  j , n+1, x)/d
+		#
+		return l + r
+
+	def splineIF0(self, j, n, x, extrapolate, start):
+		k = self.k
+		t = self.t
+		#
+		if extrapolate and j==1:
+			if start >= t[1]: return self.np.zeros(x.size)
+			return self.inteFunc(x, start, t[1], n)
+		#
+		return self.inteFunc(x, t[j-1], t[j], n)
+
+
 	# check function
 	# -------------------------------------------------------------------------
 	def check(self, i, j):
@@ -192,6 +241,22 @@ class bspline:
 		#
 		if self.np.isscalar(t): return float(l&r)
 		else:                   return (l&r).astype(self.np.double)
+
+	def expoFunc(self, t, n):
+		if self.np.all(t==0.0): return self.np.zeros(t.size)
+		return t**n/self.np.math.factorial(n)
+
+	def inteFunc(self, t, a, b, n):
+		s0 = self.np.maximum(0.0, self.np.minimum(b - a, t - a))
+		s1 = self.np.maximum(0.0, t - b)
+		#
+		f = self.expoFunc(s0, n)
+		#
+		for i in range(1, n):
+			f += self.expoFunc(s0, n-i)*self.expoFunc(s1, i)
+		#
+		return f
+
 
 
 # general function design matrix
