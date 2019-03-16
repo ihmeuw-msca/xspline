@@ -93,8 +93,8 @@ class bspline:
 			c = self.splineC(i-1, j-1)
 			d = c[1] - c[0]
 			f = (x - c[0])/d
-			r = self.splineDF(i-1, j-1,  n , x)*f + n*\
-				self.splineDF(i-1, j-1, n-1, x)/d
+			r = f*self.splineDF(i-1, j-1,  n , x, extrapolate=extrapolate) +\
+				n*self.splineDF(i-1, j-1, n-1, x, extrapolate=extrapolate)/d
 		#
 		if j == k + i:
 			l = 0.0
@@ -102,8 +102,8 @@ class bspline:
 			c = self.splineC(i-1,  j )
 			d = c[0] - c[1]
 			f = (x - c[1])/d
-			l = self.splineDF(i-1, j,  n , x)*f + n*\
-				self.splineDF(i-1, j, n-1, x)/d
+			l = f*self.splineDF(i-1,  j ,  n , x, extrapolate=extrapolate) +\
+				n*self.splineDF(i-1,  j , n-1, x, extrapolate=extrapolate)/d
 		#
 		return l + r
 
@@ -131,8 +131,10 @@ class bspline:
 			c = self.splineC(i-1, j-1)
 			d = c[1] - c[0]
 			f = (x - c[0])/d
-			r = self.splineIF(i-1, j-1,  n , x)*f - n*\
-				self.splineIF(i-1, j-1, n+1, x)/d
+			r = f*self.splineIF(i-1, j-1,  n , x, extrapolate=extrapolate,
+				start=start) - \
+				n*self.splineIF(i-1, j-1, n+1, x, extrapolate=extrapolate,
+				start=start)/d
 		#
 		if j == k + i:
 			l = 0.0
@@ -140,8 +142,10 @@ class bspline:
 			c = self.splineC(i-1,  j )
 			d = c[0] - c[1]
 			f = (x - c[1])/d
-			l = self.splineIF(i-1,  j ,  n , x)*f - n*\
-				self.splineIF(i-1,  j , n+1, x)/d
+			l = f*self.splineIF(i-1,  j ,  n , x, extrapolate=extrapolate,
+				start=start) - \
+				n*self.splineIF(i-1,  j , n+1, x, extrapolate=extrapolate,
+				start=start)/d
 		#
 		return l + r
 
@@ -149,11 +153,11 @@ class bspline:
 		k = self.k
 		t = self.t
 		#
-		if extrapolate and j==1:
-			if start >= t[1]: return self.np.zeros(x.size)
-			return self.inteFunc(x, start, t[1], n)
+		a = self.np.maximum(start, t[j-1])
+		b = t[j]
+		if extrapolate and j==1: a = start
 		#
-		return self.inteFunc(x, t[j-1], t[j], n)
+		return self.inteFunc(x, a, b, n)
 
 
 	# check function
@@ -262,38 +266,46 @@ class bspline:
 # general function design matrix
 # =============================================================================
 def designMat(x, knots, degree, l_linear=False, r_linear=False):
-	import numpy as np
-	#
-	knots = np.sort(np.array(list(set(knots))))
-	# check the input
-	assert knots.size>=2+l_linear+r_linear, \
-		'knots: wrong number of knots.'
-	assert isinstance(degree, int) and degree>=0, \
-		'degree: degree must be non-negative integer.'
-	#
-	# extrac the inner and outer region
-	a = 0
-	b = knots.size
-	if l_linear: a += 1
-	if r_linear: b -= 1
-	#
-	bs = bspline(knots[a:b])
-	#
-	lx = x[x < bs.t[0]]
-	ix = x[(bs.t[0] <= x) & (x <= bs.t[-1])]
-	rx = x[x > bs.t[-1]]
-	#
-	# design matrix of different parts
-	iM = bs.designMat(degree, ix)
-	lM = np.zeros((lx.size, iM.shape[1]))
-	rM = np.zeros((rx.size, iM.shape[1]))
-	for j in range(iM.shape[1]):
-		lf = bs.splineF(degree, j+1, bs.t[ 0])
-		rf = bs.splineF(degree, j+1, bs.t[-1])
-		dlf = bs.splineDF(degree, j+1, 1, bs.t[ 0])
-		drf = bs.splineDF(degree, j+1, 1, bs.t[-1])
-		# 
-		lM[:,j] = bs.linExten(lx, bs.t[ 0], lf, dlf)
-		rM[:,j] = bs.linExten(rx, bs.t[-1], rf, drf)
-	#
-	return np.vstack((lM, iM, rM)), bs
+    import numpy as np
+    #
+    knots = np.sort(np.array(list(set(knots))))
+    # check the input
+    assert knots.size>=2+l_linear+r_linear, \
+        'knots: wrong number of knots.'
+    assert isinstance(degree, int) and degree>=0, \
+        'degree: degree must be non-negative integer.'
+    #
+    # extrac the inner and outer region
+    a = 0
+    b = knots.size
+    if l_linear: a += 1
+    if r_linear: b -= 1
+    #
+    bs = bspline(knots[a:b])
+    #
+    ind_l = np.where(x < bs.t[0])[0]
+    ind_i = np.where((bs.t[0] <= x) & (x <= bs.t[-1]))[0]
+    ind_r = np.where(x > bs.t[-1])[0]
+    #
+    lx = x[ind_l]
+    ix = x[ind_i]
+    rx = x[ind_r]
+    #
+    # design matrix of different parts
+    iM = bs.designMat(degree, ix)
+    lM = np.zeros((lx.size, iM.shape[1]))
+    rM = np.zeros((rx.size, iM.shape[1]))
+    M  = np.zeros(( x.size, iM.shape[1]))
+    for j in range(iM.shape[1]):
+        lf = bs.splineF(degree, j+1, bs.t[ 0])
+        rf = bs.splineF(degree, j+1, bs.t[-1])
+        dlf = bs.splineDF(degree, j+1, 1, bs.t[ 0])
+        drf = bs.splineDF(degree, j+1, 1, bs.t[-1])
+        # 
+        lM[:,j] = bs.linExten(lx, bs.t[ 0], lf, dlf)
+        rM[:,j] = bs.linExten(rx, bs.t[-1], rf, drf)
+    #
+    M[ind_l] = lM
+    M[ind_i] = iM
+    M[ind_r] = rM
+    return M, bs
