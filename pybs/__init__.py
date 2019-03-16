@@ -180,6 +180,39 @@ class bspline:
 		#
 		return X
 
+	# design derivative matrix
+	# -------------------------------------------------------------------------
+	def designDMat(self, p, n, x, extrapolate=False):
+		assert isinstance(p, int) and p>=0,\
+			'p: p must be non-negative integer.'
+		assert isinstance(n, int) and n>=0,\
+			'n: n must be non-negative integer.'
+		if n == 0: return self.designMat(p, x, extrapolate=extrapolate)
+		#
+		k = self.k
+		X = self.np.zeros((x.size, p+k))
+		for j in range(p+k):
+			X[:,j] = self.splineDF(p, j+1, n, x, extrapolate=extrapolate)
+		#
+		return X
+
+	# design integration matrix
+	# -------------------------------------------------------------------------
+	def designIMat(self, p, n, x, extrapolate=False, start=None):
+		assert isinstance(p, int) and p>=0,\
+			'p: p must be non-negative integer.'
+		assert isinstance(n, int) and n>=0,\
+			'n: n must be non-negative integer.'
+		if n == 0: return self.designMat(p, x, extrapolate=extrapolate)
+		#
+		k = self.k
+		X = self.np.zeros((x.size, p+k))
+		for j in range(p+k):
+			X[:,j] = self.splineIF(p, j+1, n, x, extrapolate=extrapolate,
+				start=start)
+		#
+		return X
+
 	# derivative matrix
 	# -------------------------------------------------------------------------
 	def derivativeMat(self, i, p):
