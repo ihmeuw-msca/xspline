@@ -51,6 +51,10 @@ class lbspline:
         inner_lb = self.bs.knots[0]
         inner_rb = self.bs.knots[-1]
 
+        x_is_scalar = np.isscalar(x)
+        if x_is_scalar:
+            x = np.array([x])
+
         f = np.zeros(x.size)
         m_ind = np.array([True]*x.size)
 
@@ -76,7 +80,10 @@ class lbspline:
                                    l_extra=l_extra,
                                    r_extra=r_extra)
 
-        return f
+        if x_is_scalar:
+            return f[0]
+        else:
+            return f
 
     # -------------------------------------------------------------------------
     def splineDF(self, x, i, n, l_extra=False, r_extra=False):
@@ -91,6 +98,10 @@ class lbspline:
         outer_rb = self.knots[-1]
         inner_lb = self.bs.knots[0]
         inner_rb = self.bs.knots[-1]
+
+        x_is_scalar = np.isscalar(x)
+        if x_is_scalar:
+            x = np.array([x])
 
         Df = np.zeros(x.size)
         m_ind = np.array([True]*x.size)
@@ -115,7 +126,10 @@ class lbspline:
                                      l_extra=l_extra,
                                      r_extra=r_extra)
 
-        return Df
+        if x_is_scalar:
+            return Df[0]
+        else:
+            return Df
 
     # -------------------------------------------------------------------------
     def splineIF(self, a, x, i, n, l_extra=False, r_extra=False):
@@ -134,6 +148,11 @@ class lbspline:
         outer_rb = self.knots[-1]
         inner_lb = self.bs.knots[0]
         inner_rb = self.bs.knots[-1]
+
+        x_is_scalar = np.isscalar(x)
+        if x_is_scalar:
+            a = np.array([a])
+            x = np.array([x])
 
         # function and derivative values at inner lb and inner rb
         inner_lb_f = self.bs.splineF(inner_lb, i)
@@ -271,7 +290,10 @@ class lbspline:
             x_case6 = x[case6_ind]
             If[case6_ind] = case6(a_case6, x_case6, n)
 
-        return If
+        if x_is_scalar:
+            return If[0]
+        else:
+            return If
 
     # -------------------------------------------------------------------------
     def designMat(self, x, l_extra=False, r_extra=False):
