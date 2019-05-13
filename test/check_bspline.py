@@ -25,7 +25,8 @@ fun_list = [
     'bspline_splineIF',
     'bspline_designMat',
     'bspline_designDMat',
-    'bspline_lastDMat'
+    'bspline_lastDMat',
+    'bspline_integrate'
 ]
 
 error_count = 0
