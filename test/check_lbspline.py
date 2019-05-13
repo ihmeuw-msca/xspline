@@ -26,7 +26,8 @@ fun_list = [
     'lbspline_designMat',
     'lbspline_designDMat',
     'lbspline_designIMat',
-    'lbspline_lastDMat'
+    'lbspline_lastDMat',
+    'lbspline_integrate'
 ]
 
 error_count = 0

@@ -161,134 +161,73 @@ class lbspline:
         inner_rb_Df = self.bs.splineDF(inner_rb, i, 1)
 
         # extrapolation
-        if not l_extra:
-            a = np.maximum(a, outer_lb)
-            x = np.maximum(x, outer_lb)
-        else:
+        if l_extra:
             if self.l_linear:
                 outer_lb = -np.inf
             else:
                 inner_lb = -np.inf
 
-        if not r_extra:
-            a = np.minimum(a, outer_rb)
-            x = np.minimum(x, outer_rb)
-        else:
+        if r_extra:
             if self.r_linear:
                 outer_rb = np.inf
             else:
                 inner_rb = np.inf
 
         # extract different possible situations for a
-        a1_ind = a < inner_lb
-        a2_ind = (a >= inner_lb) & (a < inner_rb)
-        a3_ind = a >= inner_rb
+        a1_ind = a < outer_lb
+        a2_ind = (a >= outer_lb) & (a < inner_lb)
+        a3_ind = (a >= inner_lb) & (a < inner_rb)
+        a4_ind = (a >= inner_rb) & (a < outer_rb)
+        a5_ind = a >= outer_rb
+
+        a_ind = [a1_ind, a2_ind, a3_ind, a4_ind, a5_ind]
 
         # extract different possible situations for x
-        x1_ind = x < inner_lb
-        x2_ind = (x >= inner_lb) & (x < inner_rb)
-        x3_ind = x >= inner_rb
+        x1_ind = x <= outer_lb
+        x2_ind = (x > outer_lb) & (x <= inner_lb)
+        x3_ind = (x > inner_lb) & (x <= inner_rb)
+        x4_ind = (x > inner_rb) & (x <= outer_rb)
+        x5_ind = x > outer_rb
 
-        # in total 6 cases
-        case1_ind = a1_ind & x1_ind
-        case2_ind = a1_ind & x2_ind
-        case3_ind = a1_ind & x3_ind
-        case4_ind = a2_ind & x2_ind
-        case5_ind = a2_ind & x3_ind
-        case6_ind = a3_ind & x3_ind
+        x_ind = [x1_ind, x2_ind, x3_ind, x4_ind, x5_ind]
+
+        # there are in total 5 pieces functions
+        def piece1(a, x, n):
+            if np.isscalar(a):
+                return 0.0
+            else:
+                return np.zeros(a.size)
+
+        def piece2(a, x, n):
+            return self.intgLinear(a, x, n, inner_lb, inner_lb_f, inner_lb_Df)
+
+        def piece3(a, x, n):
+            return self.bs.splineIF(a, x, i, n,
+                                    l_extra=l_extra,
+                                    r_extra=r_extra)
+
+        def piece4(a, x, n):
+            return self.intgLinear(a, x, n, inner_rb, inner_rb_f, inner_rb_Df)
+
+        def piece5(a, x, n):
+            if np.isscalar(a):
+                return 0.0
+            else:
+                return np.zeros(a.size)
+
+        funcs = [piece1, piece2, piece3, piece4, piece5]
+        knots = [outer_lb, inner_lb, inner_rb, outer_rb]
 
         If = np.zeros(x.size)
 
-        # define 6 function corresponding to 6 cases
-        def case1(a_case, x_case, n):
-            return self.intgLinear(a_case, x_case, n,
-                                   inner_lb,
-                                   inner_lb_f,
-                                   inner_lb_Df)
-
-        def case2(a_case, x_case, n):
-            val = self.bs.splineIF(inner_lb, x_case, i, n,
-                                   l_extra=l_extra,
-                                   r_extra=r_extra)
-
-            for j in range(n):
-                val += case1(a_case, inner_lb, n - j)*(x_case - inner_lb)**j /\
-                    np.math.factorial(j)
-
-            return val
-
-        def case3(a_case, x_case, n):
-            val = self.intgLinear(inner_rb, x_case, n,
-                                  inner_rb,
-                                  inner_rb_f,
-                                  inner_rb_Df)
-
-            for j in range(n):
-                val += case2(a_case, inner_rb, n - j)*(x_case - inner_rb)**j /\
-                    np.math.factorial(j)
-
-            return val
-
-        def case4(a_case, x_case, n):
-            val = self.bs.splineIF(a_case, x_case, i, n,
-                                   l_extra=l_extra,
-                                   r_extra=r_extra)
-
-            return val
-
-        def case5(a_case, x_case, n):
-            val = self.intgLinear(inner_rb, x_case, n,
-                                  inner_rb,
-                                  inner_rb_f,
-                                  inner_rb_Df)
-
-            for j in range(n):
-                val += case4(a_case, inner_rb, n - j)*(x_case - inner_rb)**j /\
-                    np.math.factorial(j)
-
-            return val
-
-        def case6(a_case, x_case, n):
-            return self.intgLinear(a_case, x_case, n,
-                                   inner_rb,
-                                   inner_rb_f,
-                                   inner_rb_Df)
-
-        # case 1
-        if np.any(case1_ind):
-            a_case1 = a[case1_ind]
-            x_case1 = x[case1_ind]
-            If[case1_ind] = case1(a_case1, x_case1, n)
-
-        # case 2
-        if np.any(case2_ind):
-            a_case2 = a[case2_ind]
-            x_case2 = x[case2_ind]
-            If[case2_ind] = case2(a_case2, x_case2, n)
-
-        # case 3
-        if np.any(case3_ind):
-            a_case3 = a[case3_ind]
-            x_case3 = x[case3_ind]
-            If[case3_ind] = case3(a_case3, x_case3, n)
-
-        # case 4
-        if np.any(case4_ind):
-            a_case4 = a[case4_ind]
-            x_case4 = x[case4_ind]
-            If[case4_ind] = case4(a_case4, x_case4, n)
-
-        # case 5
-        if np.any(case5_ind):
-            a_case5 = a[case5_ind]
-            x_case5 = x[case5_ind]
-            If[case5_ind] = case5(a_case5, x_case5, n)
-
-        # case 6
-        if np.any(case6_ind):
-            a_case6 = a[case6_ind]
-            x_case6 = x[case6_ind]
-            If[case6_ind] = case6(a_case6, x_case6, n)
+        # in total 15 cases
+        for ia in range(5):
+            for ix in range(ia, 5):
+                case_ind = a_ind[ia] & x_ind[ix]
+                if np.any(case_ind):
+                    If[case_ind] = self.intgPieces(a[case_ind], x[case_ind], n,
+                                                   funcs[ia:ix + 1],
+                                                   knots[ia:ix])
 
         if x_is_scalar:
             return If[0]
@@ -348,3 +287,25 @@ class lbspline:
 
         return Dfa*(x - a)**(n + 1) / np.math.factorial(n + 1) + \
             fa*(x - a)**n / np.math.factorial(n)
+
+    @staticmethod
+    def intgPieces(a, x, n, funcs, knots):
+        '''integrate piecewise functions'''
+        assert (np.isscalar(a) and np.isscalar(x)) or (a.size == x.size)
+        assert len(funcs) == len(knots) + 1
+        if len(funcs) == 1:
+            return funcs[0](a, x, n)
+        else:
+            assert np.all(a < knots[0]) and np.all(x > knots[-1])
+
+        if np.isscalar(a):
+            b = knots[0]
+        else:
+            b = np.repeat(knots[0], a.size)
+
+        val = lbspline.intgPieces(b, x, n, funcs[1:], knots[1:])
+
+        for j in range(n):
+            val += funcs[0](a, b, n - j)*(x - b)**j / np.math.factorial(j)
+
+        return val
