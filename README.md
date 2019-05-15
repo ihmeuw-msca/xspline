@@ -1,1 +1,1 @@
-# Customized BSpline Python Package
+# BSpline with Linear Extrapolation
