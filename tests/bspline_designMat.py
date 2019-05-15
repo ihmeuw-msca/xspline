@@ -2,10 +2,8 @@
 
 
 def bspline_designMat():
-    import sys
     import numpy as np
-    sys.path.append('../xspline/')
-    from bspline import bspline
+    from xspline.__init__ import bspline
 
     ok = True
     # setup test problem

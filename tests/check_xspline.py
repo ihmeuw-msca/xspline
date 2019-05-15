@@ -1,9 +1,8 @@
 # test suite for xspline
 import os
 import sys
-# add the src and test directory
+# add current directory
 sys.path.append('./')
-sys.path.append('../xspline/')
 
 
 def run_test(name):

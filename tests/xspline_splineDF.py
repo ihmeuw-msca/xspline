@@ -2,10 +2,8 @@
 
 
 def xspline_splineDF():
-    import sys
     import numpy as np
-    sys.path.append('../xspline/')
-    from xspline import xspline
+    from xspline.__init__ import xspline
 
     ok = True
     # setup test problem
