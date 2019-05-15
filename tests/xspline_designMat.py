@@ -1,11 +1,11 @@
 # test file for designMat function
 
 
-def lbspline_designMat():
+def xspline_designMat():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
-    from lbspline import lbspline
+    sys.path.append('../xspline/')
+    from xspline import xspline
 
     ok = True
     # setup test problem
@@ -17,7 +17,7 @@ def lbspline_designMat():
 
     # test designMat function left linear
     # -------------------------------------------------------------------------
-    bs = lbspline(knots, degree, l_linear=True)
+    bs = xspline(knots, degree, l_linear=True)
     x = np.linspace(0.0, 1.0, 201)
 
     my_mat = bs.designMat(x)
@@ -28,11 +28,11 @@ def lbspline_designMat():
     ok = ok and np.linalg.norm(my_mat - tr_mat) < tol
 
     if not ok:
-        print('lbspline_designMat: l_linear error.')
+        print('xspline_designMat: l_linear error.')
 
     # test designMat function right linear
     # -------------------------------------------------------------------------
-    bs = lbspline(knots, degree, r_linear=True)
+    bs = xspline(knots, degree, r_linear=True)
     x = np.linspace(0.0, 1.0, 201)
 
     my_mat = bs.designMat(x)
@@ -43,6 +43,6 @@ def lbspline_designMat():
     ok = ok and np.linalg.norm(my_mat - tr_mat) < tol
 
     if not ok:
-        print('lbspline_designMat: r_linear error.')
+        print('xspline_designMat: r_linear error.')
 
     return ok

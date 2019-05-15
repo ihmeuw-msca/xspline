@@ -1,9 +1,9 @@
-# test suite for lbspline
+# test suite for xspline
 import os
 import sys
 # add the src and test directory
 sys.path.append('./')
-sys.path.append('../bspline/')
+sys.path.append('../xspline/')
 
 
 def run_test(name):
@@ -19,15 +19,14 @@ def run_test(name):
 
 
 fun_list = [
-    'lbspline_intgLinear',
-    'lbspline_splineF',
-    'lbspline_splineDF',
-    'lbspline_splineIF',
-    'lbspline_designMat',
-    'lbspline_designDMat',
-    'lbspline_designIMat',
-    'lbspline_lastDMat',
-    'lbspline_integrate'
+    'xspline_splineF',
+    'xspline_splineDF',
+    'xspline_splineIF',
+    'xspline_designMat',
+    'xspline_designDMat',
+    'xspline_designIMat',
+    'xspline_lastDMat',
+    'xspline_integrate'
 ]
 
 error_count = 0
@@ -38,8 +37,8 @@ for name in fun_list:
         error_count += 1
 
 if error_count > 0:
-    print('check_lbspline: error_count =', error_count)
+    print('check_xspline: error_count =', error_count)
     sys.exit(1)
 else:
-    print('check_lbspline: OK')
+    print('check_xspline: OK')
     sys.exit(0)

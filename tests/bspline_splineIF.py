@@ -1,10 +1,10 @@
-# test file for designIMat function
+# test file for splineIF function
 
 
-def bspline_designIMat():
+def bspline_splineIF():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
+    sys.path.append('../xspline/')
     from bspline import bspline
 
     ok = True
@@ -15,7 +15,7 @@ def bspline_designIMat():
 
     bs = bspline(knots, degree)
 
-    # test designIMat function
+    # test splineIF function
     # -------------------------------------------------------------------------
     N = 101
     a = np.zeros(N)
@@ -28,19 +28,20 @@ def bspline_designIMat():
     lones = np.ones(lx.size)
     rones = np.ones(rx.size)
 
-    tr_IX = np.vstack([
+    tr_if = np.vstack([
         np.hstack([lx - lx**2, 0.25*rones]),
         np.hstack([lx**2, (rx - 0.5) - (rx - 0.5)**2 + 0.25*rones]),
         np.hstack([lzeros, (rx - 0.5)**2])
-        ]).T
+        ])
 
-    my_IF = bs.designIMat(a, x, 1)
+    my_if = np.vstack([bs.splineIF(a, x, i, 1)
+                       for i in range(bs.num_spline_bases)])
 
     tol = 1e-10
-    ok = ok and np.linalg.norm(my_IF - tr_IX) < tol
+    ok = ok and np.linalg.norm(my_if - tr_if) < tol
 
     if not ok:
-        print('tr_IX', tr_IX)
-        print('my_IF', my_IF)
+        print('tr_if', tr_if)
+        print('my_if', my_if)
 
     return ok

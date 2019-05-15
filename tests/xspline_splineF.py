@@ -1,11 +1,11 @@
 # test file for splineF function
 
 
-def lbspline_splineF():
+def xspline_splineF():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
-    from lbspline import lbspline
+    sys.path.append('../xspline/')
+    from xspline import xspline
 
     ok = True
     # setup test problem
@@ -17,7 +17,7 @@ def lbspline_splineF():
 
     # test splineF function left linear without extrapolation
     # -------------------------------------------------------------------------
-    bs = lbspline(knots, degree, l_linear=True)
+    bs = xspline(knots, degree, l_linear=True)
     x = np.linspace(-1.0, 1.0, 201)
 
     my_f = bs.splineF(x, 0, l_extra=False)
@@ -29,7 +29,7 @@ def lbspline_splineF():
     ok = ok and np.linalg.norm(my_f - tr_f) < tol
 
     if not ok:
-        print('lbspline_splineF: l_linear error.')
+        print('xspline_splineF: l_linear error.')
 
     # test splineF function left linear extrapolation
     # -------------------------------------------------------------------------
@@ -41,11 +41,11 @@ def lbspline_splineF():
     ok = ok and np.linalg.norm(my_f - tr_f) < tol
 
     if not ok:
-        print('lbspline_splineF: l_linear and l_extra error.')
+        print('xspline_splineF: l_linear and l_extra error.')
 
     # test splineF function right linear without extrapolation
     # -------------------------------------------------------------------------
-    bs = lbspline(knots, degree, r_linear=True)
+    bs = xspline(knots, degree, r_linear=True)
     x = np.linspace(0.0, 2.0, 201)
 
     my_f = bs.splineF(x, 1, r_extra=False)
@@ -57,7 +57,7 @@ def lbspline_splineF():
     ok = ok and np.linalg.norm(my_f - tr_f) < tol
 
     if not ok:
-        print('lbspline_splineF: r_linear error.')
+        print('xspline_splineF: r_linear error.')
 
     # test splineF function right linear extrapolation
     # -------------------------------------------------------------------------
@@ -69,6 +69,6 @@ def lbspline_splineF():
     ok = ok and np.linalg.norm(my_f - tr_f) < tol
 
     if not ok:
-        print('lbspline_splineF: r_linear and r_extra error.')
+        print('xspline_splineF: r_linear and r_extra error.')
 
     return ok

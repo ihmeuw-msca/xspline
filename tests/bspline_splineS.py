@@ -4,7 +4,7 @@
 def bspline_splineS():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
+    sys.path.append('../xspline/')
     from bspline import bspline
 
     ok = True

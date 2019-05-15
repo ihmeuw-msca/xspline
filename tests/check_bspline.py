@@ -3,7 +3,7 @@ import os
 import sys
 # add the src and test directory
 sys.path.append('./')
-sys.path.append('../bspline/')
+sys.path.append('../xspline/')
 
 
 def run_test(name):

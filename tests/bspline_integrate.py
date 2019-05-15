@@ -5,7 +5,7 @@ def bspline_integrate():
     import sys
     import numpy as np
     import scipy.integrate as integrate
-    sys.path.append('../bspline/')
+    sys.path.append('../xspline/')
     from bspline import bspline
 
     ok = True

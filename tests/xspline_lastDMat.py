@@ -1,11 +1,11 @@
 # test file for lastDMat function
 
 
-def lbspline_lastDMat():
+def xspline_lastDMat():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
-    from lbspline import lbspline
+    sys.path.append('../xspline/')
+    from xspline import xspline
 
     ok = True
     # setup test problem
@@ -13,7 +13,7 @@ def lbspline_lastDMat():
     knots = np.linspace(0.0, 1.0, 5)
     degree = 3
 
-    bs = lbspline(knots, degree, l_linear=True, r_linear=True)
+    bs = xspline(knots, degree, l_linear=True, r_linear=True)
 
     # test lastDMat function
     # -------------------------------------------------------------------------

@@ -1,10 +1,10 @@
-# test file for splineDF function
+# test file for designDMat function
 
 
-def bspline_splineDF():
+def bspline_designDMat():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
+    sys.path.append('../xspline/')
     from bspline import bspline
 
     ok = True
@@ -15,7 +15,7 @@ def bspline_splineDF():
 
     bs = bspline(knots, degree)
 
-    # test splineDF function
+    # test designDMat function
     # -------------------------------------------------------------------------
     x = np.linspace(0.0, 1.0, 101)
     lx = x[x < 0.5]
@@ -26,20 +26,19 @@ def bspline_splineDF():
     lones = np.ones(lx.size)
     rones = np.ones(rx.size)
 
-    tr_df = np.vstack([
+    tr_DX = np.vstack([
         np.hstack([-2.0*lones, rzeros]),
         np.hstack([2.0*lones, -2.0*rones]),
         np.hstack([lzeros, 2.0*rones])
-        ])
+        ]).T
 
-    my_df = np.vstack([bs.splineDF(x, i, 1)
-                       for i in range(bs.num_spline_bases)])
+    my_DX = bs.designDMat(x, 1)
 
     tol = 1e-10
-    ok = ok and np.linalg.norm(my_df - tr_df) < tol
+    ok = ok and np.linalg.norm(my_DX - tr_DX) < tol
 
     if not ok:
-        print('tr_df', tr_df)
-        print('my_df', my_df)
+        print('tr_DX', tr_DX)
+        print('my_DX', my_DX)
 
     return ok

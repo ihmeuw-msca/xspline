@@ -1,11 +1,11 @@
 # test file for intgLinear function
 
 
-def lbspline_intgLinear():
+def xspline_intgLinear():
     import sys
     import numpy as np
-    sys.path.append('../bspline/')
-    from lbspline import lbspline
+    sys.path.append('../xspline/')
+    from xspline import xspline
 
     ok = True
     # setup test problem
@@ -13,7 +13,7 @@ def lbspline_intgLinear():
     knots = np.linspace(0.0, 1.0, 3)
     degree = 1
 
-    bs = lbspline(knots, degree)
+    bs = xspline(knots, degree)
 
     # test intgLinear function
     # -------------------------------------------------------------------------

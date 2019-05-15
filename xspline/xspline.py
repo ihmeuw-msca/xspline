@@ -1,12 +1,13 @@
-# define the lbspline objective class
+# define the xspline objective class
 import numpy as np
-from bspline import bspline
+from .utils import *
+from .bspline import bspline
 
 
-class lbspline:
+class xspline:
     # -------------------------------------------------------------------------
     def __init__(self, knots, degree, l_linear=False, r_linear=False):
-        '''constructor of the lbspline'''
+        '''constructor of the xspline'''
         knots = list(set(knots))
         knots = np.sort(np.array(knots))
 
@@ -149,11 +150,6 @@ class lbspline:
         inner_lb = self.bs.knots[0]
         inner_rb = self.bs.knots[-1]
 
-        x_is_scalar = np.isscalar(x)
-        if x_is_scalar:
-            a = np.array([a])
-            x = np.array([x])
-
         # function and derivative values at inner lb and inner rb
         inner_lb_f = self.bs.splineF(inner_lb, i)
         inner_rb_f = self.bs.splineF(inner_rb, i)
@@ -173,66 +169,23 @@ class lbspline:
             else:
                 inner_rb = np.inf
 
-        # extract different possible situations for a
-        a1_ind = a < outer_lb
-        a2_ind = (a >= outer_lb) & (a < inner_lb)
-        a3_ind = (a >= inner_lb) & (a < inner_rb)
-        a4_ind = (a >= inner_rb) & (a < outer_rb)
-        a5_ind = a >= outer_rb
-
-        a_ind = [a1_ind, a2_ind, a3_ind, a4_ind, a5_ind]
-
-        # extract different possible situations for x
-        x1_ind = x <= outer_lb
-        x2_ind = (x > outer_lb) & (x <= inner_lb)
-        x3_ind = (x > inner_lb) & (x <= inner_rb)
-        x4_ind = (x > inner_rb) & (x <= outer_rb)
-        x5_ind = x > outer_rb
-
-        x_ind = [x1_ind, x2_ind, x3_ind, x4_ind, x5_ind]
-
         # there are in total 5 pieces functions
-        def piece1(a, x, n):
-            if np.isscalar(a):
-                return 0.0
-            else:
-                return np.zeros(a.size)
+        l_piece = lambda a, x, n: intgLinear(a, x, n,
+                                             inner_lb,
+                                             inner_lb_f,
+                                             inner_lb_Df)
+        m_piece = lambda a, x, n: self.bs.splineIF(a, x, i, n,
+                                                   l_extra=l_extra,
+                                                   r_extra=r_extra)
+        r_piece = lambda a, x, n: intgLinear(a, x, n,
+                                             inner_rb,
+                                             inner_rb_f,
+                                             inner_rb_Df)
 
-        def piece2(a, x, n):
-            return self.intgLinear(a, x, n, inner_lb, inner_lb_f, inner_lb_Df)
-
-        def piece3(a, x, n):
-            return self.bs.splineIF(a, x, i, n,
-                                    l_extra=l_extra,
-                                    r_extra=r_extra)
-
-        def piece4(a, x, n):
-            return self.intgLinear(a, x, n, inner_rb, inner_rb_f, inner_rb_Df)
-
-        def piece5(a, x, n):
-            if np.isscalar(a):
-                return 0.0
-            else:
-                return np.zeros(a.size)
-
-        funcs = [piece1, piece2, piece3, piece4, piece5]
+        funcs = [intgZero, l_piece, m_piece, r_piece, intgZero]
         knots = [outer_lb, inner_lb, inner_rb, outer_rb]
 
-        If = np.zeros(x.size)
-
-        # in total 15 cases
-        for ia in range(5):
-            for ix in range(ia, 5):
-                case_ind = a_ind[ia] & x_ind[ix]
-                if np.any(case_ind):
-                    If[case_ind] = self.intgPieces(a[case_ind], x[case_ind], n,
-                                                   funcs[ia:ix + 1],
-                                                   knots[ia:ix])
-
-        if x_is_scalar:
-            return If[0]
-        else:
-            return If
+        return intgPieces(a, x, n, funcs, knots)
 
     # -------------------------------------------------------------------------
     def designMat(self, x, l_extra=False, r_extra=False):
@@ -277,35 +230,3 @@ class lbspline:
             D = np.vstack((D, self.bs.designDMat(np.array([inner_rb]), 1)))
 
         return D
-
-    # -------------------------------------------------------------------------
-    @staticmethod
-    def intgLinear(a, x, n, y, fy, Dfy):
-        '''integrate the linear function'''
-        fa = fy + Dfy*(a - y)
-        Dfa = Dfy
-
-        return Dfa*(x - a)**(n + 1) / np.math.factorial(n + 1) + \
-            fa*(x - a)**n / np.math.factorial(n)
-
-    @staticmethod
-    def intgPieces(a, x, n, funcs, knots):
-        '''integrate piecewise functions'''
-        assert (np.isscalar(a) and np.isscalar(x)) or (a.size == x.size)
-        assert len(funcs) == len(knots) + 1
-        if len(funcs) == 1:
-            return funcs[0](a, x, n)
-        else:
-            assert np.all(a < knots[0]) and np.all(x > knots[-1])
-
-        if np.isscalar(a):
-            b = knots[0]
-        else:
-            b = np.repeat(knots[0], a.size)
-
-        val = lbspline.intgPieces(b, x, n, funcs[1:], knots[1:])
-
-        for j in range(n):
-            val += funcs[0](a, b, n - j)*(x - b)**j / np.math.factorial(j)
-
-        return val
