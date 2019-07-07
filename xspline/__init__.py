@@ -6,7 +6,7 @@ from xspline.utils import *
 class bspline:
     # -------------------------------------------------------------------------
     def __init__(self, knots, degree):
-        '''constructor of the bspline'''
+        """constructor of the bspline"""
         knots = list(set(knots))
         knots = np.sort(np.array(knots))
 
@@ -23,7 +23,7 @@ class bspline:
 
     # -------------------------------------------------------------------------
     def splineSGen(self, i, p, l_extra=False, r_extra=False):
-        '''atom spline support for the ith spline with degree p'''
+        """atom spline support for the ith spline with degree p"""
         assert isinstance(p, int) and p >= 0
         assert isinstance(i, int) and 0 <= i < self.num_invls + p
 
@@ -38,13 +38,13 @@ class bspline:
         return [cl, cr]
 
     def splineS(self, i, l_extra=False, r_extra=False):
-        '''spline support for the ith spline'''
+        """spline support for the ith spline"""
         return self.splineSGen(i, self.degree,
                                l_extra=l_extra, r_extra=r_extra)
 
     # -------------------------------------------------------------------------
     def splineFGen(self, x, i, p, l_extra=False, r_extra=False):
-        '''atom spline function for ith spline for degree p'''
+        """atom spline function for ith spline for degree p"""
         k = self.num_invls + p - 1
         assert isinstance(p, int) and p >= 0
         assert isinstance(i, int) and 0 <= i <= k
@@ -78,13 +78,13 @@ class bspline:
         return lf + rf
 
     def splineF(self, x, i, l_extra=False, r_extra=False):
-        '''spline function for ith spline'''
+        """spline function for ith spline"""
         return self.splineFGen(x, i, self.degree,
                                l_extra=l_extra, r_extra=r_extra)
 
     # -------------------------------------------------------------------------
     def splineDFGen(self, x, i, p, n, l_extra=False, r_extra=False):
-        '''atom spline differentiation function'''
+        """atom spline differentiation function"""
         k = self.num_invls + p - 1
         assert isinstance(p, int) and p >= 0
         assert isinstance(i, int) and 0 <= i <= k
@@ -126,13 +126,13 @@ class bspline:
         return ldf + rdf
 
     def splineDF(self, x, i, n, l_extra=False, r_extra=False):
-        '''spline differentiation function'''
+        """spline differentiation function"""
         return self.splineDFGen(x, i, self.degree, n,
                                 l_extra=l_extra, r_extra=r_extra)
 
     # -------------------------------------------------------------------------
     def splineIFGen(self, a, x, i, p, n, l_extra=False, r_extra=False):
-        '''atom spline integration function'''
+        """atom spline integration function"""
         k = self.num_invls + p - 1
         assert isinstance(p, int) and p >= 0
         assert isinstance(i, int) and 0 <= i <= k
@@ -170,13 +170,13 @@ class bspline:
         return lif + rif
 
     def splineIF(self, a, x, i, n, l_extra=False, r_extra=False):
-        '''spline integration function'''
+        """spline integration function"""
         return self.splineIFGen(a, x, i, self.degree, n,
                                 l_extra=l_extra, r_extra=r_extra)
 
     # -------------------------------------------------------------------------
     def designMat(self, x, l_extra=False, r_extra=False):
-        '''spline design matrix function'''
+        """spline design matrix function"""
         X = np.vstack([
             self.splineF(x, i, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -185,7 +185,7 @@ class bspline:
         return X
 
     def designDMat(self, x, n, l_extra=False, r_extra=False):
-        '''spline derivative design matrix function'''
+        """spline derivative design matrix function"""
         DX = np.vstack([
             self.splineDF(x, i, n, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -194,7 +194,7 @@ class bspline:
         return DX
 
     def designIMat(self, a, x, n, l_extra=False, r_extra=False):
-        '''spline integral design matrix function'''
+        """spline integral design matrix function"""
         IX = np.vstack([
             self.splineIF(a, x, i, n, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -204,7 +204,7 @@ class bspline:
 
     # -------------------------------------------------------------------------
     def lastDMatGen(self, i):
-        '''highest order of derivarive matrix atom function'''
+        """highest order of derivarive matrix atom function"""
         if i == 0:
             return np.identity(self.num_invls)
 
@@ -219,7 +219,7 @@ class bspline:
         return D
 
     def lastDMat(self):
-        '''highest order of derivative matrix'''
+        """highest order of derivative matrix"""
         p = self.degree
         D = p * self.lastDMatGen(p)
 
@@ -232,7 +232,7 @@ class bspline:
 class xspline:
     # -------------------------------------------------------------------------
     def __init__(self, knots, degree, l_linear=False, r_linear=False):
-        '''constructor of the xspline'''
+        """constructor of the xspline"""
         knots = list(set(knots))
         knots = np.sort(np.array(knots))
 
@@ -257,7 +257,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def splineS(self, i, l_extra=False, r_extra=False):
-        '''spline support for the ith spline'''
+        """spline support for the ith spline"""
         invl = self.bs.spline(i, l_extra=l_extra, r_extra=r_extra)
         if invl[0] == self.bs.knots[0]:
             invl[0] = self.knots[0]
@@ -268,7 +268,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def splineF(self, x, i, l_extra=False, r_extra=False):
-        '''spline function for ith spline'''
+        """spline function for ith spline"""
         if not self.l_linear and not self.r_linear:
             return self.bs.splineF(x, i, l_extra=l_extra, r_extra=r_extra)
 
@@ -313,7 +313,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def splineDF(self, x, i, n, l_extra=False, r_extra=False):
-        '''spline differentiation function'''
+        """spline differentiation function"""
         if n == 0:
             return self.splineF(x, i, l_extra=l_extra, r_extra=r_extra)
 
@@ -359,7 +359,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def splineIF(self, a, x, i, n, l_extra=False, r_extra=False):
-        '''spline integration function'''
+        """spline integration function"""
         if n == 0:
             return self.splineF(x, i, l_extra=l_extra, r_extra=r_extra)
 
@@ -412,7 +412,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def designMat(self, x, l_extra=False, r_extra=False):
-        '''spline design matrix function'''
+        """spline design matrix function"""
         X = np.vstack([
             self.splineF(x, i, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -421,7 +421,7 @@ class xspline:
         return np.ascontiguousarray(X)
 
     def designDMat(self, x, n, l_extra=False, r_extra=False):
-        '''spline derivative design matrix function'''
+        """spline derivative design matrix function"""
         DX = np.vstack([
             self.splineDF(x, i, n, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -430,7 +430,7 @@ class xspline:
         return np.ascontiguousarray(DX)
 
     def designIMat(self, a, x, n, l_extra=False, r_extra=False):
-        '''spline integral design matrix function'''
+        """spline integral design matrix function"""
         IX = np.vstack([
             self.splineIF(a, x, i, n, l_extra=l_extra, r_extra=r_extra)
             for i in range(self.num_spline_bases)
@@ -440,7 +440,7 @@ class xspline:
 
     # -------------------------------------------------------------------------
     def lastDMat(self):
-        '''highest order of derivative matrix'''
+        """highest order of derivative matrix"""
         inner_lb = self.bs.knots[0]
         inner_rb = self.bs.knots[-1]
 
@@ -453,3 +453,166 @@ class xspline:
             D = np.vstack((D, self.bs.designDMat(np.array([inner_rb]), 1)))
 
         return D
+
+
+class ndxspline:
+    """muti-dimensional xspline"""
+    def __init__(self, ndim, knots_list, degree_list,
+                 l_linear_list=None,
+                 r_linear_list=None):
+        """construct function for ndxspline class"""
+        self.ndim = ndim
+        self.knots_list = knots_list
+        self.degree_list = degree_list
+        self.l_linear_list = self.option2List(l_linear_list, self.ndim)
+        self.r_linear_list = self.option2List(r_linear_list, self.ndim)
+
+        assert len(self.knots_list) == self.ndim
+        assert len(self.degree_list) == self.ndim
+        assert len(self.l_linear_list) == self.ndim
+        assert len(self.r_linear_list) == self.ndim
+
+        self.xs_list = [
+            xspline(self.knots_list[i], self.degree_list[i],
+                    l_linear=self.l_linear_list[i],
+                    r_linear=self.r_linear_list[i])
+            for i in range(self.ndim)
+        ]
+
+        self.num_knots_list = [self.xs_list[i].num_knots
+                               for i in range(self.ndim)]
+        self.num_invls_list = [self.xs_list[i].num_invls
+                               for i in range(self.ndim)]
+        self.num_spline_bases_list = [self.xs_list[i].num_spline_bases
+                                 for i in range(self.ndim)]
+
+        self.num_knots = np.prod(self.num_knots_list)
+        self.num_invls = np.prod(self.num_invls_list)
+        self.num_spline_bases = np.prod(self.num_spline_bases_list)
+
+    # -------------------------------------------------------------------------
+    def designMat(self, x_list, l_extra_list=None, r_extra_list=None):
+        """multi-dimensional spline design matrix function"""
+        l_extra_list = option2List(l_extra_list, self.ndim)
+        r_extra_list = option2List(r_extra_list, self.ndim)
+
+        assert len(x_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        X_list = [self.xs_list[i].designMat(x_list[i],
+                                            l_extra=l_extra_list[i],
+                                            r_extra=r_extra_list[i])
+                  for i in range(self.ndim)]
+
+        X = []
+        for i in range(self.num_spline_bases):
+            index_list = self.indexList(i, self.num_spline_bases_list)
+            bases_list = [X_list[j][:, index_list[j]]
+                          for j in range(self.ndim)]
+            X.append(self.outerFlatten(*bases_list))
+
+        return np.ascontiguousarray(np.vstack(X).T)
+
+    def designDMat(self, x_list, n_list,
+                   l_extra_list=None, r_extra_list=None):
+        """multi-dimensional spline derivative design matrix function"""
+        l_extra_list = option2List(l_extra_list, self.ndim)
+        r_extra_list = option2List(r_extra_list, self.ndim)
+
+        assert len(x_list) == self.ndim
+        assert len(n_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        DX_list = [self.xs_list[i].designDMat(x_list[i], n_list[i],
+                                              l_extra=l_extra_list[i],
+                                              r_extra=r_extra_list[i])
+                   for i in range(self.ndim)]
+
+        DX = []
+        for i in range(self.num_spline_bases):
+            index_list = self.indexList(i, self.num_spline_bases_list)
+            bases_list = [DX_list[j][:, index_list[j]]
+                          for j in range(self.ndim)]
+            DX.append(self.outerFlatten(*bases_list))
+
+        return np.ascontiguousarray(np.vstack(DX).T)
+
+    def designIMat(self, a_list, x_list, n_list,
+                   l_extra_list=None, r_extra_list=None):
+        """multi-dimensional spline integration design matrix function"""
+        l_extra_list = option2List(l_extra_list, self.ndim)
+        r_extra_list = option2List(r_extra_list, self.ndim)
+
+        assert len(x_list) == self.ndim
+        assert len(n_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        IX_list = [self.xs_list[i].designIMat(a_list[i], x_list[i], n_list[i],
+                                              l_extra=l_extra_list[i],
+                                              r_extra=r_extra_list[i])
+                   for i in range(self.ndim)]
+
+        IX = []
+        for i in range(self.num_spline_bases):
+            index_list = self.indexList(i, self.num_spline_bases_list)
+            bases_list = [IX_list[j][:, index_list[j]]
+                          for j in range(self.ndim)]
+            IX.append(self.outerFlatten(*bases_list))
+
+        return np.ascontiguousarray(np.vstack(IX).T)
+
+    # -------------------------------------------------------------------------
+    def lastDMat(self):
+        """highest order of derivative matrix"""
+        mat_list = [self.xs_list[i].lastDMat() for i in range(self.ndim)]
+
+        D = []
+        for i in range(self.num_spline_bases):
+            index_list = self.indexList(i, self.num_spline_bases_list)
+            bases_list = [mat_list[j][:, index_list[j]]
+                          for j in range(self.ndim)]
+            D.append(self.outerFlatten(*bases_list))
+
+        return np.ascontiguousarray(np.vstack(D).T)
+
+    @staticmethod
+    def outerFlatten(*arg):
+        ndim = len(arg)
+        if ndim == 1:
+            return arg[0]
+
+        mat = np.outer(arg[0], arg[1])
+        vec = mat.reshape(mat.size, 1)
+
+        if ndim == 2:
+            return vec
+        else:
+            return outerFlatten(vec, *arg[2:])
+
+    @staticmethod
+    def indexList(i, sizes):
+        assert not sizes
+        assert i < np.prod(sizes)
+
+        ndim = len(sizes)
+        n = np.cumprod(np.insert(sizes, 0, 1))[-2::-1]
+
+        index_list = []
+        for j in range(ndim):
+            quotient = i // n[j]
+            index_list.append(quotient)
+            i -= quotient*n[j]
+
+        return index_list
+
+    @staticmethod
+    def option2List(opt, n):
+        if opt is None or not opt:
+            return [False]*n
+        elif opt:
+            return [True]*n
+        else:
+            return opt
