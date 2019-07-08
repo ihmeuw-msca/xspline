@@ -464,8 +464,8 @@ class ndxspline:
         self.ndim = ndim
         self.knots_list = knots_list
         self.degree_list = degree_list
-        self.l_linear_list = self.option2List(l_linear_list, self.ndim)
-        self.r_linear_list = self.option2List(r_linear_list, self.ndim)
+        self.l_linear_list = option2List(l_linear_list, self.ndim)
+        self.r_linear_list = option2List(r_linear_list, self.ndim)
 
         assert len(self.knots_list) == self.ndim
         assert len(self.degree_list) == self.ndim
@@ -507,10 +507,10 @@ class ndxspline:
 
         X = []
         for i in range(self.num_spline_bases):
-            index_list = self.indexList(i, self.num_spline_bases_list)
+            index_list = indexList(i, self.num_spline_bases_list)
             bases_list = [X_list[j][:, index_list[j]]
                           for j in range(self.ndim)]
-            X.append(self.outerFlatten(*bases_list))
+            X.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(X).T)
 
@@ -532,10 +532,10 @@ class ndxspline:
 
         DX = []
         for i in range(self.num_spline_bases):
-            index_list = self.indexList(i, self.num_spline_bases_list)
+            index_list = indexList(i, self.num_spline_bases_list)
             bases_list = [DX_list[j][:, index_list[j]]
                           for j in range(self.ndim)]
-            DX.append(self.outerFlatten(*bases_list))
+            DX.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(DX).T)
 
@@ -557,10 +557,10 @@ class ndxspline:
 
         IX = []
         for i in range(self.num_spline_bases):
-            index_list = self.indexList(i, self.num_spline_bases_list)
+            index_list = indexList(i, self.num_spline_bases_list)
             bases_list = [IX_list[j][:, index_list[j]]
                           for j in range(self.ndim)]
-            IX.append(self.outerFlatten(*bases_list))
+            IX.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(IX).T)
 
@@ -571,9 +571,9 @@ class ndxspline:
 
         D = []
         for i in range(self.num_spline_bases):
-            index_list = self.indexList(i, self.num_spline_bases_list)
+            index_list = indexList(i, self.num_spline_bases_list)
             bases_list = [mat_list[j][:, index_list[j]]
                           for j in range(self.ndim)]
-            D.append(self.outerFlatten(*bases_list))
+            D.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(D).T)
