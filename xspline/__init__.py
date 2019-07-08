@@ -484,7 +484,7 @@ class ndxspline:
         self.num_invls_list = [self.xs_list[i].num_invls
                                for i in range(self.ndim)]
         self.num_spline_bases_list = [self.xs_list[i].num_spline_bases
-                                 for i in range(self.ndim)]
+                                      for i in range(self.ndim)]
 
         self.num_knots = np.prod(self.num_knots_list)
         self.num_invls = np.prod(self.num_invls_list)
@@ -577,42 +577,3 @@ class ndxspline:
             D.append(self.outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(D).T)
-
-    @staticmethod
-    def outerFlatten(*arg):
-        ndim = len(arg)
-        if ndim == 1:
-            return arg[0]
-
-        mat = np.outer(arg[0], arg[1])
-        vec = mat.reshape(mat.size, 1)
-
-        if ndim == 2:
-            return vec
-        else:
-            return outerFlatten(vec, *arg[2:])
-
-    @staticmethod
-    def indexList(i, sizes):
-        assert not sizes
-        assert i < np.prod(sizes)
-
-        ndim = len(sizes)
-        n = np.cumprod(np.insert(sizes, 0, 1))[-2::-1]
-
-        index_list = []
-        for j in range(ndim):
-            quotient = i // n[j]
-            index_list.append(quotient)
-            i -= quotient*n[j]
-
-        return index_list
-
-    @staticmethod
-    def option2List(opt, n):
-        if opt is None or not opt:
-            return [False]*n
-        elif opt:
-            return [True]*n
-        else:
-            return opt

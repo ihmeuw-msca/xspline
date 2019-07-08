@@ -1,4 +1,4 @@
-# test suite for bspline
+# test suite for utils
 import os
 import sys
 # add current directory
@@ -18,15 +18,9 @@ def run_test(name):
 
 
 fun_list = [
-    'bspline_splineS',
-    'bspline_splineF',
-    'bspline_splineDF',
-    'bspline_splineIF',
-    'bspline_designMat',
-    'bspline_designDMat',
-    'bspline_designIMat',
-    'bspline_lastDMat',
-    'bspline_integrate'
+    'utils_indexList',
+    'utils_option2List',
+    'utils_outerFlatten'
 ]
 
 error_count = 0
@@ -37,8 +31,8 @@ for name in fun_list:
         error_count += 1
 
 if error_count > 0:
-    print('check_bspline: error_count =', error_count)
+    print('check_utils: error_count =', error_count)
     sys.exit(1)
 else:
-    print('check_bspline: OK')
+    print('check_utils: OK')
     sys.exit(0)

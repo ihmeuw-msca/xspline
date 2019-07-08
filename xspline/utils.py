@@ -3,7 +3,7 @@ import numpy as np
 
 
 def indicator(x, invl, l_close=True, r_close=False):
-    '''indicator function'''
+    """indicator function"""
     if l_close:
         lb = (x >= invl[0])
     else:
@@ -21,22 +21,22 @@ def indicator(x, invl, l_close=True, r_close=False):
 
 
 def linear(x, y, fy, Dfy):
-    '''linear function with y as the base point'''
+    """linear function with y as the base point"""
     return fy + Dfy*(x - y)
 
 
 def linearL(x, invl):
-    '''linear function start from the left point'''
+    """linear function start from the left point"""
     return (x - invl[0])/(invl[1] - invl[0])
 
 
 def linearR(x, invl):
-    '''linear function start from the right point'''
+    """linear function start from the right point"""
     return (x - invl[1])/(invl[0] - invl[1])
 
 
 def intgZero(a, x, n):
-    '''integrate constant 0'''
+    """integrate constant 0"""
     if np.isscalar(a):
         return 0.0
     else:
@@ -44,17 +44,17 @@ def intgZero(a, x, n):
 
 
 def intgOne(a, x, n):
-    '''integrate constant 1'''
+    """integrate constant 1"""
     return (x - a)**n/np.math.factorial(n)
 
 
 def intgConstant(a, x, n, c):
-    '''integrate constant c n times'''
+    """integrate constant c n times"""
     return c*(x - a)**n/np.math.factorial(n)
 
 
 def intgLinear(a, x, n, y, fy, Dfy):
-    '''integrate the linear function'''
+    """integrate the linear function"""
     fa = fy + Dfy*(a - y)
     Dfa = Dfy
 
@@ -63,7 +63,7 @@ def intgLinear(a, x, n, y, fy, Dfy):
 
 
 def intgAcrossPieces(a, x, n, funcs, knots):
-    '''integrate Across piecewise functions'''
+    """integrate Across piecewise functions"""
     if len(funcs) == 1:
         return funcs[0](a, x, n)
     else:
@@ -79,7 +79,7 @@ def intgAcrossPieces(a, x, n, funcs, knots):
 
 
 def intgPieces(a, x, n, funcs, knots):
-    '''integrate different pieces of the functions'''
+    """integrate different pieces of the functions"""
     # verify the input
     if np.isscalar(a) and not np.isscalar(x):
         a = np.repeat(a, x.size)
@@ -126,12 +126,12 @@ def intgPieces(a, x, n, funcs, knots):
 
 
 def intgIndicator(a, x, n, invl):
-    '''integrate indicator function to the order of n'''
+    """integrate indicator function to the order of n"""
     return intgPieces(a, x, n, [intgZero, intgOne, intgZero], invl)
 
 
 def seqDiffMat(n):
-    '''sequencial difference matrix'''
+    """sequencial difference matrix"""
     assert isinstance(n, int) and n >= 2
 
     M = np.zeros((n - 1, n))
@@ -142,3 +142,45 @@ def seqDiffMat(n):
     M[id_d1] = 1.0
 
     return M
+
+
+def indexList(i, sizes):
+    """flat index to index list"""
+    assert sizes
+    assert i < np.prod(sizes)
+
+    ndim = len(sizes)
+    n = np.cumprod(np.insert(sizes[::-1], 0, 1))[-2::-1]
+
+    index_list = []
+    for j in range(ndim):
+        quotient = i // n[j]
+        index_list.append(quotient)
+        i -= quotient*n[j]
+
+    return index_list
+
+
+def option2List(opt, n):
+    """convert default option to option list"""
+    if opt is None or opt == False:
+        return [False]*n
+    elif opt == True:
+        return [True]*n
+    else:
+        return opt
+
+
+def outerFlatten(*arg):
+    """outer product of multiple vectors and then flatten the result"""
+    ndim = len(arg)
+    if ndim == 1:
+        return arg[0]
+
+    mat = np.outer(arg[0], arg[1])
+    vec = mat.reshape(mat.size,)
+
+    if ndim == 2:
+        return vec
+    else:
+        return outerFlatten(vec, *arg[2:])

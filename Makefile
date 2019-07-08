@@ -10,6 +10,7 @@ sdist: setup.py
 	python setup.py sdist
 
 test:
+	python tests/check_utils.py
 	python tests/check_bspline.py
 	python tests/check_xspline.py
 
