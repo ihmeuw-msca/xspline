@@ -491,7 +491,8 @@ class ndxspline:
         self.num_spline_bases = np.prod(self.num_spline_bases_list)
 
     # -------------------------------------------------------------------------
-    def designMat(self, x_list, l_extra_list=None, r_extra_list=None):
+    def designMat(self, x_list,
+                  grid_off=False, l_extra_list=None, r_extra_list=None):
         """multi-dimensional spline design matrix function"""
         l_extra_list = option2List(l_extra_list, self.ndim)
         r_extra_list = option2List(r_extra_list, self.ndim)
@@ -505,17 +506,28 @@ class ndxspline:
                                             r_extra=r_extra_list[i])
                   for i in range(self.ndim)]
 
-        X = []
-        for i in range(self.num_spline_bases):
-            index_list = indexList(i, self.num_spline_bases_list)
-            bases_list = [X_list[j][:, index_list[j]]
-                          for j in range(self.ndim)]
-            X.append(outerFlatten(*bases_list))
+        if grid_off:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            X = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [X_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                X.append(np.prod(bases_list, axis=0))
+        else:
+            X = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [X_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                X.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(X).T)
 
     def designDMat(self, x_list, n_list,
-                   l_extra_list=None, r_extra_list=None):
+                   grid_off=False, l_extra_list=None, r_extra_list=None):
         """multi-dimensional spline derivative design matrix function"""
         l_extra_list = option2List(l_extra_list, self.ndim)
         r_extra_list = option2List(r_extra_list, self.ndim)
@@ -530,17 +542,28 @@ class ndxspline:
                                               r_extra=r_extra_list[i])
                    for i in range(self.ndim)]
 
-        DX = []
-        for i in range(self.num_spline_bases):
-            index_list = indexList(i, self.num_spline_bases_list)
-            bases_list = [DX_list[j][:, index_list[j]]
-                          for j in range(self.ndim)]
-            DX.append(outerFlatten(*bases_list))
+        if grid_off:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            DX = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [DX_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                DX.append(np.prod(bases_list, axis=0))
+        else:
+            DX = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [DX_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                DX.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(DX).T)
 
     def designIMat(self, a_list, x_list, n_list,
-                   l_extra_list=None, r_extra_list=None):
+                   grid_off=False, l_extra_list=None, r_extra_list=None):
         """multi-dimensional spline integration design matrix function"""
         l_extra_list = option2List(l_extra_list, self.ndim)
         r_extra_list = option2List(r_extra_list, self.ndim)
@@ -555,12 +578,23 @@ class ndxspline:
                                               r_extra=r_extra_list[i])
                    for i in range(self.ndim)]
 
-        IX = []
-        for i in range(self.num_spline_bases):
-            index_list = indexList(i, self.num_spline_bases_list)
-            bases_list = [IX_list[j][:, index_list[j]]
-                          for j in range(self.ndim)]
-            IX.append(outerFlatten(*bases_list))
+        if grid_off:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            IX = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [IX_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                IX.append(np.prod(bases_list, axis=0))
+        else:
+            IX = []
+            for i in range(self.num_spline_bases):
+                index_list = indexList(i, self.num_spline_bases_list)
+                bases_list = [IX_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                IX.append(outerFlatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(IX).T)
 
