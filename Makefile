@@ -1,4 +1,5 @@
 # makefile for xspline package
+.PHONY: clean, tests
 
 build: setup.py
 	python setup.py build
@@ -9,12 +10,18 @@ install: setup.py
 sdist: setup.py
 	python setup.py sdist
 
-test:
-	python tests/check_utils.py
-	python tests/check_bspline.py
-	python tests/check_xspline.py
+tests:
+	pytest tests
 
 clean:
-	rm -rf build dist *.egg-info
-	rm -rf xspline/__pycache__
-	rm -rf tests/__pycache__
+	find . -name "*.so*" | xargs rm -rf
+	find . -name "*.pyc" | xargs rm -rf
+	find . -name "__pycache__" | xargs rm -rf
+	find . -name "build" | xargs rm -rf
+	find . -name "dist" | xargs rm -rf
+	find . -name "MANIFEST" | xargs rm -rf
+	find . -name "*.egg-info" | xargs rm -rf
+	find . -name ".pytest_cache" | xargs rm -rf
+
+uninstall:
+	find $(CONDA_PREFIX)/lib/ -name "*xspline*" | xargs rm -rf
