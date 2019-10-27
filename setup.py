@@ -8,5 +8,6 @@ setup(name='xspline',
       author_email='zhengp@uw.edu',
       license='MIT',
       packages=['xspline'],
-      install_requires=['numpy', 'scipy'],
+      package_dir={'xspline': 'src/xspline'},
+      install_requires=['numpy', 'scipy', 'pytest'],
       zip_safe=False)
