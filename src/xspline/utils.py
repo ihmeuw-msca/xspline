@@ -3,7 +3,28 @@ import numpy as np
 
 
 def indicator_f(x, b, l_close=True, r_close=False):
-    """indicator function"""
+    r"""Indicator function for provided interval.
+
+    Args:
+        x (float | np.ndarray):
+        Float scalar or numpy array store the variable(s).
+
+        b (np.ndarray):
+        1D array with 2 elements represent the left and right end of the
+        interval.
+
+        l_close (bool | True, optional):
+        Bool variable indicate that if include the left end of the interval.
+
+        r_close (bool | False, optional):
+        Bool variable indicate that if include the right end of the interval.
+
+    Returns:
+        float | np.ndarray:
+        Return function value(s) at ``x``. The result has the same shape with
+        ``x``. 0 in the result indicate corresponding element in ``x`` is not in
+        the interval and 1 means the it is in the interval.
+    """
     if l_close:
         lb = (x >= b[0])
     else:
@@ -21,36 +42,119 @@ def indicator_f(x, b, l_close=True, r_close=False):
 
 
 def linear_f(x, z, fz, dfz):
-    """linear function with y as the base point"""
+    r"""Linear function construct by a base point and its derivative.
+
+    Args:
+        x (float | np.ndarray):
+        Float scalar or numpy array store the variable(s).
+
+        z (float | np.ndarray):
+        Float scalar or numpy array store the base point(s). When ``x`` is
+        ``np.ndarray``, ``z`` has to have the same shape with ``x``.
+
+        fz (float | np.ndarray):
+        Float scalar or numpy array store the function value(s) at ``z``. Same
+        requirements with ``z``.
+
+        dfz (float | np.ndarray):
+        Float scalar or numpy array store the function derivative(s) at ``z``.
+        Same requirements with ``z``.
+
+    Returns:
+        float | np.ndarray:
+        Return function value(s) at ``x`` with linear function constructed at
+        base point(s) ``z``. The result has the same shape with ``x`` when
+        ``z`` is scalar or same shape with ``z`` when ``x`` is scalar.
+    """
     return fz + dfz*(x - z)
 
 
 def linear_lf(x, b):
-    """linear function start from the left point"""
+    r"""Linear function constructed by linearly interpolate 0 and 1 from left
+    end point to right end point.
+
+    Args:
+        x (float | np.ndarray):
+        Float scalar or numpy array that store the variable(s).
+
+        b (np.ndarray):
+        1D array with 2 elements represent the left and right end of the
+        interval.
+
+    Returns:
+        float | np.ndarray:
+        Return function value(s) at ``x``. The result has the same shape with
+        ``x``.
+    """
     return (x - b[0])/(b[1] - b[0])
 
 
 def linear_rf(x, b):
-    """linear function start from the right point"""
+    r"""Linear function constructed by linearly interpolate 0 and 1 from right
+    end point to left end point.
+
+    Args:
+        x (float | np.ndarray):
+        Float scalar or numpy array that store the variable(s).
+
+        b (np.ndarray):
+        1D array with 2 elements represent the left and right end of the
+        interval.
+
+    Returns:
+        float | np.ndarray:
+        Return function value(s) at ``x``. The result has the same shape with
+        ``x``.
+    """
     return (x - b[1])/(b[0] - b[1])
 
 
-def zero_if(a, x, order):
-    """integrate constant 0"""
-    if np.isscalar(x):
-        return 0.0
-    else:
-        return np.zeros(x.size)
-
-
-def one_if(a, x, order):
-    """integrate constant 1"""
-    return (x - a)**order/np.math.factorial(order)
-
-
 def constant_if(a, x, order, c):
-    """integrate constant c n times"""
-    return c*one_if(a, x, order)
+    r"""Integration of constant function.
+
+    Args:
+        a (float | np.ndarray):
+        Starting point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        x (float | np.ndarray):
+        Ending point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        order (int):
+        Non-negative integer number indicate the order of integration. In other
+        words, how many time(s) we integrate.
+
+        c (float):
+        Constant function value.
+
+    Returns:
+        float | np.ndarray:
+        Integration value(s) of the constant function.
+    """
+    # determine the result size
+    a_is_ndarray = isinstance(a, np.ndarray)
+    x_is_ndarray = isinstance(x, np.ndarray)
+
+    if a_is_ndarray and x_is_ndarray:
+        assert a.size == x.size
+
+    result_is_ndarray = a_is_ndarray or x_is_ndarray
+    if a_is_ndarray:
+        result_size = a.size
+    elif x_is_ndarray:
+        result_size = x.size
+    else:
+        result_size = 1
+
+    # special case when c is 0
+    if c == 0.0:
+        if result_is_ndarray:
+            return np.zeros(result_size)
+        else:
+            return 0.0
+
+    return c*(x - a)**order/np.math.factorial(order)
 
 
 def linear_if(a, x, order, z, fz, dfz):
@@ -128,7 +232,10 @@ def pieces_if(a, x, order, funcs, knots):
 
 def indicator_if(a, x, order, b):
     """integrate indicator function to the order of n"""
-    return pieces_if(a, x, order, [zero_if, one_if, zero_if], b)
+    return pieces_if(a, x, order,
+                     [lambda *params: constant_if(*params, 0.0),
+                      lambda *params: constant_if(*params, 1.0),
+                      lambda *params: constant_if(*params, 0.0)], b)
 
 
 def seq_diff_mat(size):
