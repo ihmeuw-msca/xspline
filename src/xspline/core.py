@@ -22,7 +22,7 @@ def bspline_b(knots, degree, idx, l_extra=False, r_extra=False):
     if idx == num_splines - 1 and r_extra:
         ub = np.inf
 
-    return [lb, ub]
+    return np.array([lb, ub])
 
 
 def bspline_f(x, knots, degree, idx, l_extra=False, r_extra=False):
@@ -30,20 +30,20 @@ def bspline_f(x, knots, degree, idx, l_extra=False, r_extra=False):
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
 
-    b = bspline_b(idx, degree, l_extra=l_extra, r_extra=r_extra)
+    b = bspline_b(knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
 
     if degree == 0:
         f = utils.indicator_f(x, b, r_close=(idx == num_splines - 1))
         return f
 
     if idx == 0:
-        b_effect = bspline_b(idx, degree)
+        b_effect = bspline_b(knots, degree, idx)
         y = utils.indicator_f(x, b)
         z = utils.linear_rf(x, b_effect)
         return y*(z**degree)
 
     if idx == num_splines - 1:
-        b_effect = bspline_b(idx, degree)
+        b_effect = bspline_b(knots, degree, idx)
         y = utils.indicator_f(x, b, r_close=True)
         z = utils.linear_lf(x, b_effect)
         return y*(z**degree)

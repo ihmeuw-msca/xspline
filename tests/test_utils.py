@@ -134,3 +134,21 @@ def test_utils_pieces_if(a, x, order, knots, result):
 def test_utils_indicator_if(a, x, order, b, result):
     my_result = utils.indicator_if(a, x, order, b)
     assert np.linalg.norm(my_result - result) < 1e-10
+
+
+@pytest.mark.parametrize("size", [5, 10])
+def test_utils_seq_diff_mat(size):
+    x = np.random.randn(size)
+    y = np.array([x[i+1] - x[i] for i in range(size - 1)])
+
+    mat = utils.seq_diff_mat(size)
+    my_y = mat.dot(x)
+
+    assert np.linalg.norm(my_y - y) < 1e-10
+
+
+@pytest.mark.parametrize("order", [0, 2, 4])
+@pytest.mark.parametrize("shape", [(5,), (2, 5), (1, 2, 3)])
+def test_utils_order_to_index(order, shape):
+
+

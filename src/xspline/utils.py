@@ -358,7 +358,17 @@ def indicator_if(a, x, order, b, l_close=True, r_close=False):
 
 
 def seq_diff_mat(size):
-    """sequencial difference matrix"""
+    r"""Compute sequencial difference matrix.
+
+    Args:
+        size (int):
+        Positive integer that indicate the number of columns of the matrix.
+        Number of rows will be 1 less than number of columns.
+
+    Returns:
+        ndarray:
+        A matrix consist of one and minus one.
+    """
     assert isinstance(size, int) and size >= 2
 
     mat = np.zeros((size - 1, size))
@@ -371,21 +381,35 @@ def seq_diff_mat(size):
     return mat
 
 
-def index_list(i, sizes):
-    """flat index to index list"""
-    assert sizes
-    assert i < np.prod(sizes)
+def order_to_index(order, shape):
+    r"""Compute the index of the element in a high dimensional array provided
+    the order of the element.
 
-    ndim = len(sizes)
-    n = np.cumprod(np.insert(sizes[::-1], 0, 1))[-2::-1]
+    Args:
+        order: int
+        Non-negative integer present the order of the element.
 
-    idxes = []
+        shape: tuple
+        Shape tuple of the high dimensional array.
+
+    Returns:
+        tuple:
+        The index element in the array.
+    """
+    assert isinstance(shape, tuple)
+    assert isinstance(order, int)
+    assert 0 <= order < np.prod(shape)
+
+    ndim = len(shape)
+    n = np.cumprod(np.insert(shape[::-1], 0, 1))[-2::-1]
+
+    index = []
     for j in range(ndim):
-        quotient = i // n[j]
-        idxes.append(quotient)
-        i -= quotient*n[j]
+        quotient = order // n[j]
+        index.append(quotient)
+        order -= quotient*n[j]
 
-    return idxes
+    return index
 
 
 def option_to_list(opt, size):
