@@ -42,14 +42,14 @@ def indicator_f(x, b, l_close=True, r_close=False):
 
 
 def linear_f(x, z, fz, dfz):
-    r"""Linear function construct by a base point and its derivative.
+    r"""Linear function construct by reference point(s).
 
     Args:
         x (float | np.ndarray):
         Float scalar or numpy array store the variable(s).
 
         z (float | np.ndarray):
-        Float scalar or numpy array store the base point(s). When ``x`` is
+        Float scalar or numpy array store the reference point(s). When ``x`` is
         ``np.ndarray``, ``z`` has to have the same shape with ``x``.
 
         fz (float | np.ndarray):
@@ -158,7 +158,37 @@ def constant_if(a, x, order, c):
 
 
 def linear_if(a, x, order, z, fz, dfz):
-    """integrate the linear function"""
+    r"""Integrate linear function constructed by the reference point(s).
+
+    Args:
+        a (float | np.ndarray):
+        Starting point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        x (float | np.ndarray):
+        Ending point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        order (int):
+        Non-negative integer number indicate the order of integration. In other
+        words, how many time(s) we integrate.
+
+        z (float | np.ndarray):
+        Float scalar or numpy array store the reference point(s). When ``x`` is
+        ``np.ndarray``, ``z`` has to have the same shape with ``x``.
+
+        fz (float | np.ndarray):
+        Float scalar or numpy array store the function value(s) at ``z``. Same
+        requirements with ``z``.
+
+        dfz (float | np.ndarray):
+        Float scalar or numpy array store the function derivative(s) at ``z``.
+        Same requirements with ``z``.
+
+    Returns:
+        float | np.ndarray:
+        Integration value(s) of the constant function.
+    """
     fa = fz + dfz*(a - z)
     dfa = dfz
 
@@ -167,13 +197,45 @@ def linear_if(a, x, order, z, fz, dfz):
 
 
 def integrate_across_pieces(a, x, order, funcs, knots):
-    """integrate Across piecewise functions"""
+    r"""Integrate Across piecewise functions.
+
+    Args:
+        a (float | np.ndarray):
+        Starting point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape. ``a`` has to be less
+        than ``knots[0]``.
+
+        x (float | np.ndarray):
+        Ending point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape. ``x`` has to be greater
+        than ``knots[-1]``.
+
+        order (int):
+        Non-negative integer number indicate the order of integration. In other
+        words, how many time(s) we integrate.
+
+        funcs (list):
+        List of functions defined on pieces of domain.
+
+        knots (np.ndarray):
+        1D numpy array contains all the breaking points for the piecewise
+        functions.
+
+    Returns:
+        float | np.ndarray:
+        Integration value(s) of the constant function.
+    """
+    assert len(funcs) == len(knots) + 1
     if len(funcs) == 1:
         return funcs[0](a, x, order)
     else:
         assert np.all(a < knots[0]) and np.all(x > knots[-1])
 
-    b = np.repeat(knots[0], a.size)
+    if np.isscalar(a):
+        b = knots[0]
+    else:
+        b = np.repeat(knots[0], a.size)
+
     val = integrate_across_pieces(b, x, order, funcs[1:], knots[1:])
 
     for j in range(order):
@@ -183,8 +245,34 @@ def integrate_across_pieces(a, x, order, funcs, knots):
 
 
 def pieces_if(a, x, order, funcs, knots):
-    """integrate different pieces of the functions"""
+    r"""Integrate pieces of the functions.
+
+    Args:
+        a (float | np.ndarray):
+        Starting point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        x (float | np.ndarray):
+        Ending point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        order (int):
+        Non-negative integer number indicate the order of integration. In other
+        words, how many time(s) we integrate.
+
+        funcs (list):
+        List of functions defined on pieces of domain.
+
+        knots (np.ndarray):
+        1D numpy array contains all the breaking points for the piecewise
+        functions.
+
+    Returns:
+        float | np.ndarray:
+        Integration value(s) of the constant function.
+    """
     # verify the input
+    assert len(funcs) == len(knots) + 1
     if np.isscalar(a) and not np.isscalar(x):
         a = np.repeat(a, x.size)
     if np.isscalar(x) and not np.isscalar(a):
@@ -230,12 +318,43 @@ def pieces_if(a, x, order, funcs, knots):
         return int_f
 
 
-def indicator_if(a, x, order, b):
-    """integrate indicator function to the order of n"""
-    return pieces_if(a, x, order,
-                     [lambda *params: constant_if(*params, 0.0),
-                      lambda *params: constant_if(*params, 1.0),
-                      lambda *params: constant_if(*params, 0.0)], b)
+def indicator_if(a, x, order, b, l_close=True, r_close=False):
+    r"""Integrate indicator function.
+
+    Args:
+        a (float | np.ndarray):
+        Starting point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        x (float | np.ndarray):
+        Ending point(s) of the integration. If both ``a`` and ``x`` are
+        ``np.ndarray``, they should have the same shape.
+
+        order (int):
+        Non-negative integer number indicate the order of integration. In other
+        words, how many time(s) we integrate.
+
+        b (np.ndarray):
+        1D array with 2 elements represent the left and right end of the
+        interval.
+
+        l_close (bool | True, optional):
+        Bool variable indicate that if include the left end of the interval.
+
+        r_close (bool | False, optional):
+        Bool variable indicate that if include the right end of the interval.
+
+    Returns:
+        float | np.ndarray:
+        Integration value(s) of the constant function.
+    """
+    if order == 0:
+        return indicator_f(x, b, l_close=l_close, r_close=r_close)
+    else:
+        return pieces_if(a, x, order,
+                         [lambda *params: constant_if(*params, 0.0),
+                          lambda *params: constant_if(*params, 1.0),
+                          lambda *params: constant_if(*params, 0.0)], b)
 
 
 def seq_diff_mat(size):

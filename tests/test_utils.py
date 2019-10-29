@@ -77,3 +77,60 @@ def test_utils_constant_if_0(a, x, order):
 def test_utils_constant_if_1(a, x, order, result):
     my_result = utils.constant_if(a, x, order, 1.0)
     assert np.linalg.norm(my_result - result) < 1e-10
+
+
+@pytest.mark.parametrize(("z", "fz", "dfz"),
+                         [(1.0, 0.0, 2.0)])
+@pytest.mark.parametrize("a", [0.0, np.zeros(5)])
+@pytest.mark.parametrize("x", [1.0, np.ones(5)])
+@pytest.mark.parametrize(("order", "result"),
+                         [(0, 0.0), (1, -1.0), (2, -2.0/3.0)])
+def test_utils_linear_if(a, x, order, z, fz, dfz, result):
+    my_result = utils.linear_if(a, x, order, z, fz, dfz)
+    assert np.linalg.norm(my_result - result) < 1e-10
+
+
+@pytest.mark.parametrize("a", [0.0, np.zeros(5)])
+@pytest.mark.parametrize("x", [1.0, np.ones(5)])
+@pytest.mark.parametrize("knots", [np.array([0.5])])
+@pytest.mark.parametrize(("order", "result"),
+                         [(0, 2.0), (1, 1.5), (2, 0.625), (3, 3.0/16.0)])
+def test_utils_integrate_across_pieces(a, x, order, knots, result):
+    my_result = utils.integrate_across_pieces(
+        a, x, order,
+        [
+            lambda *params: utils.constant_if(*params, 1.0),
+            lambda *params: utils.constant_if(*params, 2.0),
+        ],
+        knots
+    )
+    assert np.linalg.norm(my_result - result) < 1e-10
+
+
+@pytest.mark.parametrize("a", [0.0, np.zeros(5)])
+@pytest.mark.parametrize("x", [1.0, np.ones(5)])
+@pytest.mark.parametrize("knots", [np.array([0.0, 0.5, 1.0])])
+@pytest.mark.parametrize(("order", "result"),
+                         [(0, 2.0), (1, 1.5), (2, 0.625), (3, 3.0/16.0)])
+def test_utils_pieces_if(a, x, order, knots, result):
+    my_result = utils.pieces_if(
+        a, x, order,
+        [
+            lambda *params: utils.constant_if(*params, 0.0),
+            lambda *params: utils.constant_if(*params, 1.0),
+            lambda *params: utils.constant_if(*params, 2.0),
+            lambda *params: utils.constant_if(*params, 0.0),
+        ],
+        knots
+    )
+    assert np.linalg.norm(my_result - result) < 1e-10
+
+
+@pytest.mark.parametrize("a", [0.0, np.zeros(5)])
+@pytest.mark.parametrize("x", [1.0, np.ones(5)])
+@pytest.mark.parametrize("b", [np.array([0.5, 1.0])])
+@pytest.mark.parametrize(("order", "result"),
+                         [(0, 0.0), (1, 0.5), (2, 0.125)])
+def test_utils_indicator_if(a, x, order, b, result):
+    my_result = utils.indicator_if(a, x, order, b)
+    assert np.linalg.norm(my_result - result) < 1e-10
