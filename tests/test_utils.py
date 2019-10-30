@@ -150,5 +150,29 @@ def test_utils_seq_diff_mat(size):
 @pytest.mark.parametrize("order", [0, 2, 4])
 @pytest.mark.parametrize("shape", [(5,), (2, 5), (1, 2, 3)])
 def test_utils_order_to_index(order, shape):
+    x = np.random.randn(*shape)
+    z = x.reshape(x.size, 1)
+    index = utils.order_to_index(order, shape)
+    print(shape)
+    print(index)
+    assert z[order] == x[index]
 
 
+@pytest.mark.parametrize("option", [True, False, None])
+@pytest.mark.parametrize("size", [2, 3])
+def test_utils_option_to_list(option, size):
+    result = not option
+    my_result = utils.option_to_list(option, size)
+    assert len(my_result) == size
+    assert all([~(my_result[i] ^ result) for i in range(size)])
+
+
+@pytest.mark.parametrize("args",
+                         [(np.arange(2), np.arange(3)),
+                          (np.arange(2), np.arange(3), np.arange(4))])
+def test_utils_outer_flatten(args):
+    result = np.prod(np.ix_(*args))
+    result = result.reshape(result.size,)
+    my_result = utils.outer_flatten(*args)
+
+    assert np.linalg.norm(my_result - result) < 1e-10

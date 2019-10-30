@@ -409,11 +409,25 @@ def order_to_index(order, shape):
         index.append(quotient)
         order -= quotient*n[j]
 
-    return index
+    return tuple(index)
 
 
 def option_to_list(opt, size):
-    """convert default option to option list"""
+    r"""Convert default option to list of options.
+
+    Args:
+        opt (bool | None):
+        A single option in the form of bool or None.
+
+        size (int):
+        Positive integer indicate the size of the option list.
+
+    Returns:
+        list:
+        Option list consist of bool elements.
+    """
+    assert isinstance(size, int)
+    assert size > 0
     if not opt:
         return [False]*size
     else:
@@ -421,7 +435,16 @@ def option_to_list(opt, size):
 
 
 def outer_flatten(*arg):
-    """outer product of multiple vectors and then flatten the result"""
+    r"""Outer product of multiple vectors and then flatten the result.
+
+    Args:
+        arg (list | tuple):
+        A list or tuple of 1D numpy arrays.
+
+    Return:
+        np.ndarray:
+        1D numpy array that store the flattened outer product.
+    """
     ndim = len(arg)
     if ndim == 1:
         return arg[0]
