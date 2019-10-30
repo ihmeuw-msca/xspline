@@ -434,25 +434,16 @@ def option_to_list(opt, size):
         return [True]*size
 
 
-def outer_flatten(*arg):
+def outer_flatten(*args):
     r"""Outer product of multiple vectors and then flatten the result.
 
     Args:
-        arg (list | tuple):
+        args (list | tuple):
         A list or tuple of 1D numpy arrays.
 
     Return:
         np.ndarray:
         1D numpy array that store the flattened outer product.
     """
-    ndim = len(arg)
-    if ndim == 1:
-        return arg[0]
-
-    mat = np.outer(arg[0], arg[1])
-    vec = mat.reshape(mat.size,)
-
-    if ndim == 2:
-        return vec
-    else:
-        return outer_flatten(vec, *arg[2:])
+    result = np.prod(np.ix_(*args))
+    return result.reshape(result.size,)
