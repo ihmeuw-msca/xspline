@@ -6,10 +6,37 @@
     core module contains main functions and classes.
 """
 import numpy as np
-from xspline import utils
+from . import utils
 
 
 def bspline_b(knots, degree, idx, l_extra=False, r_extra=False):
+    r"""Compute the support for the spline basis, knots degree and the index of
+    the basis.
+
+    Args:
+        knots (np.ndarray):
+        1D array that stores the knots of the splines.
+
+        degree (int):
+        A non-negative integer that indicates the degree of the polynomial.
+
+        idx (int):
+        A non-negative integer that indicates the order in the spline bases
+        list.
+
+        l_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at left end.
+        Default to be False.
+
+        r_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at right end.
+        Default to be False.
+
+    Returns:
+        np.ndarray:
+        1D array with two elements represents that left and right end of the
+        support of the spline basis.
+    """
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree

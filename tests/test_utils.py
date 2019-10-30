@@ -153,8 +153,6 @@ def test_utils_order_to_index(order, shape):
     x = np.random.randn(*shape)
     z = x.reshape(x.size, 1)
     index = utils.order_to_index(order, shape)
-    print(shape)
-    print(index)
     assert z[order] == x[index]
 
 
