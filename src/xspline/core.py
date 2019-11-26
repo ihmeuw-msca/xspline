@@ -41,6 +41,9 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
 
+    if idx == -1:
+        idx = num_splines - 1
+
     lb = knots[max(idx - degree, 0)]
     ub = knots[min(idx + 1, num_intervals)]
 
