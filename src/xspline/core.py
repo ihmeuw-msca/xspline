@@ -14,7 +14,7 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
     the basis.
 
     Args:
-        knots (np.ndarray):
+        knots (numpy.ndarray):
         1D array that stores the knots of the splines.
 
         degree (int):
@@ -33,7 +33,7 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
         Default to be False.
 
     Returns:
-        np.ndarray:
+        numpy.ndarray:
         1D array with two elements represents that left and right end of the
         support of the spline basis.
     """
