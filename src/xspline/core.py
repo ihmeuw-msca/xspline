@@ -56,6 +56,34 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
 
 
 def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
+    r"""Compute the spline basis.
+
+    Args:
+        x (float | numpy.ndarray):
+        Scalar or numpy array that store the independent variables.
+
+        knots (numpy.ndarray):
+        1D array that stores the knots of the splines.
+
+        degree (int):
+        A non-negative integer that indicates the degree of the polynomial.
+
+        idx (int):
+        A non-negative integer that indicates the order in the spline bases
+        list.
+
+        l_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at left end.
+        Default to be False.
+
+        r_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at right end.
+        Default to be False.
+
+    Returns:
+        float | numpy.ndarray:
+        Function values of the corresponding spline bases.
+    """
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -93,6 +121,37 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
 
 
 def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
+    r"""Compute the derivative of the spline basis.
+
+    Args:
+        x (float | numpy.ndarray):
+        Scalar or numpy array that store the independent variables.
+
+        knots (numpy.ndarray):
+        1D array that stores the knots of the splines.
+
+        degree (int):
+        A non-negative integer that indicates the degree of the polynomial.
+
+        order (int):
+        A non-negative integer that indicates the order of differentiation.
+
+        idx (int):
+        A non-negative integer that indicates the order in the spline bases
+        list.
+
+        l_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at left end.
+        Default to be False.
+
+        r_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at right end.
+        Default to be False.
+
+    Returns:
+        float | numpy.ndarray:
+        Derivative values of the corresponding spline bases.
+    """
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -133,6 +192,37 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
 
 
 def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
+    r"""Compute the integral of the spline basis.
+
+    Args:
+        x (float | numpy.ndarray):
+        Scalar or numpy array that store the independent variables.
+
+        knots (numpy.ndarray):
+        1D array that stores the knots of the splines.
+
+        degree (int):
+        A non-negative integer that indicates the degree of the polynomial.
+
+        order (int):
+        A non-negative integer that indicates the order of integration.
+
+        idx (int):
+        A non-negative integer that indicates the order in the spline bases
+        list.
+
+        l_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at left end.
+        Default to be False.
+
+        r_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at right end.
+        Default to be False.
+
+    Returns:
+        float | numpy.ndarray:
+        Integral values of the corresponding spline bases.
+    """
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
