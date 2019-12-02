@@ -60,6 +60,9 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
 
+    if idx == -1:
+        idx = num_splines - 1
+
     b = bspline_domain(knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
 
     if degree == 0:
@@ -93,6 +96,9 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
+
+    if idx == -1:
+        idx = num_splines - 1
 
     if order == 0:
         return bspline_fun(x, knots, degree, idx,
@@ -130,6 +136,9 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
+
+    if idx == -1:
+        idx = num_splines - 1
 
     if order == 0:
         return bspline_fun(x, knots, degree, idx,
