@@ -153,3 +153,52 @@ def test_bspline_dfun_r_extra(x, knots, r_extra):
     else:
         tr_dy = 0.0
     assert np.linalg.norm(my_dy - tr_dy) < 1e-10
+
+
+@pytest.mark.parametrize("knots", [np.linspace(0.0, 1.0, 5)])
+@pytest.mark.parametrize("degree", [1])
+@pytest.mark.parametrize("order", [1])
+@pytest.mark.parametrize("idx", [0])
+@pytest.mark.parametrize("x", [np.linspace(0.0, 1.0, 101)])
+def test_bspline_ifun(x, knots, degree, order, idx):
+    my_iy = core.bspline_ifun(knots[0], x, knots, degree, order, idx)
+    tr_iy = np.zeros(x.size)
+    idx1 = (x >= knots[0]) & (x <= knots[1])
+
+    tr_iy[idx1] = x[idx1] - 0.5/knots[1]*x[idx1]**2
+    tr_iy[~idx1] = tr_iy[idx1][-1]
+
+    assert np.linalg.norm(tr_iy - my_iy) < 1e-10
+
+
+@pytest.mark.parametrize("knots", [np.linspace(0.0, 1.0, 5)])
+@pytest.mark.parametrize("x", [np.linspace(-1.0, -0.1, 10)])
+@pytest.mark.parametrize("l_extra", [True, False])
+def test_bspline_ifun_l_extra(x, knots, l_extra):
+    degree = 0
+    idx = 0
+    order = 1
+    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx,
+                              l_extra=l_extra)
+    if l_extra:
+        tr_iy = x - x[0]
+    else:
+        tr_iy = 0.0
+
+    assert np.linalg.norm(my_iy - tr_iy) < 1e-10
+
+
+@pytest.mark.parametrize("knots", [np.linspace(0.0, 1.0, 5)])
+@pytest.mark.parametrize("x", [np.linspace(1.1, 2.0, 10)])
+@pytest.mark.parametrize("r_extra", [True, False])
+def test_bspline_ifun_r_extra(x, knots, r_extra):
+    degree = 0
+    idx = -1
+    order = 1
+    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx,
+                              r_extra=r_extra)
+    if r_extra:
+        tr_iy = x - x[0]
+    else:
+        tr_iy = 0.0
+    assert np.linalg.norm(my_iy - tr_iy) < 1e-10
