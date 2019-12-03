@@ -21,7 +21,7 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
         A non-negative integer that indicates the degree of the polynomial.
 
         idx (int):
-        A non-negative integer that indicates the order in the spline bases
+        A non-negative integer that indicates the index in the spline bases
         list.
 
         l_extra (bool, optional):
@@ -69,7 +69,7 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
         A non-negative integer that indicates the degree of the polynomial.
 
         idx (int):
-        A non-negative integer that indicates the order in the spline bases
+        A non-negative integer that indicates the index in the spline bases
         list.
 
         l_extra (bool, optional):
@@ -137,7 +137,7 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
         A non-negative integer that indicates the order of differentiation.
 
         idx (int):
-        A non-negative integer that indicates the order in the spline bases
+        A non-negative integer that indicates the index in the spline bases
         list.
 
         l_extra (bool, optional):
@@ -195,8 +195,11 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
     r"""Compute the integral of the spline basis.
 
     Args:
+        a (float | numpy.ndarray):
+        Scalar or numpy array that store the starting point of the integration.
+
         x (float | numpy.ndarray):
-        Scalar or numpy array that store the independent variables.
+        Scalar or numpy array that store the ending point of the integration.
 
         knots (numpy.ndarray):
         1D array that stores the knots of the splines.
@@ -208,7 +211,7 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
         A non-negative integer that indicates the order of integration.
 
         idx (int):
-        A non-negative integer that indicates the order in the spline bases
+        A non-negative integer that indicates the index in the spline bases
         list.
 
         l_extra (bool, optional):
@@ -261,3 +264,169 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
                                   l_extra=l_extra, r_extra=r_extra)/d
 
     return lif + rif
+
+
+class XSpline:
+    """XSpline main class of the package.
+    """
+    def __init__(self, knots, degree, l_linear=False, r_linear=False):
+        r"""Constructor of the XSpline class.
+
+        knots (numpy.ndarray):
+        1D numpy array that store the knots, must including that boundary knots.
+
+        degree (int):
+        A non-negative integer that indicates the degree of the spline.
+
+        l_linear (bool, optional):
+        A bool variable, that if using the linear tail at left end.
+
+        r_linear (bool, optional):
+        A bool variable, that if using the linear tail at right end.
+        """
+        # pre-process the knots vector
+        knots = list(set(knots))
+        knots = np.sort(np.array(knots))
+
+        self.knots = knots
+        self.degree = degree
+        self.l_linear = l_linear
+        self.r_linear = r_linear
+
+        # dimensions
+        self.num_knots = knots.size
+        self.num_intervals = knots.size - 1
+        self.num_spline_bases = self.num_intervals + self.degree
+
+        # check inputs
+        int_l_linear = int(l_linear)
+        int_r_linear = int(r_linear)
+        assert self.num_intervals >= 1 + int_l_linear + int_r_linear
+        assert isinstance(self.degree, int) and self.degree >= 0
+
+        # create inner knots
+        self.inner_knots = self.knots[int_l_linear:
+                                      self.num_knots - int_l_linear]
+        self.lb = self.knots[0]
+        self.ub = self.knots[-1]
+        self.inner_lb = self.inner_knots[0]
+        self.inner_ub = self.inner_knots[-1]
+
+    def domain(self, idx, l_extra=False, r_extra=False):
+        """Return the support of the XSpline.
+
+        idx (int):
+        A non-negative integer that indicates the index in the spline bases
+        list.
+
+        l_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at left end.
+        Default to be False.
+
+        r_extra (bool, optional):
+        A optional bool variable indicates that if extrapolate at right end.
+        Default to be False.
+
+        Returns:
+            numpy.ndarray:
+            1D array with two elements represents that left and right end of the
+            support of the spline basis.
+        """
+        inner_domain = bspline_domain(self.inner_knots,
+                                      self.degree,
+                                      idx,
+                                      l_extra=l_extra,
+                                      r_extra=r_extra)
+        lb = inner_domain[0]
+        ub = inner_domain[1]
+
+        lb = self.lb if inner_domain[0] == self.inner_lb else lb
+        ub = self.ub if inner_domain[0] == self.inner_ub else ub
+
+        return np.array([lb, ub])
+
+    def fun(self, x, idx, l_extra=False, r_extra=False):
+        r"""Compute the spline basis.
+
+        Args:
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the independent variables.
+
+            idx (int):
+            A non-negative integer that indicates the index in the spline bases
+            list.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            float | numpy.ndarray:
+            Function values of the corresponding spline bases.
+        """
+        if not self.l_linear and not self.r_linear:
+            return bspline_fun(x,
+                               self.inner_knots,
+                               self.degree,
+                               idx,
+                               l_extra=l_extra,
+                               r_extra=r_extra)
+
+        x_is_scalar = np.isscalar(x)
+        if x_is_scalar:
+            x = np.array([x])
+
+        f = np.zeros(x.size)
+        m_idx = np.array([True] * x.size)
+
+        if self.l_linear:
+            l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
+            m_idx &= (x >= self.inner_lb)
+
+            inner_lb_fun = bspline_fun(self.inner_lb,
+                                       self.inner_knots,
+                                       self.degree,
+                                       idx)
+            inner_lb_dfun = bspline_dfun(self.inner_lb,
+                                         self.inner_knots,
+                                         self.degree,
+                                         1, idx)
+
+            f[l_idx] = inner_lb_fun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
+
+        if self.r_linear:
+            u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
+            m_idx &= (x <= self.inner_ub)
+
+            inner_ub_fun = bspline_fun(self.inner_ub,
+                                       self.inner_knots,
+                                       self.degree,
+                                       idx)
+            inner_ub_dfun = bspline_dfun(self.inner_ub,
+                                         self.inner_knots,
+                                         self.degree,
+                                         1, idx)
+
+            f[u_idx] = inner_ub_fun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
+
+        f[m_idx] = bspline_fun(x[m_idx],
+                               self.inner_knots,
+                               self.degree,
+                               idx,
+                               l_extra=l_extra,
+                               r_extra=r_extra)
+
+        if x_is_scalar:
+            return f[0]
+        else:
+            return f
+
+# TODO:
+# 1. bspline function pass in too many default every time
+# 2. name of f, df and if
+# 3. the way to deal with the scalar vs array.
+# test these two functions first next time and then modify correspondingly.
