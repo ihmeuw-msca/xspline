@@ -387,7 +387,7 @@ class XSpline:
             l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
             m_idx &= (x >= self.inner_lb)
 
-            inner_lb_fun = bspline_fun(self.inner_lb,
+            inner_lb_yun = bspline_fun(self.inner_lb,
                                        self.inner_knots,
                                        self.degree,
                                        idx)
@@ -396,13 +396,13 @@ class XSpline:
                                          self.degree,
                                          1, idx)
 
-            f[l_idx] = inner_lb_fun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
+            f[l_idx] = inner_lb_yun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
 
         if self.r_linear:
             u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
             m_idx &= (x <= self.inner_ub)
 
-            inner_ub_fun = bspline_fun(self.inner_ub,
+            inner_ub_yun = bspline_fun(self.inner_ub,
                                        self.inner_knots,
                                        self.degree,
                                        idx)
@@ -411,7 +411,7 @@ class XSpline:
                                          self.degree,
                                          1, idx)
 
-            f[u_idx] = inner_ub_fun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
+            f[u_idx] = inner_ub_yun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
 
         f[m_idx] = bspline_fun(x[m_idx],
                                self.inner_knots,
@@ -449,7 +449,7 @@ class XSpline:
 
         Returns:
             float | numpy.ndarray:
-            Function values of the corresponding spline bases.
+            Derivative values of the corresponding spline bases.
         """
         if order == 0:
             return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
@@ -505,9 +505,112 @@ class XSpline:
         else:
             return dy
 
+    def ifun(self, a, x, order, idx, l_extra=False, r_extra=False):
+        r"""Compute the integral of the spline basis.
+
+        Args:
+            a (float | numpy.ndarray):
+            Scalar or numpy array that store the starting point of the
+            integration.
+
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the ending point of the
+            integration.
+
+            order (int):
+            A non-negative integer that indicates the order of integration.
+
+            idx (int):
+            A non-negative integer that indicates the index in the spline bases
+            list.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            float | numpy.ndarray:
+            Integral values of the corresponding spline bases.
+        """
+        if order == 0:
+            return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+
+        if not self.l_linear and not self.r_linear:
+            return bspline_ifun(a, x,
+                                self.knots,
+                                self.degree,
+                                order,
+                                idx,
+                                l_extra=l_extra,
+                                r_extra=r_extra)
+        # verify the inputs
+        assert np.all(a <= x)
+
+        # function and derivative values at inner lb and inner rb
+        inner_lb_y = bspline_fun(self.inner_lb,
+                                 self.inner_knots,
+                                 self.degree,
+                                 idx)
+        inner_ub_y = bspline_fun(self.inner_ub,
+                                 self.inner_knots,
+                                 self.degree,
+                                 idx)
+        inner_lb_dy = bspline_dfun(self.inner_lb,
+                                   self.inner_knots,
+                                   self.degree,
+                                   1, idx)
+        inner_ub_dy = bspline_dfun(self.inner_ub,
+                                   self.inner_knots,
+                                   self.degree,
+                                   1, idx)
+
+        # extrapolation
+        lb = self.lb
+        ub = self.ub
+        inner_lb = self.inner_lb
+        inner_ub = self.inner_ub
+        if l_extra:
+            if self.l_linear:
+                lb = -np.inf
+            else:
+                inner_lb = -np.inf
+
+        if r_extra:
+            if self.r_linear:
+                ub = np.inf
+            else:
+                inner_ub = np.inf
+
+        # there are in total 5 pieces functions
+        def l_piece(a, x, order):
+            return utils.linear_if(a, x, order,
+                                   inner_lb, inner_lb_y, inner_lb_dy)
+
+        def m_piece(a, x, order):
+            return bspline_ifun(a, x,
+                                self.inner_knots,
+                                self.degree,
+                                order, idx,
+                                l_extra=l_extra, r_extra=r_extra)
+
+        def r_piece(a, x, order):
+            return utils.linear_if(a, x, order,
+                                   inner_ub, inner_ub_y, inner_ub_dy)
+
+        def zero_piece(a, x, order):
+            return np.zeros(x.size)
+
+        funcs = [zero_piece, l_piece, m_piece, r_piece, zero_piece]
+        knots = np.array([lb, inner_lb, inner_ub, ub])
+
+        return utils.pieces_if(a, x, order, funcs, knots)
 
 # TODO:
 # 1. bspline function pass in too many default every time
 # 2. name of f, df and if
 # 3. the way to deal with the scalar vs array.
-# test these two functions first next time and then modify correspondingly.
+# test integration function
