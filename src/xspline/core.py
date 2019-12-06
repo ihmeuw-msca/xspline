@@ -425,6 +425,87 @@ class XSpline:
         else:
             return f
 
+    def dfun(self, x, order, idx, l_extra=False, r_extra=False):
+        r"""Compute the derivative of the spline basis.
+
+        Args:
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the independent variables.
+
+            order (int):
+            A non-negative integer that indicates the order of differentiation.
+
+            idx (int):
+            A non-negative integer that indicates the index in the spline bases
+            list.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            float | numpy.ndarray:
+            Function values of the corresponding spline bases.
+        """
+        if order == 0:
+            return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+
+        if not self.l_linear and self.r_linear:
+            return bspline_dfun(x,
+                                self.knots,
+                                self.degree,
+                                order,
+                                idx,
+                                l_extra=l_extra,
+                                r_extra=r_extra)
+
+        x_is_scalar = np.isscalar(x)
+        if x_is_scalar:
+            x = np.array([x])
+
+        dy = np.zeros(x.size)
+        m_idx = np.array([True] * x.size)
+
+        if self.l_linear:
+            l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
+            m_idx &= (x >= self.inner_lb)
+
+            if order == 1:
+                inner_lb_dy = bspline_dfun(self.inner_lb,
+                                           self.inner_knots,
+                                           self.degree,
+                                           order, idx)
+                dy[l_idx] = np.repeat(inner_lb_dy, np.sum(l_idx))
+
+        if self.r_linear:
+            u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
+            m_idx &= (x <= self.inner_ub)
+
+            if order == 1:
+                inner_ub_dy = bspline_dfun(self.inner_ub,
+                                           self.inner_knots,
+                                           self.degree,
+                                           order, idx)
+                dy[u_idx] = np.repeat(inner_ub_dy, np.sum(u_idx))
+
+        dy[m_idx] = bspline_dfun(x[m_idx],
+                                 self.inner_knots,
+                                 self.degree,
+                                 order,
+                                 idx,
+                                 l_extra=l_extra,
+                                 r_extra=r_extra)
+
+        if x_is_scalar:
+            return dy[0]
+        else:
+            return dy
+
+
 # TODO:
 # 1. bspline function pass in too many default every time
 # 2. name of f, df and if
