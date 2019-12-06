@@ -306,7 +306,7 @@ class XSpline:
 
         # create inner knots
         self.inner_knots = self.knots[int_l_linear:
-                                      self.num_knots - int_l_linear]
+                                      self.num_knots - int_r_linear]
         self.lb = self.knots[0]
         self.ub = self.knots[-1]
         self.inner_lb = self.inner_knots[0]
@@ -341,7 +341,7 @@ class XSpline:
         ub = inner_domain[1]
 
         lb = self.lb if inner_domain[0] == self.inner_lb else lb
-        ub = self.ub if inner_domain[0] == self.inner_ub else ub
+        ub = self.ub if inner_domain[1] == self.inner_ub else ub
 
         return np.array([lb, ub])
 
