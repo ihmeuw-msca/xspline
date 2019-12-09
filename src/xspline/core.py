@@ -568,27 +568,10 @@ class XSpline:
                                    self.degree,
                                    1, idx)
 
-        # extrapolation
-        lb = self.lb
-        ub = self.ub
-        inner_lb = self.inner_lb
-        inner_ub = self.inner_ub
-        if l_extra:
-            if self.l_linear:
-                lb = -np.inf
-            else:
-                inner_lb = -np.inf
-
-        if r_extra:
-            if self.r_linear:
-                ub = np.inf
-            else:
-                inner_ub = np.inf
-
         # there are in total 5 pieces functions
         def l_piece(a, x, order):
             return utils.linear_if(a, x, order,
-                                   inner_lb, inner_lb_y, inner_lb_dy)
+                                   self.inner_lb, inner_lb_y, inner_lb_dy)
 
         def m_piece(a, x, order):
             return bspline_ifun(a, x,
@@ -599,13 +582,40 @@ class XSpline:
 
         def r_piece(a, x, order):
             return utils.linear_if(a, x, order,
-                                   inner_ub, inner_ub_y, inner_ub_dy)
+                                   self.inner_ub, inner_ub_y, inner_ub_dy)
 
         def zero_piece(a, x, order):
-            return np.zeros(x.size)
+            if np.isscalar(a) and np.isscalar(x):
+                return 0.0
+            elif np.isscalar(a):
+                return np.zeros(x.size)
+            else:
+                return np.zeros(a.size)
 
-        funcs = [zero_piece, l_piece, m_piece, r_piece, zero_piece]
-        knots = np.array([lb, inner_lb, inner_ub, ub])
+        funcs = []
+        knots = []
+        if not l_extra:
+            funcs.append(zero_piece)
+        if self.l_linear:
+            funcs.append(l_piece)
+        funcs.append(m_piece)
+        if self.r_linear:
+            funcs.append(r_piece)
+        if not r_extra:
+            funcs.append(zero_piece)
+
+        if not l_extra:
+            knots.append(self.lb)
+            knots.append(self.inner_lb)
+        if self.l_linear:
+            knots.append(self.inner_lb)
+        if self.r_linear:
+            knots.append(self.inner_ub)
+        if not r_extra:
+            knots.append(self.inner_ub)
+            knots.append(self.ub)
+
+        knots = np.array(list(set(knots)))
 
         return utils.pieces_if(a, x, order, funcs, knots)
 

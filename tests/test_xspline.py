@@ -92,3 +92,35 @@ def test_dfun(knots, degree, order, idx, l_linear, r_linear, l_extra, r_extra):
             tr_dy[x > xs.knots[-1]] = 0.0
 
     assert np.linalg.norm(my_dy - tr_dy) < 1e-10
+
+
+@pytest.mark.parametrize("l_linear", [True, False])
+@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_extra", [True, False])
+@pytest.mark.parametrize("r_extra", [True, False])
+@pytest.mark.parametrize("order", [1])
+@pytest.mark.parametrize("idx", [0, -1])
+def test_ifun(knots, degree, order, idx, l_linear, r_linear, l_extra, r_extra):
+    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+    if idx == 0:
+        x = np.linspace(xs.knots[0] - 1.0, xs.knots[1], 101)
+    else:
+        x = np.linspace(xs.knots[-2], xs.knots[-1], 101)
+    my_iy = xs.ifun(x[0], x, order, idx, l_extra=l_extra, r_extra=r_extra)
+
+    domain = xs.domain(idx, l_extra=l_extra, r_extra=r_extra)
+    lb = domain[0]
+    ub = domain[1]
+    v_idx = (x >= lb) & (x <= ub)
+    tr_iy = np.zeros(x.size)
+
+    if idx == 0:
+        def ifun(a):
+            return 0.5*(xs.inner_knots[1] - a)**2 / \
+                   (xs.inner_knots[0] - xs.inner_knots[1])
+    else:
+        def ifun(a):
+            return 0.5*(a - xs.inner_knots[-2])**2 / \
+                   (xs.inner_knots[-1] - xs.inner_knots[-2])
+
+    tr_iy[v_idx] = ifun(x[v_idx]) - ifun(lb)
