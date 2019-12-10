@@ -124,3 +124,49 @@ def test_ifun(knots, degree, order, idx, l_linear, r_linear, l_extra, r_extra):
                    (xs.inner_knots[-1] - xs.inner_knots[-2])
 
     tr_iy[v_idx] = ifun(x[v_idx]) - ifun(lb)
+
+
+@pytest.mark.parametrize("l_linear", [True, False])
+@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_extra", [True, False])
+@pytest.mark.parametrize("r_extra", [True, False])
+@pytest.mark.parametrize("x", [np.linspace(0.0, 1.0, 100),
+                               np.linspace(-1.0, 0.5, 100),
+                               np.linspace(0.5, 2.0, 100)])
+def test_design_mat(knots, degree, x, l_linear, r_linear, l_extra, r_extra):
+    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+    mat = xs.design_mat(x, l_extra=l_extra, r_extra=r_extra)
+
+    assert mat.shape == (x.size, xs.num_spline_bases)
+
+
+@pytest.mark.parametrize("l_linear", [True, False])
+@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_extra", [True, False])
+@pytest.mark.parametrize("r_extra", [True, False])
+@pytest.mark.parametrize("order", [1])
+@pytest.mark.parametrize("x", [np.linspace(0.0, 1.0, 100),
+                               np.linspace(-1.0, 0.5, 100),
+                               np.linspace(0.5, 2.0, 100)])
+def test_design_dmat(knots, degree, order, x,
+                     l_linear, r_linear, l_extra, r_extra):
+    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+    dmat = xs.design_dmat(x, order, l_extra=l_extra, r_extra=r_extra)
+
+    assert dmat.shape == (x.size, xs.num_spline_bases)
+
+
+@pytest.mark.parametrize("l_linear", [True, False])
+@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_extra", [True, False])
+@pytest.mark.parametrize("r_extra", [True, False])
+@pytest.mark.parametrize("order", [1])
+@pytest.mark.parametrize("x", [np.linspace(0.0, 1.0, 100),
+                               np.linspace(-1.0, 0.5, 100),
+                               np.linspace(0.5, 2.0, 100)])
+def test_design_imat(knots, degree, order, x,
+                     l_linear, r_linear, l_extra, r_extra):
+    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+    imat = xs.design_imat(x[0], x, order, l_extra=l_extra, r_extra=r_extra)
+
+    assert imat.shape == (x.size, xs.num_spline_bases)

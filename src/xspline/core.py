@@ -296,7 +296,6 @@ class XSpline:
         # dimensions
         self.num_knots = knots.size
         self.num_intervals = knots.size - 1
-        self.num_spline_bases = self.num_intervals + self.degree
 
         # check inputs
         int_l_linear = int(l_linear)
@@ -311,6 +310,8 @@ class XSpline:
         self.ub = self.knots[-1]
         self.inner_lb = self.inner_knots[0]
         self.inner_ub = self.inner_knots[-1]
+
+        self.num_spline_bases = self.inner_knots.size - 1 + self.degree
 
     def domain(self, idx, l_extra=False, r_extra=False):
         """Return the support of the XSpline.
@@ -619,8 +620,94 @@ class XSpline:
 
         return utils.pieces_if(a, x, order, funcs, knots)
 
+    def design_mat(self, x, l_extra=False, r_extra=False):
+        r"""Compute the design matrix of spline basis.
+
+        Args:
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the independent variables.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            numpy.ndarray:
+            Return design matrix.
+        """
+        mat = np.vstack([
+            self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+            for idx in range(self.num_spline_bases)
+        ]).T
+        return mat
+
+    def design_dmat(self, x, order, l_extra=False, r_extra=False):
+        r"""Compute the design matrix of spline basis derivatives.
+
+        Args:
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the independent variables.
+
+            order (int):
+            A non-negative integer that indicates the order of differentiation.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            numpy.ndarray:
+            Return design matrix.
+        """
+        dmat = np.vstack([
+            self.dfun(x, order, idx, l_extra=l_extra, r_extra=r_extra)
+            for idx in range(self.num_spline_bases)
+        ]).T
+        return dmat
+
+    def design_imat(self, a, x, order, l_extra=False, r_extra=False):
+        r"""Compute the design matrix of the integrals of the spline bases.
+
+        Args:
+            a (float | numpy.ndarray):
+            Scalar or numpy array that store the starting point of the
+            integration.
+
+            x (float | numpy.ndarray):
+            Scalar or numpy array that store the ending point of the
+            integration.
+
+            order (int):
+            A non-negative integer that indicates the order of integration.
+
+            l_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at left end.
+            Default to be False.
+
+            r_extra (bool, optional):
+            A optional bool variable indicates that if extrapolate at right end.
+            Default to be False.
+
+        Returns:
+            numpy.ndarray:
+            Return design matrix.
+        """
+        imat = np.vstack([
+            self.ifun(a, x, order, idx, l_extra=l_extra, r_extra=r_extra)
+            for idx in range(self.num_spline_bases)
+        ]).T
+        return imat
+
 # TODO:
 # 1. bspline function pass in too many default every time
 # 2. name of f, df and if
 # 3. the way to deal with the scalar vs array.
-# test integration function
+# 4. keep the naming scheme consistent.
