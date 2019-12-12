@@ -170,3 +170,16 @@ def test_design_imat(knots, degree, order, x,
     imat = xs.design_imat(x[0], x, order, l_extra=l_extra, r_extra=r_extra)
 
     assert imat.shape == (x.size, xs.num_spline_bases)
+
+
+@pytest.mark.parametrize("l_linear", [True, False])
+@pytest.mark.parametrize("r_linear", [True, False])
+def test_last_dmat(knots, degree, l_linear, r_linear):
+    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+    my_last_dmat = xs.last_dmat()
+
+    x = np.array([0.5*(xs.knots[i] + xs.knots[i+1])
+                  for i in range(xs.knots.size - 1)])
+    tr_last_dmat = xs.design_dmat(x, 1)
+
+    assert np.linalg.norm(my_last_dmat - tr_last_dmat) < 1e-10

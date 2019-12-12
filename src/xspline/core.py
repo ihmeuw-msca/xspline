@@ -706,6 +706,36 @@ class XSpline:
         ]).T
         return imat
 
+    def last_dmat(self):
+        """Compute highest order of derivative in domain.
+
+        Returns:
+            numpy.ndarray:
+            1D array that contains highest order of derivative for intervals.
+        """
+        # compute the last dmat for the inner domain
+        inner_num_intervals = self.inner_knots.size - 1
+        if self.degree == 0:
+            dmat = np.identity(inner_num_intervals)
+        else:
+            dmat = utils.seq_diff_mat(inner_num_intervals + self.degree)
+            l_slopes = np.repeat(self.inner_knots[:inner_num_intervals],
+                                 [self.degree] + [1]*(self.degree - 1))
+            r_slopes = np.repeat(self.inner_knots[1:],
+                                 [1]*(self.degree - 1) + [self.degree])
+            dmat /= (r_slopes - l_slopes).reshape(self.degree +
+                                                  inner_num_intervals - 1, 1)
+
+        if self.l_linear:
+            dmat = np.vstack((self.design_dmat(np.array([self.inner_lb]), 1),
+                              dmat))
+
+        if self.r_linear:
+            dmat = np.vstack((dmat,
+                              self.design_dmat(np.array([self.inner_ub]), 1)))
+
+        return dmat
+
 # TODO:
 # 1. bspline function pass in too many default every time
 # 2. name of f, df and if
