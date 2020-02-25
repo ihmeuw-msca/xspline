@@ -736,6 +736,254 @@ class XSpline:
 
         return dmat
 
+
+class NDXSpline:
+    """Multi-dimensional xspline.
+    """
+    def __init__(self, ndim, knots_list, degree_list,
+                 l_linear_list=None,
+                 r_linear_list=None):
+        """Constructor of ndXSpline class
+
+        Args:
+            ndim (int):
+                Number of dimension.
+            knots_list (list{numpy.ndarray}):
+                List of knots for every dimension.
+            degree_list (list{int}):
+                List of degree for every dimension.
+            l_linear_list (list{bool} | None, optional):
+                List of indicator of if have left linear tail for each
+                dimension.
+            r_linear_list (list{bool} | None, optional):
+                List of indicator of if have right linear tail for each
+                dimension.
+        """
+        self.ndim = ndim
+        self.knots_list = knots_list
+        self.degree_list = degree_list
+        self.l_linear_list = utils.option_to_list(l_linear_list, self.ndim)
+        self.r_linear_list = utils.option_to_list(r_linear_list, self.ndim)
+
+        self.spline_list = [
+            XSpline(self.knots_list[i], self.degree_list[i],
+                    l_linear=self.l_linear_list[i],
+                    r_linear=self.r_linear_list[i])
+            for i in range(self.ndim)
+        ]
+
+        self.num_knots_list = np.array([
+            spline.num_knots for spline in self.spline_list])
+        self.num_intervals_list = np.array([
+            spline.num_intervals for spline in self.spline_list])
+        self.num_spline_bases_list = np.array([
+            spline.num_spline_bases for spline in self.spline_list])
+
+        self.num_knots = self.num_knots_list.prod()
+        self.num_intervals = self.num_intervals_list.prod()
+        self.num_spline_bases = self.num_spline_bases_list.prod()
+
+    def design_mat(self, x_list,
+                   is_grid=True,
+                   l_extra_list=None,
+                   r_extra_list=None):
+        """Design matrix of the spline basis.
+
+        Args:
+            x_list (list{numpy.ndarray}):
+                A list of coordinates for each dimension, they should have the
+                same dimension or come in matrix form.
+            is_grid (bool, optional):
+                If `True` treat the coordinates from `x_list` as the grid points
+                and compute the mesh grid from it, otherwise, treat each group
+                of the coordinates independent.
+            l_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the left side for each
+                dimension.
+            r_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the right side for each
+                dimension.
+
+        Returns:
+            numpy.ndarray:
+                Design matrix.
+        """
+        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
+        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
+
+        assert len(x_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        mat_list = [spline.design_mat(x_list[i],
+                                      l_extra=l_extra_list[i],
+                                      r_extra=r_extra_list[i])
+                    for i, spline in enumerate(self.spline_list)]
+
+        if is_grid:
+            mat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [mat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                mat.append(utils.outer_flatten(*bases_list))
+        else:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            mat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [mat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                mat.append(np.prod(bases_list, axis=0))
+
+        return np.ascontiguousarray(np.vstack(mat).T)
+
+    def design_dmat(self, x_list, n_list,
+                    is_grid=True,
+                    l_extra_list=None,
+                    r_extra_list=None):
+        """Design matrix of the derivatives of spline basis.
+
+        Args:
+            x_list (list{numpy.ndarray}):
+                A list of coordinates for each dimension, they should have the
+                same dimension or come in matrix form.
+            n_list (list{int}):
+                A list of integers indicates the order of differentiation for
+                each dimension.
+            is_grid (bool, optional):
+                If `True` treat the coordinates from `x_list` as the grid points
+                and compute the mesh grid from it, otherwise, treat each group
+                of the coordinates independent.
+            l_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the left side for each
+                dimension.
+            r_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the right side for each
+                dimension.
+
+        Returns:
+            numpy.ndarray:
+                Differentiation design matrix.
+        """
+        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
+        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
+
+        assert len(x_list) == self.ndim
+        assert len(n_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        dmat_list = [spline.design_dmat(x_list[i], n_list[i],
+                                        l_extra=l_extra_list[i],
+                                        r_extra=r_extra_list[i])
+                     for i, spline in enumerate(self.spline_list)]
+
+        if is_grid:
+            dmat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [dmat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                dmat.append(utils.outer_flatten(*bases_list))
+        else:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            dmat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [dmat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                dmat.append(np.prod(bases_list, axis=0))
+
+        return np.ascontiguousarray(np.vstack(dmat).T)
+
+    def design_imat(self, a_list, x_list, n_list,
+                    is_grid=True,
+                    l_extra_list=None,
+                    r_extra_list=None):
+        """Design matrix of the spline basis.
+
+        Args:
+            a_list (list{numpy.ndarray}):
+                Start of integration of coordinates for each dimension.
+            x_list (list{numpy.ndarray}):
+                A list of coordinates for each dimension, they should have the
+                same dimension or come in matrix form.
+            n_list (list{int}):
+                A list of integers indicates the order of integration for
+                each dimension.
+            is_grid (bool, optional):
+                If `True` treat the coordinates from `x_list` as the grid points
+                and compute the mesh grid from it, otherwise, treat each group
+                of the coordinates independent.
+            l_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the left side for each
+                dimension.
+            r_extra_list (list{bool} | None, optional):
+                Indicators of if extrapolate in the right side for each
+                dimension.
+
+        Returns:
+            numpy.ndarray:
+                Integration design matrix.
+        """
+        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
+        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
+
+        assert len(a_list) == self.ndim
+        assert len(x_list) == self.ndim
+        assert len(n_list) == self.ndim
+        assert len(l_extra_list) == self.ndim
+        assert len(r_extra_list) == self.ndim
+
+        imat_list = [spline.design_imat(a_list[i], x_list[i], n_list[i],
+                                        l_extra=l_extra_list[i],
+                                        r_extra=r_extra_list[i])
+                     for i, spline in enumerate(self.spline_list)]
+
+        if is_grid:
+            imat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [imat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                imat.append(utils.outer_flatten(*bases_list))
+        else:
+            num_points = x_list[0].size
+            assert np.all([x_list[i].size == num_points
+                           for i in range(self.ndim)])
+            imat = []
+            for i in range(self.num_spline_bases):
+                index_list = utils.order_to_index(i, self.num_spline_bases_list)
+                bases_list = [imat_list[j][:, index_list[j]]
+                              for j in range(self.ndim)]
+                imat.append(np.prod(bases_list, axis=0))
+
+        return np.ascontiguousarray(np.vstack(imat).T)
+
+    def last_dmat(self):
+        """Highest order of derivative matrix.
+
+        Returns:
+            numpy.ndarray:
+                Design matrix contain the highest order of derivative.
+        """
+        mat_list = [spline.last_dmat() for spline in self.spline_list]
+
+        mat = []
+        for i in range(self.num_spline_bases):
+            index_list = utils.order_to_index(i, self.num_spline_bases_list)
+            bases_list = [mat_list[j][:, index_list[j]]
+                          for j in range(self.ndim)]
+            mat.append(utils.outer_flatten(*bases_list))
+
+        return np.ascontiguousarray(np.vstack(mat).T)
+
+
 # TODO:
 # 1. bspline function pass in too many default every time
 # 2. name of f, df and if
