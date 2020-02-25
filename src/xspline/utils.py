@@ -396,7 +396,7 @@ def order_to_index(order, shape):
         tuple:
         The index element in the array.
     """
-    assert isinstance(shape, tuple)
+    assert hasattr(shape, '__iter__')
     assert isinstance(order, int)
     assert 0 <= order < np.prod(shape)
 
