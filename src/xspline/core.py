@@ -714,17 +714,7 @@ class XSpline:
             1D array that contains highest order of derivative for intervals.
         """
         # compute the last dmat for the inner domain
-        inner_num_intervals = self.inner_knots.size - 1
-        if self.degree == 0:
-            dmat = np.identity(inner_num_intervals)
-        else:
-            dmat = utils.seq_diff_mat(inner_num_intervals + self.degree)
-            l_slopes = np.repeat(self.inner_knots[:inner_num_intervals],
-                                 [self.degree] + [1]*(self.degree - 1))
-            r_slopes = np.repeat(self.inner_knots[1:],
-                                 [1]*(self.degree - 1) + [self.degree])
-            dmat /= (r_slopes - l_slopes).reshape(self.degree +
-                                                  inner_num_intervals - 1, 1)
+        dmat = self.design_dmat(self.inner_knots[:-1], self.degree)
 
         if self.l_linear:
             dmat = np.vstack((self.design_dmat(np.array([self.inner_lb]), 1),
