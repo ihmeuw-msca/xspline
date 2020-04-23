@@ -455,7 +455,7 @@ class XSpline:
         if order == 0:
             return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
 
-        if not self.l_linear and self.r_linear:
+        if (not self.l_linear) and (not self.r_linear):
             return bspline_dfun(x,
                                 self.knots,
                                 self.degree,
@@ -540,7 +540,7 @@ class XSpline:
         if order == 0:
             return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
 
-        if not self.l_linear and not self.r_linear:
+        if (not self.l_linear) and (not self.r_linear):
             return bspline_ifun(a, x,
                                 self.knots,
                                 self.degree,
