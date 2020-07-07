@@ -229,7 +229,7 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     if len(funcs) == 1:
         return funcs[0](a, x, order)
     else:
-        assert np.all(a < knots[0]) and np.all(x > knots[-1])
+        assert np.all(a < knots[0]) and np.all(x > knots[-1]), f"{a} should be in [{knots[0]}, {knots[-1]}]."
 
     if np.isscalar(a):
         b = knots[0]

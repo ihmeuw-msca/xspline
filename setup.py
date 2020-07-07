@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='xspline',
-      version='0.0.4',
+      version='0.0.5',
       description='robust spline package',
       url='https://github.com/zhengp0/xspline',
       author='Peng Zheng',

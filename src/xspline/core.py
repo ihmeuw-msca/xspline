@@ -616,7 +616,7 @@ class XSpline:
             knots.append(self.inner_ub)
             knots.append(self.ub)
 
-        knots = np.array(list(set(knots)))
+        knots = np.sort(list(set(knots)))
 
         return utils.pieces_if(a, x, order, funcs, knots)
 
