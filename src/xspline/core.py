@@ -164,7 +164,10 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
                            l_extra=l_extra, r_extra=r_extra)
 
     if order > degree:
-        return np.zeros(x.size)
+        if np.isscalar(x):
+            return 0.0
+        else:
+            return np.zeros(len(x))
 
     if idx == 0:
         rdf = 0.0
