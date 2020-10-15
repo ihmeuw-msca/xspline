@@ -1,4 +1,4 @@
 XSpline
 =======
 
-Advanced spline packages the provides spline bases, their derivatives and integrals.
+Advanced spline package that provides b-spline bases, their derivatives and integrals.
