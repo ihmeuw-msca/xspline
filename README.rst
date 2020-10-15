@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.com/zhengp0/xspline.svg?branch=main
+    :target: https://travis-ci.com/zhengp0/xspline
+
 XSpline
 =======
 
