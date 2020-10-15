@@ -11,6 +11,6 @@ deploy:
   password:
     secure: uKkcs01nJ63MW7AQakDvfrXCm6MSDE6gxDVrvqOUGcss1sXlXbMcBupdSEBxF0KEG1LnwSTcdrPi6J6mZU7DJEyjdd1lRn3k+WR3k1l210WujuvOKgfpjJNcSqeKmNb7vmv2KB0U0WtPx6ax7+vanR91iIku1jSSHNtkin7ES0GHQY0PY8hj1mgoYdevqbedNbz8WzfSZvxR4IfK+JCqKPvr852PTFwCXC1+xwTQMCX7oqzFLhr3PuEghQlz8Dl64JLgVicFWzDLzDwQvx3C7FZJFFO5v+ZOYTVRNf+b4wm1Hxqwev0LfTC5WkKs6jwAnEQ+wC05oB4sghy0sjNqqSuZ4nEdDSCzecRlXglfTRg8y3fu5Uq+ICRR4TRfAVesDCvRdMmOyC+4Z0y7X//SSmt8Hb9qFN3EEO8xd5efME8th9cKl/EEijjdROj/7w2cgTVlrM0lyXERqOh/bg67EhDqn+sIXFurcVs9IKCpLHPtELhqhjY7AFlimUKiQ20el0RrQDhaSVgCz9nLbge4fPV7y6btutVldWUhBRuIWPHgVNyp0AEVX8UCl4EgDnMs4vvqmfZUp19JIpBrMe3+a51Y9OpsvB2kMEf/lxadkurPNCioy9KnS5sUpYgwcnhIm0/etH1rCWQOjJAz+5iU/348nnZ05FzwYwAAE+oiJ1M=
   on:
-    distributions: sdist bdist_wheel
+    branch: main
     repo: zhengp0/xspline
     tags: true
