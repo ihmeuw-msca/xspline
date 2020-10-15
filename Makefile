@@ -1,9 +1,6 @@
 # makefile for xspline package
 .PHONY: clean, tests
 
-tests:
-	pytest tests
-
 clean:
 	find . -name "*.so*" | xargs rm -rf
 	find . -name "*.pyc" | xargs rm -rf
