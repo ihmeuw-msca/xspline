@@ -1,15 +1,6 @@
 # makefile for xspline package
 .PHONY: clean, tests
 
-build: setup.py
-	python setup.py build
-
-install: setup.py
-	python setup.py install
-
-sdist: setup.py
-	python setup.py sdist
-
 tests:
 	pytest tests
 
