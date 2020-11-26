@@ -3,13 +3,66 @@ Spline Basis Module
 """
 from __future__ import annotations
 from warnings import warn
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Iterable
 from dataclasses import dataclass, field
-from operator import xor
+from operator import xor, le, lt, ge, gt
 import numpy as np
-from .data import SplineSpecs
+from scipy.interpolate import lagrange
 from .utils import linear_lf, linear_rf
 
+
+@dataclass
+class Interval:
+    lb: float
+    ub: float
+    lb_closed: bool = True
+    ub_closed: bool = True
+
+    def __post_init__(self):
+        assert isinstance(self.lb_closed, bool)
+        assert isinstance(self.ub_closed, bool)
+        if self.lb_closed and self.ub_closed:
+            assert self.lb <= self.ub
+        else:
+            assert self.lb < self.ub
+        self.lb_closed = self.lb_closed and self.is_lb_finite()
+        self.ub_closed = self.ub_closed and self.is_ub_finite()
+
+    def is_lb_finite(self) -> bool:
+        return not np.isneginf(self.lb)
+    
+    def is_ub_finite(self) -> bool:
+        return not np.isposinf(self.ub)
+
+    def is_finite(self) -> bool:
+        return self.is_lb_finite() and self.is_ub_finite()
+
+    def indicator(self, data: Iterable) -> np.ndarray:
+        data = np.asarray(data)
+        lb_opt = ge if self.lb_closed else gt
+        ub_opt = le if self.ub_closed else lt
+        sub_index = lb_opt(data, self.lb) & ub_opt(data, self.ub)
+        return sub_index.astype(float)
+
+    def lagrange(self, data: Iterable, weights: np.ndarray) -> np.ndarray:
+        assert self.is_finite()
+        assert len(weights) >= 2
+        data = np.asarray(data)
+        lb_opt = ge if self.lb_closed else gt
+        ub_opt = le if self.ub_closed else lt
+        sub_index = lb_opt(data, self.lb) & ub_opt(data, self.ub)
+
+        points = np.linspace(self.lb, self.ub, len(weights))
+        poly = lagrange(points, weights)
+
+        result = np.zeros(data.shape)
+        result[sub_index] = poly(data[sub_index])
+        return result
+
+    def __repr__(self) -> str:
+        lb_bracket = "[" if self.lb_closed else "("
+        ub_bracket = "]" if self.ub_closed else ")"
+        return f"{lb_bracket}{self.lb}, {self.ub}{ub_bracket}"
 
 @dataclass
 class SplineSpecs:
@@ -26,7 +79,7 @@ class SplineSpecs:
         assert len(self.knots) >= 2 + self.l_linear + self.r_linear
 
         self.knots = np.unique(self.knots)
-        self.inner_knots = self.knots[self.l_linear:
+        self.basis_knots = self.knots[self.l_linear:
                                       len(self.knots) - self.r_linear]
     
     def reset_degree(self, degree: int) -> SplineSpecs:
@@ -39,7 +92,7 @@ class SplineSpecs:
     
     @property
     def num_spline_bases(self) -> int:
-        return len(self.inner_knots) + self.degree - 1
+        return len(self.basis_knots) + self.degree - 1
 
 
 @dataclass
@@ -57,9 +110,15 @@ class BasisLinks:
 
     def is_empty(self) -> bool:
         return all([basis is None for basis in self.bases])
+
+    def is_l_linked(self) -> bool:
+        return self.bases[0] is not None
+    
+    def is_r_linked(self) -> bool:
+        return self.bases[1] is not None
     
     def is_linked(self) -> List[bool]:
-        return [basis is not None for basis in self.bases]
+        return [self.is_l_linked(), self.is_r_linked()]
     
     def link_basis(self, basis: SplineBasis, index: int):
         assert self.is_basis(basis)
@@ -77,12 +136,32 @@ class SplineBasis:
     def __post_init__(self):
         assert isinstance(self.index, int)
         assert 0 <= self.index < self.specs.num_spline_bases
-        self.domain = 
+
+        lb_index = max(self.index - self.specs.degree, 0)
+        ub_index = min(self.index + 1, len(self.specs.basis_knots) - 1)
+
+        self.domain = Interval(
+            lb=self.specs.basis_knots[lb_index],
+            ub=self.specs.basis_knots[ub_index],
+            lb_closed=True, ub_closed=self.is_r_edge()
+        )
+        self.support = Interval(
+            lb=-np.inf if self.is_l_edge() else self.domain.lb,
+            ub= np.inf if self.is_r_edge() else self.domain.ub,
+            lb_closed=not self.is_l_edge(), ub_closed=False
+        )
+
         self.data = None
         self.vals = {}
+
+    def is_l_edge(self) -> bool:
+        return self.index == 0
+    
+    def is_r_edge(self) -> bool:
+        return self.index == self.specs.num_spline_bases - 1
     
     def is_edge(self) -> List[bool]:
-        return [self.index == 0, self.index == self.specs.num_spline_bases]
+        return [self.is_l_edge(), self.is_r_edge()]
     
     def link_basis(self, basis: SplineBasis):
         assert isinstance(basis, SplineBasis)
@@ -115,7 +194,16 @@ class SplineBasis:
             self.data = data
 
     def fun(self):
-        return NotImplementedError()
+        if self.specs.degree == 0:
+            self.vals[0] = self.support.indicator(self.data)
+        else:
+            self.vals[0] = np.zeros(self.data.shape)
+            if self.links.is_l_linked():
+                basis = self.links.bases[0]
+                self.vals[0] += basis(self.data, order=0)*basis.domain.lagrange(self.data, [0, 1])
+            if self.links.is_r_linked():
+                basis = self.links.bases[1]
+                self.vals[0] += basis(self.data, order=0)*basis.domain.lagrange(self.data, [1, 0])
 
     def dfun(self, order: int):
         return NotImplementedError()
@@ -124,17 +212,6 @@ class SplineBasis:
         return NotImplementedError()
         
     def __call__(self, data: np.ndarray, order: int = 0) -> np.ndarray:
-        """Compute the spline base values.
-        Args:
-            data (np.ndarray): Independent variable.
-            order (int, optional):
-                Indicate differentiation or integration. When positive
-                it is order of integration, when negative it is order of
-                differentiation, and when zero, return function value.
-                Defaults to 0.
-        Returns:
-            np.ndarray: Dependent variable.
-        """
         assert isinstance(order, int)
         assert self.is_linked()
         self.attach_data(data)
@@ -150,4 +227,4 @@ class SplineBasis:
         return self.vals[order]
 
     def __repr__(self) -> str:
-        return f"SplineBasis(degree={self.specs.degree}, index={self.index})"
+        return f"SplineBasis(degree={self.specs.degree}, index={self.index}, domain={self.domain})"

@@ -14,7 +14,8 @@ if __name__ == '__main__':
         long_description = f.read()
 
     install_requirements = [
-        'numpy'
+        'numpy',
+        'scipy'
     ]
 
     test_requirements = [
