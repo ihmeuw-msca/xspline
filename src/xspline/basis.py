@@ -2,13 +2,13 @@
 Spline Basis Module
 """
 from __future__ import annotations
-from typing import List, Union
-from collections.abc import Iterable
+from typing import List, Iterable
 from dataclasses import dataclass, field
 from operator import xor
+from functools import partial
 import numpy as np
-from .new_utils import Interval, SplineSpecs
-from .new_utils import ind_fun, lag_fun
+from .new_utils import Interval, IntervalFunction, SplineSpecs
+from .new_utils import ind_fun, lag_fun, lin_fun, combine_invl_funs
 
 
 @dataclass
@@ -19,25 +19,14 @@ class BasisLinks:
 
     def __post_init__(self):
         assert len(self.bases) == 2
-        assert all([self.is_basis(basis) for basis in self.bases])
-
-    def is_basis(self, basis: Union[SplineBasis, None]):
-        return isinstance(basis, SplineBasis) or basis is None
-
-    def is_empty(self) -> bool:
-        return all([basis is None for basis in self.bases])
-
-    def is_l_linked(self) -> bool:
-        return self.bases[0] is not None
-
-    def is_r_linked(self) -> bool:
-        return self.bases[1] is not None
+        assert all([isinstance(basis, SplineBasis) or basis is None
+                    for basis in self.bases])
 
     def is_linked(self) -> List[bool]:
-        return [self.is_l_linked(), self.is_r_linked()]
+        return [basis is not None for basis in self.bases]
 
     def link_basis(self, basis: SplineBasis, index: int):
-        assert self.is_basis(basis)
+        assert isinstance(basis, SplineBasis) or basis is None
         self.bases[index] = basis
 
 
@@ -72,14 +61,9 @@ class SplineBasis:
         self.data = np.empty((2, 0))
         self.vals = {}
 
-    def is_l_edge(self) -> bool:
-        return self.index == 0
-
-    def is_r_edge(self) -> bool:
-        return self.index == self.specs.num_spline_bases - 1
-
     def is_edge(self) -> List[bool]:
-        return [self.is_l_edge(), self.is_r_edge()]
+        return [self.index == 0,
+                self.index == self.specs.num_spline_bases - 1]
 
     def link_basis(self, basis: SplineBasis):
         assert isinstance(basis, SplineBasis)
@@ -117,40 +101,21 @@ class SplineBasis:
                 self.data = x
             else:
                 self.data = np.empty((2, x.size))
-                self.data[0] = self.specs.knots[0]
+                self.data[0] = x.min()
                 self.data[1] = x
             assert (self.data[0] <= self.data[1]).all()
 
-    def fun(self):
-        if self.specs.degree == 0:
-            self.vals[0] = ind_fun(self.data[1], 0, self.support)
-        else:
-            self.vals[0] = np.zeros(self.data.shape[1])
-            if self.links.is_l_linked():
-                basis = self.links.bases[0]
-                self.vals[0] += basis(self.data[1], order=0)*lag_fun(self.data[1], [0, 1], basis.domain)
-            if self.links.is_r_linked():
-                basis = self.links.bases[1]
-                self.vals[0] += basis(self.data[1], order=0)*lag_fun(self.data[1], [1, 0], basis.domain)
-
-    def difun(self, order: int):
+    def fun(self, order: int):
         if self.specs.degree == 0:
             self.vals[order] = ind_fun(self.data, order, self.support)
         else:
             self.vals[order] = np.zeros(self.data.shape[1])
-            if self.specs.degree - order >= 0:
-                if self.links.is_l_linked():
-                    basis = self.links.bases[0]
-                    self.vals[order] += (
-                        basis(self.data, order=order)*lag_fun(self.data[1], [0, 1], basis.domain) +
-                        basis(self.data, order=order - 1)*order/basis.domain.size
-                    )
-                if self.links.is_r_linked():
-                    basis = self.links.bases[1]
-                    self.vals[order] += (
-                        basis(self.data, order=order)*lag_fun(self.data[1], [1, 0], basis.domain) -
-                        basis(self.data, order=order - 1)*order/basis.domain.size
-                    )
+            for i, basis in enumerate(self.links.bases):
+                if basis is not None:
+                    lag_val = lag_fun(self.data[1], [i, 1 - i], basis.domain)
+                    self.vals[order] += basis(self.data, order=order)*lag_val
+                    if order != 0:
+                        self.vals[order] += np.sign(0.5 - i)*basis(self.data, order=order - 1)*order/basis.domain.size
 
     def __call__(self, data: np.ndarray, order: int = 0) -> np.ndarray:
         assert isinstance(order, int)
@@ -158,12 +123,69 @@ class SplineBasis:
         self.attach_data(data)
 
         if order not in self.vals:
-            if order == 0:
-                self.fun()
-            else:
-                self.difun(order=order)
+            self.fun(order)
 
         return self.vals[order]
 
     def __repr__(self) -> str:
         return f"SplineBasis(degree={self.specs.degree}, index={self.index}, domain={self.domain})"
+
+
+class XSpline:
+    def __init__(self, knots: Iterable, degree: int,
+                 l_linx: bool = False, r_linx: bool = False):
+        self.specs = SplineSpecs(knots, degree,
+                                 l_linx=l_linx, r_linx=r_linx)
+        self.bases = []
+        for d in range(self.specs.degree + 1):
+            specs = self.specs.reset_degree(d)
+            self.bases.append([
+                SplineBasis(specs, i)
+                for i in range(specs.num_spline_bases)
+            ])
+
+        for d in range(1, self.specs.degree + 1):
+            bases = self.bases[d]
+            bases_prev = self.bases[d - 1]
+            for i, basis in enumerate(bases):
+                indices = set([
+                    max(0, i - 1),
+                    min(i, len(bases_prev) - 1)
+                ])
+                basis.link_bases([bases_prev[j] for j in indices])
+
+        invl = Interval(lb=self.specs.knots[0] if self.specs.l_linx else -np.inf,
+                        ub=self.specs.knots[-1] if self.specs.r_linx else np.inf,
+                        lb_closed=True,
+                        ub_closed=True)
+        outer_invls = [
+            Interval(lb=-np.inf, ub=invl.lb,
+                     lb_closed=False, ub_closed=False) if invl.is_lb_finite() else None,
+            Interval(lb=invl.ub, ub=np.inf,
+                     lb_closed=False, ub_closed=False) if invl.is_ub_finite() else None
+        ]
+        self.basis_funs = []
+        for i in range(self.specs.num_spline_bases):
+            basis = self.bases[-1][i]
+            if not (self.specs.l_linx or self.specs.r_linx):
+                self.basis_funs.append(basis)
+            else:
+                funs = [IntervalFunction(basis, invl)]
+                for j, outer_invl in enumerate(outer_invls):
+                    if outer_invl is not None:
+                        outer_fun = partial(lin_fun,
+                                            z=invl[j],
+                                            fz=basis([invl[j]], order=0)[0],
+                                            gz=basis([invl[j]], order=1)[0])
+                        index = 0 if j == 0 else len(funs)
+                        funs.insert(index, IntervalFunction(outer_fun, outer_invls[j]))
+                self.basis_funs.append(combine_invl_funs(funs))
+
+    def design_mat(self, data: np.ndarray, order: int = 0) -> np.ndarray:
+        data = np.asarray(data)
+        if data.ndim == 1 and order < 0:
+            data = np.vstack([np.repeat(data.min(), data.size), data])
+        return np.hstack([
+            fun(data, order)[:, None]
+            for fun in self.basis_funs
+        ])
