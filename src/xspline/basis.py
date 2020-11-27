@@ -2,13 +2,13 @@
 Spline Basis Module
 """
 from __future__ import annotations
-from typing import List, Iterable
+from typing import List, Dict, Iterable
 from numbers import Number
 from dataclasses import dataclass, field
 from operator import xor
 from functools import partial
 import numpy as np
-from .new_utils import Interval, IntervalFunction, SplineSpecs
+from .new_utils import Interval, IntervalFunction
 from .new_utils import ind_fun, lag_fun, lin_fun, combine_invl_funs
 
 
@@ -50,13 +50,10 @@ class SplineBasis:
             lb_closed=True, ub_closed=reach_ub
         )
         self.support = Interval(
-            lb=-np.inf if reach_lb else self.domain.lb,
-            ub=np.inf if reach_ub else self.domain.ub,
+            lb="inf" if reach_lb else self.domain.lb,
+            ub="inf" if reach_ub else self.domain.ub,
             lb_closed=not reach_lb, ub_closed=False
         )
-
-        self.data = np.empty((2, 0))
-        self.vals = {}
 
     def link_basis(self, basis: SplineBasis):
         assert isinstance(basis, SplineBasis)
@@ -75,51 +72,26 @@ class SplineBasis:
         links = [basis is not None for basis in self.links]
         return self.degree == 0 or all([xor(*p) for p in zip(edges, links)])
 
-    def clear(self):
-        self.data = np.empty((2, 0))
-        self.vals = {}
-
-    def has_data(self, x: np.ndarray = None) -> bool:
-        if x is None:
-            result = self.data.size > 0
-        else:
-            data = self.data if x.ndim == 2 else self.data[1]
-            result = data.shape == x.shape and np.allclose(data, x)
-        return result
-
-    def attach_data(self, x: np.ndarray):
-        x = np.asarray(x)
-        if not self.has_data(x):
-            self.clear()
-            if x.ndim == 2:
-                self.data = x
-            else:
-                self.data = np.empty((2, x.size))
-                self.data[0] = x.min()
-                self.data[1] = x
-            assert (self.data[0] <= self.data[1]).all()
-
-    def fun(self, order: int):
+    def fun(self, data: np.ndarray, order: int) -> np.ndarray:
         if self.degree == 0:
-            self.vals[order] = ind_fun(self.data, order, self.support)
+            val = ind_fun(data, order, self.support)
         else:
-            self.vals[order] = np.zeros(self.data.shape[1])
+            val = np.zeros(data.shape[-1])
             for i, basis in enumerate(self.links):
-                if basis is not None:
-                    lag_val = lag_fun(self.data[1], [i, 1 - i], basis.domain)
-                    self.vals[order] += basis(self.data, order=order)*lag_val
-                    if order != 0:
-                        self.vals[order] += np.sign(0.5 - i)*basis(self.data, order=order - 1)*order/basis.domain.size
+                if basis is None:
+                    continue
+                val += basis(data, order)*lag_fun(data, [i, 1 - i], basis.domain)
+                if order != 0:
+                    val += (1 - 2*i)*basis(data, order - 1)*order/basis.domain.size
+        return val
 
-    def __call__(self, data: np.ndarray, order: int = 0) -> np.ndarray:
+    def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         assert isinstance(order, int)
         assert self.is_linked()
-        self.attach_data(data)
-
-        if order not in self.vals:
-            self.fun(order)
-
-        return self.vals[order]
+        data = np.asarray(data)
+        if data.ndim == 1:
+            data = np.vstack([np.repeat(self.knots[0], data.size), data])
+        return self.fun(data, order)
 
     def __repr__(self) -> str:
         return f"SplineBasis(degree={self.degree}, index={self.index}, domain={self.domain})"

@@ -20,13 +20,15 @@ class Interval:
     def __post_init__(self):
         assert isinstance(self.lb_closed, bool)
         assert isinstance(self.ub_closed, bool)
+        self.lb = -np.inf if self.lb == "inf" else self.lb
+        self.ub = np.inf if self.ub == "inf" else self.ub
+        self.lb_closed = self.lb_closed and self.is_lb_finite()
+        self.ub_closed = self.ub_closed and self.is_ub_finite()
+        self.size = self.ub - self.lb
         if self.lb_closed and self.ub_closed:
             assert self.lb <= self.ub
         else:
             assert self.lb < self.ub
-        self.lb_closed = self.lb_closed and self.is_lb_finite()
-        self.ub_closed = self.ub_closed and self.is_ub_finite()
-        self.size = self.ub - self.lb
 
     def is_lb_finite(self) -> bool:
         return not np.isneginf(self.lb)
@@ -134,6 +136,7 @@ def lag_fun(data: Iterable, weights: Iterable, invl: Interval) -> np.ndarray:
     assert invl.is_finite()
     assert len(weights) >= 2
     data = np.asarray(data)
+    data = data[-1] if data.ndim == 2 else data
     points = np.linspace(invl.lb, invl.ub, len(weights))
     return lagrange(points, weights)(data)
 
