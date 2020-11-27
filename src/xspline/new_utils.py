@@ -158,16 +158,14 @@ def combine_two_invl_funs(l_fun: Callable,
         else:
             val[l_logi[1]] = l_fun(data[:, l_logi[1]], order)
             val[r_logi[0]] = l_fun(data[:, r_logi[0]], order)
-            rest_index = l_logi[0] & r_logi[1]
-            l_data = data[:, rest_index].copy()
-            r_data = data[:, rest_index].copy()
-            l_data[1] = l_sup.ub
-            r_data[0] = r_sup.lb
+            logi = l_logi[0] & r_logi[1]
+            l_data = np.vstack([data[0, logi], np.repeat(l_sup.ub, logi.sum())])
+            r_data = np.vstack([np.repeat(r_sup.lb, logi.sum()), data[1, logi]])
             for i in range(order + 1, 0):
-                val[rest_index] += l_fun(l_data, i)*taylor_term(
+                val[logi] += l_fun(l_data, i)*taylor_term(
                     r_data[1] - r_data[0], i - order
                 )
-            val[rest_index] += l_fun(l_data, order) + r_fun(r_data, order)
+            val[logi] += l_fun(l_data, order) + r_fun(r_data, order)
         return val
     invl = Interval(lb=l_sup.lb,
                     ub=r_sup.ub,
