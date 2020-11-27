@@ -12,31 +12,12 @@ from .new_utils import ind_fun, lag_fun, lin_fun, combine_invl_funs
 
 
 @dataclass
-class BasisLinks:
-    """Links between bases
-    """
-    bases: List[SplineBasis] = field(default_factory=lambda: [None, None])
-
-    def __post_init__(self):
-        assert len(self.bases) == 2
-        assert all([isinstance(basis, SplineBasis) or basis is None
-                    for basis in self.bases])
-
-    def is_linked(self) -> List[bool]:
-        return [basis is not None for basis in self.bases]
-
-    def link_basis(self, basis: SplineBasis, index: int):
-        assert isinstance(basis, SplineBasis) or basis is None
-        self.bases[index] = basis
-
-
-@dataclass
 class SplineBasis:
     """Basic building block for splines.
     """
     specs: SplineSpecs
     index: int
-    links: BasisLinks = field(default_factory=BasisLinks)
+    links: List[SplineBasis] = field(default_factory=lambda: [None, None])
 
     def __post_init__(self):
         assert isinstance(self.index, int)
@@ -61,14 +42,10 @@ class SplineBasis:
         self.data = np.empty((2, 0))
         self.vals = {}
 
-    def is_edge(self) -> List[bool]:
-        return [self.index == 0,
-                self.index == self.specs.num_spline_bases - 1]
-
     def link_basis(self, basis: SplineBasis):
         assert isinstance(basis, SplineBasis)
         assert basis.specs.degree == self.specs.degree - 1
-        self.links.link_basis(basis, basis.index - self.index + 1)
+        self.links[basis.index - self.index + 1] = basis
 
     def link_bases(self, bases: List[SplineBasis]):
         assert len(bases) <= 2
@@ -76,10 +53,10 @@ class SplineBasis:
             self.link_basis(basis)
 
     def is_linked(self) -> bool:
-        return self.specs.degree == 0 or all([
-            xor(*pair)
-            for pair in zip(self.is_edge(), self.links.is_linked())
-        ])
+        edges = [self.index == 0,
+                 self.index == self.specs.num_spline_bases - 1]
+        links = [basis is not None for basis in self.links]
+        return self.specs.degree == 0 or all([xor(*p) for p in zip(edges, links)])
 
     def clear(self):
         self.data = np.empty((2, 0))
@@ -110,7 +87,7 @@ class SplineBasis:
             self.vals[order] = ind_fun(self.data, order, self.support)
         else:
             self.vals[order] = np.zeros(self.data.shape[1])
-            for i, basis in enumerate(self.links.bases):
+            for i, basis in enumerate(self.links):
                 if basis is not None:
                     lag_val = lag_fun(self.data[1], [i, 1 - i], basis.domain)
                     self.vals[order] += basis(self.data, order=order)*lag_val
