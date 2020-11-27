@@ -63,34 +63,6 @@ class IntervalFunction:
         return self.fun(data, order)
 
 
-@dataclass
-class SplineSpecs:
-    knots: Iterable
-    degree: int
-    l_linx: bool = False
-    r_linx: bool = False
-
-    def __post_init__(self):
-        assert isinstance(self.knots, Iterable)
-        assert isinstance(self.degree, int) and self.degree >= 0
-        assert isinstance(self.l_linx, bool)
-        assert isinstance(self.r_linx, bool)
-        assert len(self.knots) >= 2
-        self.knots = np.unique(self.knots)
-
-    def reset_degree(self, degree: int) -> SplineSpecs:
-        return SplineSpecs(
-            knots=self.knots,
-            degree=degree,
-            l_linx=self.l_linx,
-            r_linx=self.r_linx
-        )
-
-    @property
-    def num_spline_bases(self) -> int:
-        return len(self.knots) + self.degree - 1
-
-
 def process_fun_input(data: Iterable, order: int) -> Tuple[np.ndarray, int]:
     data = np.asarray(data)
     assert isinstance(order, int)
