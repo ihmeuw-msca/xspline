@@ -2,97 +2,13 @@
 Spline Basis Module
 """
 from __future__ import annotations
-from warnings import warn
-from typing import List, Dict, Union, Iterable
+from typing import List, Union
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from operator import xor, le, lt, ge, gt
+from operator import xor
 import numpy as np
-from scipy.interpolate import lagrange
-from .utils import linear_lf, linear_rf
-
-
-@dataclass
-class Interval:
-    lb: float
-    ub: float
-    lb_closed: bool = True
-    ub_closed: bool = True
-
-    def __post_init__(self):
-        assert isinstance(self.lb_closed, bool)
-        assert isinstance(self.ub_closed, bool)
-        if self.lb_closed and self.ub_closed:
-            assert self.lb <= self.ub
-        else:
-            assert self.lb < self.ub
-        self.lb_closed = self.lb_closed and self.is_lb_finite()
-        self.ub_closed = self.ub_closed and self.is_ub_finite()
-
-    def is_lb_finite(self) -> bool:
-        return not np.isneginf(self.lb)
-    
-    def is_ub_finite(self) -> bool:
-        return not np.isposinf(self.ub)
-
-    def is_finite(self) -> bool:
-        return self.is_lb_finite() and self.is_ub_finite()
-
-    def indicator(self, data: Iterable) -> np.ndarray:
-        data = np.asarray(data)
-        lb_opt = ge if self.lb_closed else gt
-        ub_opt = le if self.ub_closed else lt
-        sub_index = lb_opt(data, self.lb) & ub_opt(data, self.ub)
-        return sub_index.astype(float)
-
-    def lagrange(self, data: Iterable, weights: np.ndarray) -> np.ndarray:
-        assert self.is_finite()
-        assert len(weights) >= 2
-        data = np.asarray(data)
-        lb_opt = ge if self.lb_closed else gt
-        ub_opt = le if self.ub_closed else lt
-        sub_index = lb_opt(data, self.lb) & ub_opt(data, self.ub)
-
-        points = np.linspace(self.lb, self.ub, len(weights))
-        poly = lagrange(points, weights)
-
-        result = np.zeros(data.shape)
-        result[sub_index] = poly(data[sub_index])
-        return result
-
-    def __repr__(self) -> str:
-        lb_bracket = "[" if self.lb_closed else "("
-        ub_bracket = "]" if self.ub_closed else ")"
-        return f"{lb_bracket}{self.lb}, {self.ub}{ub_bracket}"
-
-@dataclass
-class SplineSpecs:
-    knots: Iterable
-    degree: int
-    l_linear: bool = False
-    r_linear: bool = False
-
-    def __post_init__(self):
-        assert isinstance(self.knots, Iterable)
-        assert isinstance(self.degree, int) and self.degree >= 0
-        assert isinstance(self.l_linear, bool)
-        assert isinstance(self.r_linear, bool)
-        assert len(self.knots) >= 2 + self.l_linear + self.r_linear
-
-        self.knots = np.unique(self.knots)
-        self.basis_knots = self.knots[self.l_linear:
-                                      len(self.knots) - self.r_linear]
-    
-    def reset_degree(self, degree: int) -> SplineSpecs:
-        return SplineSpecs(
-            knots=self.knots,
-            degree=degree,
-            l_linear=self.l_linear,
-            r_linear=self.r_linear
-        )
-    
-    @property
-    def num_spline_bases(self) -> int:
-        return len(self.basis_knots) + self.degree - 1
+from .new_utils import Interval, SplineSpecs
+from .new_utils import ind_fun, lag_fun
 
 
 @dataclass
@@ -103,7 +19,7 @@ class BasisLinks:
 
     def __post_init__(self):
         assert len(self.bases) == 2
-        assert all([self.is_basis(basis) for basis in self.bases])      
+        assert all([self.is_basis(basis) for basis in self.bases])
 
     def is_basis(self, basis: Union[SplineBasis, None]):
         return isinstance(basis, SplineBasis) or basis is None
@@ -113,13 +29,13 @@ class BasisLinks:
 
     def is_l_linked(self) -> bool:
         return self.bases[0] is not None
-    
+
     def is_r_linked(self) -> bool:
         return self.bases[1] is not None
-    
+
     def is_linked(self) -> List[bool]:
         return [self.is_l_linked(), self.is_r_linked()]
-    
+
     def link_basis(self, basis: SplineBasis, index: int):
         assert self.is_basis(basis)
         self.bases[index] = basis
@@ -138,79 +54,104 @@ class SplineBasis:
         assert 0 <= self.index < self.specs.num_spline_bases
 
         lb_index = max(self.index - self.specs.degree, 0)
-        ub_index = min(self.index + 1, len(self.specs.basis_knots) - 1)
+        ub_index = min(self.index + 1, len(self.specs.knots) - 1)
+        reach_lb = lb_index == 0
+        reach_ub = ub_index == len(self.specs.knots) - 1
 
         self.domain = Interval(
-            lb=self.specs.basis_knots[lb_index],
-            ub=self.specs.basis_knots[ub_index],
-            lb_closed=True, ub_closed=self.is_r_edge()
+            lb=self.specs.knots[lb_index],
+            ub=self.specs.knots[ub_index],
+            lb_closed=True, ub_closed=reach_ub
         )
         self.support = Interval(
-            lb=-np.inf if self.is_l_edge() else self.domain.lb,
-            ub= np.inf if self.is_r_edge() else self.domain.ub,
-            lb_closed=not self.is_l_edge(), ub_closed=False
+            lb=-np.inf if reach_lb else self.domain.lb,
+            ub=np.inf if reach_ub else self.domain.ub,
+            lb_closed=not reach_lb, ub_closed=False
         )
 
-        self.data = None
+        self.data = np.empty((2, 0))
         self.vals = {}
 
     def is_l_edge(self) -> bool:
         return self.index == 0
-    
+
     def is_r_edge(self) -> bool:
         return self.index == self.specs.num_spline_bases - 1
-    
+
     def is_edge(self) -> List[bool]:
         return [self.is_l_edge(), self.is_r_edge()]
-    
+
     def link_basis(self, basis: SplineBasis):
         assert isinstance(basis, SplineBasis)
         assert basis.specs.degree == self.specs.degree - 1
         self.links.link_basis(basis, basis.index - self.index + 1)
-    
+
     def link_bases(self, bases: List[SplineBasis]):
         assert len(bases) <= 2
         for basis in bases:
             self.link_basis(basis)
 
     def is_linked(self) -> bool:
-        return all([xor(*pair)
-                    for pair in zip(self.is_edge(), self.links.is_linked())])
-    
-    def clear(self):
-        self.data = None
-        self.vals = {}
-    
-    def has_data(self, data: np.ndarray) -> bool:
-        return (self.data is data) or (
-            self.data.size == data.size and
-            np.allclose(self.data, data)
-        )
+        return self.specs.degree == 0 or all([
+            xor(*pair)
+            for pair in zip(self.is_edge(), self.links.is_linked())
+        ])
 
-    def attach_data(self, data: np.ndarray) -> bool:
-        data = np.asarray(data)
-        if not self.has_data(data):
+    def clear(self):
+        self.data = np.empty((2, 0))
+        self.vals = {}
+
+    def has_data(self, x: np.ndarray = None) -> bool:
+        if x is None:
+            result = self.data.size > 0
+        else:
+            data = self.data if x.ndim == 2 else self.data[1]
+            result = data.shape == x.shape and np.allclose(data, x)
+        return result
+
+    def attach_data(self, x: np.ndarray):
+        x = np.asarray(x)
+        if not self.has_data(x):
             self.clear()
-            self.data = data
+            if x.ndim == 2:
+                self.data = x
+            else:
+                self.data = np.empty((2, x.size))
+                self.data[0] = self.specs.knots[0]
+                self.data[1] = x
+            assert (self.data[0] <= self.data[1]).all()
 
     def fun(self):
         if self.specs.degree == 0:
-            self.vals[0] = self.support.indicator(self.data)
+            self.vals[0] = ind_fun(self.data[1], 0, self.support)
         else:
-            self.vals[0] = np.zeros(self.data.shape)
+            self.vals[0] = np.zeros(self.data.shape[1])
             if self.links.is_l_linked():
                 basis = self.links.bases[0]
-                self.vals[0] += basis(self.data, order=0)*basis.domain.lagrange(self.data, [0, 1])
+                self.vals[0] += basis(self.data[1], order=0)*lag_fun(self.data[1], [0, 1], basis.domain)
             if self.links.is_r_linked():
                 basis = self.links.bases[1]
-                self.vals[0] += basis(self.data, order=0)*basis.domain.lagrange(self.data, [1, 0])
+                self.vals[0] += basis(self.data[1], order=0)*lag_fun(self.data[1], [1, 0], basis.domain)
 
-    def dfun(self, order: int):
-        return NotImplementedError()
-    
-    def ifun(self, order: int):
-        return NotImplementedError()
-        
+    def difun(self, order: int):
+        if self.specs.degree == 0:
+            self.vals[order] = ind_fun(self.data, order, self.support)
+        else:
+            self.vals[order] = np.zeros(self.data.shape[1])
+            if self.specs.degree - order >= 0:
+                if self.links.is_l_linked():
+                    basis = self.links.bases[0]
+                    self.vals[order] += (
+                        basis(self.data, order=order)*lag_fun(self.data[1], [0, 1], basis.domain) +
+                        basis(self.data, order=order - 1)*order/basis.domain.size
+                    )
+                if self.links.is_r_linked():
+                    basis = self.links.bases[1]
+                    self.vals[order] += (
+                        basis(self.data, order=order)*lag_fun(self.data[1], [1, 0], basis.domain) -
+                        basis(self.data, order=order - 1)*order/basis.domain.size
+                    )
+
     def __call__(self, data: np.ndarray, order: int = 0) -> np.ndarray:
         assert isinstance(order, int)
         assert self.is_linked()
@@ -219,10 +160,8 @@ class SplineBasis:
         if order not in self.vals:
             if order == 0:
                 self.fun()
-            elif order < 0:
-                self.dfun(order=order)
             else:
-                self.ifun(order=order)
+                self.difun(order=order)
 
         return self.vals[order]
 
