@@ -2,26 +2,18 @@
 Spline Basis Module
 """
 from __future__ import annotations
-from typing import List, Dict, Iterable
-from numbers import Number
+
+from collections import deque
 from dataclasses import dataclass, field
-from operator import xor
 from functools import partial
+from operator import xor
+from typing import Iterable, List
+
 import numpy as np
-from .new_utils import Interval, IntervalFunction
-from .new_utils import ind_fun, lag_fun, lin_fun, combine_invl_funs
 
-
-def check_integer(i: int,
-                  lb: Number = -np.inf,
-                  ub: Number = np.inf) -> int:
-    assert isinstance(i, int)
-    assert lb <= i < ub
-    return i
-
-
-def get_num_bases(knots: np.ndarray, degree: int) -> int:
-    return len(knots) + degree - 1
+from .new_utils import (Interval, check_fun_input, check_integer,
+                        combine_invl_funs, get_num_bases, ind_fun, lag_fun,
+                        lin_fun)
 
 
 @dataclass
@@ -88,9 +80,7 @@ class SplineBasis:
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         assert isinstance(order, int)
         assert self.is_linked()
-        data = np.asarray(data)
-        if data.ndim == 1:
-            data = np.vstack([np.repeat(self.knots[0], data.size), data])
+        data, order = check_fun_input(data, order)
         return self.fun(data, order)
 
     def __repr__(self) -> str:
@@ -122,14 +112,14 @@ class XSpline:
                 ])
                 basis.link_bases([bases_prev[j] for j in indices])
 
-        invl = Interval(lb=self.knots[0] if self.l_linx else -np.inf,
-                        ub=self.knots[-1] if self.r_linx else np.inf,
+        invl = Interval(lb=self.knots.min() if self.l_linx else "inf",
+                        ub=self.knots.max() if self.r_linx else "inf",
                         lb_closed=True,
                         ub_closed=True)
-        outer_invls = [
-            Interval(lb=-np.inf, ub=invl.lb,
+        outer_sups = [
+            Interval("inf", invl.lb,
                      lb_closed=False, ub_closed=False) if invl.is_lb_finite() else None,
-            Interval(lb=invl.ub, ub=np.inf,
+            Interval(invl.ub, "inf",
                      lb_closed=False, ub_closed=False) if invl.is_ub_finite() else None
         ]
         self.basis_funs = []
@@ -138,16 +128,18 @@ class XSpline:
             if not (self.l_linx or self.r_linx):
                 self.basis_funs.append(basis)
             else:
-                funs = [IntervalFunction(basis, invl)]
-                for j, outer_invl in enumerate(outer_invls):
-                    if outer_invl is not None:
+                funs = deque([basis])
+                sups = deque([invl])
+                for j, sup in enumerate(outer_sups):
+                    if sup is not None:
                         outer_fun = partial(lin_fun,
                                             z=invl[j],
                                             fz=basis([invl[j]], order=0)[0],
                                             gz=basis([invl[j]], order=1)[0])
                         index = 0 if j == 0 else len(funs)
-                        funs.insert(index, IntervalFunction(outer_fun, outer_invls[j]))
-                self.basis_funs.append(combine_invl_funs(funs))
+                        funs.insert(index, outer_fun)
+                        sups.insert(index, sup)
+                self.basis_funs.append(combine_invl_funs(funs, sups))
 
     def design_mat(self, data: np.ndarray, order: int = 0) -> np.ndarray:
         data = np.asarray(data)
