@@ -1,8 +1,11 @@
 """
 Interval Module
 """
-from typing import Tuple, Union
 from dataclasses import dataclass
+from typing import List, Tuple, Union
+from numbers import Number
+from operator import le, lt, ge, gt
+
 import numpy as np
 
 
@@ -66,6 +69,12 @@ class Interval:
         rinvl = None if np.isinf(self.ub) else \
             Interval(self.ub, np.inf, lb_closed=not self.ub_closed, ub_closed=False)
         return linvl, rinvl
+
+    def __contains__(self, num: Number) -> bool:
+        assert isinstance(num, Number)
+        lopt = ge if self.lb_closed else gt
+        ropt = le if self.ub_closed else lt
+        return lopt(num, self.lb) and ropt(num, self.ub)
 
     def __getitem__(self, index: int) -> float:
         assert index in [0, 1]

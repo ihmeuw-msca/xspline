@@ -103,3 +103,14 @@ def test_get_item():
     invl = Interval(0.0, 1.0)
     assert invl[0] == 0.0
     assert invl[1] == 1.0
+
+
+@pytest.mark.parametrize("invl", [Interval(0.0, 1.0)])
+@pytest.mark.parametrize(("num", "isin"),
+                         [(-1.0, False),
+                          (0.0, True),
+                          (0.5, True),
+                          (1.0, True),
+                          (1.5, False)])
+def test_contains(invl, num, isin):
+    assert (num in invl) == isin

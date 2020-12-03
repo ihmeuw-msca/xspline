@@ -4,7 +4,7 @@ Test Functions Module
 import pytest
 import numpy as np
 from xspline.interval import Interval
-from xspline.functions import ConstFunction, IndicatorFunction
+from xspline.funs import ConstFunction, IndicatorFunction
 
 
 @pytest.mark.parametrize("const", [1.0, 2.0, 3.0])

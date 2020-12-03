@@ -1,9 +1,10 @@
 """
-Test Utility Module
+Test Function Utility Module
 """
 import pytest
 import numpy as np
-from xspline.utils import check_fun_input, taylor_term
+from xspline.funutils import check_fun_input, taylor_term, check_number
+from xspline.interval import Interval
 
 
 @pytest.mark.parametrize(("data", "order"), [([1, 2, 3], -2),
@@ -37,3 +38,17 @@ def test_taylor_term_matrix(order):
     data = np.random.randn(2, 5)
     assert np.allclose(taylor_term(data, order),
                        taylor_term(data[1] - data[0], order))
+
+
+@pytest.mark.parametrize("num", ["a", (1, 2), [1], {1}])
+@pytest.mark.parametrize("num_type", [int])
+def test_check_number_type(num, num_type):
+    with pytest.raises(AssertionError):
+        check_number(num, num_type)
+
+
+@pytest.mark.parametrize("num", [1.0, 2.0, 3.0, 4.0])
+@pytest.mark.parametrize("invl", [Interval(0.0, 0.5)])
+def test_check_number_invl(num, invl):
+    with pytest.raises(AssertionError):
+        check_number(num, invl=invl)

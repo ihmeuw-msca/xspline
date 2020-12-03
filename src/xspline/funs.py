@@ -1,13 +1,14 @@
 """
 Function Module
 """
-from dataclasses import dataclass
 from collections.abc import Iterable
+from dataclasses import dataclass
+
 import numpy as np
 
-from xspline.utils import check_fun_input, taylor_term
+from xspline.fullfun import FullFunction
 from xspline.interval import Interval
-from xspline.fullfunction import FullFunction
+from xspline.funutils import check_fun_input, taylor_term
 
 
 @dataclass

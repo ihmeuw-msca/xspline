@@ -8,8 +8,8 @@ from typing import Callable, List, Tuple, Union
 
 import numpy as np
 
-from xspline.utils import check_fun_input, taylor_term
 from xspline.interval import Interval
+from xspline.funutils import check_fun_input, taylor_term
 
 
 @dataclass
