@@ -39,6 +39,9 @@ class Interval:
         return Interval(self.lb, invl.ub,
                         self.lb_closed, invl.ub_closed)
 
+    def __radd__(self, invl: Union[int, "Interval"]) -> "Interval":
+        return self if invl == 0 else self.__add__(invl)
+
     def __and__(self, invl: "Interval") -> "Interval":
         assert self.is_andable(invl)
         return Interval(invl.lb, self.ub,
