@@ -77,6 +77,14 @@ def test_ge(a_val, b_val, a_cld, b_cld):
     assert (a >= b) == (anum >= bnum)
 
 
+@pytest.mark.parametrize(("a", "b", "result"),
+                         [(BoundaryNumber(1), BoundaryNumber(1), True),
+                          (BoundaryNumber(1, False), BoundaryNumber(1), False),
+                          (BoundaryNumber(1, False), BoundaryNumber(2), True)])
+def test_xor(a, b, result):
+    assert a ^ b == result
+
+
 @pytest.mark.parametrize(("a", "b"),
                          [(BoundaryNumber(1), BoundaryNumber(1, False)),
                           (BoundaryNumber(1, False), BoundaryNumber(1))])
@@ -86,5 +94,5 @@ def test_invert(a, b):
 
 @pytest.mark.parametrize("num", [1, (1, True)])
 def test_from_number_or_tuple(num):
-    a = BoundaryNumber.from_number_or_tuple(num)
+    a = BoundaryNumber.as_boundary_number(num)
     assert a == BoundaryNumber(1)

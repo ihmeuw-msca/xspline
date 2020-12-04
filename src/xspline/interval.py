@@ -20,38 +20,45 @@ class BoundaryNumber:
         self.cld = bool(self.cld) and (not np.isinf(self.val))
 
     @classmethod
-    def from_number_or_tuple(cls, num: Union[Number, Tuple]) -> "BoundaryNumber":
+    def as_boundary_number(cls, num: Union[Number, Tuple]) -> "BoundaryNumber":
+        if isinstance(num, cls):
+            return num
         if isinstance(num, Number):
-            bnum = cls(num)
+            num = cls(num)
         elif isinstance(num, Tuple):
-            bnum = cls(*num)
+            num = cls(*num)
         else:
-            raise ValueError("`object` has to be number or tuple.")
-        return bnum
+            raise ValueError("Input has to be number, tuple or BoundaryNumber.")
+        return num
 
     def __eq__(self, other: "BoundaryNumber") -> bool:
-        assert isinstance(other, BoundaryNumber)
+        other = BoundaryNumber.as_boundary_number(other)
         return (self.val == other.val) and (self.cld == other.cld)
 
     def __lt__(self, other: "BoundaryNumber") -> bool:
-        assert isinstance(other, BoundaryNumber)
+        other = BoundaryNumber.as_boundary_number(other)
         return (self.val < other.val) or ((self.val == other.val) and
                                           (self.cld < other.cld))
 
     def __le__(self, other: "BoundaryNumber") -> bool:
-        assert isinstance(other, BoundaryNumber)
+        other = BoundaryNumber.as_boundary_number(other)
         return (self.val < other.val) or ((self.val == other.val) and
                                           (self.cld <= other.cld))
 
     def __gt__(self, other: "BoundaryNumber") -> bool:
-        assert isinstance(other, BoundaryNumber)
+        other = BoundaryNumber.as_boundary_number(other)
         return (self.val > other.val) or ((self.val == other.val) and
                                           (self.cld > other.cld))
 
     def __ge__(self, other: "BoundaryNumber") -> bool:
-        assert isinstance(other, BoundaryNumber)
+        other = BoundaryNumber.as_boundary_number(other)
         return (self.val > other.val) or ((self.val == other.val) and
                                           (self.cld >= other.cld))
+
+    def __xor__(self, other: "BoundaryNumber") -> bool:
+        other = BoundaryNumber.as_boundary_number(other)
+        return (self.val < other.val) or (self.val == other.val and
+                                          self.cld and other.cld)
 
     def __invert__(self) -> "BoundaryNumber":
         return BoundaryNumber(self.val, not self.cld)
@@ -63,76 +70,60 @@ class BoundaryNumber:
 
 @dataclass
 class Interval:
-    lb: float = -np.inf
-    ub: float = np.inf
-    lb_closed: bool = True
-    ub_closed: bool = True
+    lb: Union[Number, Tuple[Number, bool], BoundaryNumber] = BoundaryNumber(-np.inf)
+    ub: Union[Number, Tuple[Number, bool], BoundaryNumber] = BoundaryNumber(np.inf)
 
     def __post_init__(self):
-        self.lb_closed = bool(self.lb_closed) and (not np.isinf(self.lb))
-        self.ub_closed = bool(self.ub_closed) and (not np.isinf(self.ub))
-        assert (self.lb < self.ub) or ((self.lb == self.ub) and
-                                       (self.lb_closed and self.ub_closed))
+        self.lb = BoundaryNumber.as_boundary_number(self.lb)
+        self.ub = BoundaryNumber.as_boundary_number(self.ub)
+        if not self.lb ^ self.ub:
+            raise ValueError(f"{self} is an empty interval.")
 
     @property
     def size(self) -> float:
-        return self.ub - self.lb
+        return self.ub.val - self.lb.val
 
     def is_addable(self, invl: "Interval") -> bool:
-        return (self.ub == invl.lb) and (self.ub_closed ^ invl.lb_closed)
+        assert isinstance(invl, Interval)
+        return self.ub == ~invl.lb
 
-    def is_andable(self, invl: "Interval") -> bool:
-        return (self.ub > invl.lb) or ((self.ub == invl.lb) and
-                                       (self.ub_closed and invl.lb_closed))
-
-    def is_orable(self, invl: 'Interval') -> bool:
-        return (self.ub > invl.lb) or ((self.ub == invl.lb) and
-                                       (self.ub_closed or invl.lb_closed))
+    def intersects_with(self, invl: "Interval") -> bool:
+        assert isinstance(invl, Interval)
+        return max(self.lb, invl.lb) ^ min(self.ub, invl.ub)
 
     def __add__(self, invl: "Interval") -> "Interval":
         assert self.is_addable(invl)
-        return Interval(self.lb, invl.ub,
-                        self.lb_closed, invl.ub_closed)
+        return Interval(self.lb, invl.ub)
 
     def __radd__(self, invl: Union[int, "Interval"]) -> "Interval":
         return self if invl == 0 else self.__add__(invl)
 
     def __and__(self, invl: "Interval") -> "Interval":
-        assert self.is_andable(invl)
-        return Interval(invl.lb, self.ub,
-                        invl.lb_closed, self.ub_closed)
+        assert self.intersects_with(invl)
+        return Interval(max(self.lb, invl.lb), min(self.ub, invl.ub))
 
     def __or__(self, invl: "Interval") -> "Interval":
-        assert self.is_orable(invl)
-        return Interval(self.lb, invl.ub,
-                        self.lb_closed, invl.ub_closed)
+        assert self.intersects_with(invl)
+        return Interval(min(self.lb, invl.lb), max(self.ub, invl.ub))
 
     def __eq__(self, invl: "Interval") -> bool:
-        if not isinstance(invl, Interval):
-            raise ValueError("Can only compare to Interval instance.")
-        return all([
-            val == getattr(invl, key)
-            for key, val in vars(self).items()
-        ])
+        assert isinstance(invl, Interval)
+        return (self.lb == invl.lb) and (self.ub == invl.ub)
 
     def __invert__(self) -> Tuple[Union[None, "Interval"], Union[None, "Interval"]]:
-        linvl = None if np.isinf(self.lb) else \
-            Interval(-np.inf, self.lb, lb_closed=False, ub_closed=not self.lb_closed)
-        rinvl = None if np.isinf(self.ub) else \
-            Interval(self.ub, np.inf, lb_closed=not self.ub_closed, ub_closed=False)
+        linvl = None if np.isinf(self.lb.val) else Interval(-np.inf, ~self.lb)
+        rinvl = None if np.isinf(self.ub.val) else Interval(~self.ub, np.inf)
         return linvl, rinvl
 
     def __contains__(self, num: Number) -> bool:
         assert isinstance(num, Number)
-        lopt = ge if self.lb_closed else gt
-        ropt = le if self.ub_closed else lt
-        return lopt(num, self.lb) and ropt(num, self.ub)
+        return self.lb <= num <= self.ub
 
     def __getitem__(self, index: int) -> float:
         assert index in [0, 1]
         return self.lb if index == 0 else self.ub
 
     def __repr__(self) -> str:
-        lb_bracket = "[" if self.lb_closed else "("
-        ub_bracket = "]" if self.ub_closed else ")"
-        return f"{lb_bracket}{self.lb}, {self.ub}{ub_bracket}"
+        lbracket = "[" if self.lb.cld else "("
+        rbracket = "]" if self.ub.cld else ")"
+        return f"{lbracket}{self.lb.val}, {self.ub.val}{rbracket}"

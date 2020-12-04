@@ -43,5 +43,5 @@ def lag_fun(data: Iterable, weights: Iterable, invl: Interval) -> np.ndarray:
     assert len(weights) >= 2
     data = np.asarray(data)
     data = data[-1] if data.ndim == 2 else data
-    points = np.linspace(invl.lb, invl.ub, len(weights))
+    points = np.linspace(invl.lb.val, invl.ub.val, len(weights))
     return lagrange(points, weights)(data)

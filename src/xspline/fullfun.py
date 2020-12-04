@@ -27,19 +27,16 @@ class FullFunction:
         domain = self.domain + rfun.domain
         support = self.support | rfun.support
 
-        break_pt = self.domain.ub
-        logi_opt = le if self.domain.ub_closed else lt
-
         def fun(data: Iterable, order: int = 0) -> np.ndarray:
             data, order = check_fun_input(data, order)
-            lx1 = logi_opt(data[-1], break_pt)
+            lx1 = data[-1] <= self.domain.ub
             rx1 = ~lx1
             val = np.zeros(data.shape[-1])
             if order >= 0:
                 val[lx1] = self(data[:, lx1], order)
                 val[rx1] = rfun(data[:, rx1], order)
             else:
-                lx0 = logi_opt(data[0], break_pt)
+                lx0 = data[0] <= self.domain.ub
                 rx0 = ~lx0
                 lboth = lx0 & lx1
                 rboth = rx0 & rx1
@@ -50,8 +47,8 @@ class FullFunction:
 
                 ldata = data[:, landr].copy()
                 rdata = data[:, landr].copy()
-                ldata[1] = break_pt
-                rdata[0] = break_pt
+                ldata[1] = self.domain.ub.val
+                rdata[0] = self.domain.ub.val
                 for i in range(order + 1, 0):
                     val[landr] += self(ldata, i)*taylor_term(rdata, i - order)
                 val[landr] += self(ldata, order) + rfun(rdata, order)
