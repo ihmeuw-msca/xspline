@@ -2,12 +2,19 @@
 Test Boundary Number Class
 """
 import pytest
+import numpy as np
 from xspline.interval import BoundaryNumber
 
 
 def test_default():
     a = BoundaryNumber(1)
     assert a.cld
+
+
+@pytest.mark.parametrize("a_val", [-np.inf, np.inf])
+def test_inf(a_val):
+    a = BoundaryNumber(a_val)
+    assert not a.cld
 
 
 @pytest.mark.parametrize("a_val", [1, 2])
@@ -75,3 +82,9 @@ def test_ge(a_val, b_val, a_cld, b_cld):
                           (BoundaryNumber(1, False), BoundaryNumber(1))])
 def test_invert(a, b):
     assert ~a == b
+
+
+@pytest.mark.parametrize("num", [1, (1, True)])
+def test_from_number_or_tuple(num):
+    a = BoundaryNumber.from_number_or_tuple(num)
+    assert a == BoundaryNumber(1)

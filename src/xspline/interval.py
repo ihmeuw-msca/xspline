@@ -17,7 +17,17 @@ class BoundaryNumber:
     def __post_init__(self):
         if not isinstance(self.val, Number):
             raise ValueError("`val` must be a number.")
-        self.cld = bool(self.cld)
+        self.cld = bool(self.cld) and (not np.isinf(self.val))
+
+    @classmethod
+    def from_number_or_tuple(cls, num: Union[Number, Tuple]) -> "BoundaryNumber":
+        if isinstance(num, Number):
+            bnum = cls(num)
+        elif isinstance(num, Tuple):
+            bnum = cls(*num)
+        else:
+            raise ValueError("`object` has to be number or tuple.")
+        return bnum
 
     def __eq__(self, other: "BoundaryNumber") -> bool:
         assert isinstance(other, BoundaryNumber)
@@ -51,7 +61,7 @@ class BoundaryNumber:
         return f"{lbracket}{self.val}{rbracket}"
 
 
-@ dataclass
+@dataclass
 class Interval:
     lb: float = -np.inf
     ub: float = np.inf
@@ -64,7 +74,7 @@ class Interval:
         assert (self.lb < self.ub) or ((self.lb == self.ub) and
                                        (self.lb_closed and self.ub_closed))
 
-    @ property
+    @property
     def size(self) -> float:
         return self.ub - self.lb
 
