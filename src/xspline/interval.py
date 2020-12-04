@@ -10,6 +10,48 @@ import numpy as np
 
 
 @dataclass
+class BoundaryNumber:
+    val: Number
+    cld: bool = True
+
+    def __post_init__(self):
+        if not isinstance(self.val, Number):
+            raise ValueError("`val` must be a number.")
+        self.cld = bool(self.cld)
+
+    def __eq__(self, other: "BoundaryNumber") -> bool:
+        assert isinstance(other, BoundaryNumber)
+        return (self.val == other.val) and (self.cld == other.cld)
+
+    def __lt__(self, other: "BoundaryNumber") -> bool:
+        assert isinstance(other, BoundaryNumber)
+        return (self.val < other.val) or ((self.val == other.val) and
+                                          (self.cld < other.cld))
+
+    def __le__(self, other: "BoundaryNumber") -> bool:
+        assert isinstance(other, BoundaryNumber)
+        return (self.val < other.val) or ((self.val == other.val) and
+                                          (self.cld <= other.cld))
+
+    def __gt__(self, other: "BoundaryNumber") -> bool:
+        assert isinstance(other, BoundaryNumber)
+        return (self.val > other.val) or ((self.val == other.val) and
+                                          (self.cld > other.cld))
+
+    def __ge__(self, other: "BoundaryNumber") -> bool:
+        assert isinstance(other, BoundaryNumber)
+        return (self.val > other.val) or ((self.val == other.val) and
+                                          (self.cld >= other.cld))
+
+    def __invert__(self) -> "BoundaryNumber":
+        return BoundaryNumber(self.val, not self.cld)
+
+    def __repr__(self) -> str:
+        lbracket, rbracket = ("[", "]") if self.cld else ("(", ")")
+        return f"{lbracket}{self.val}{rbracket}"
+
+
+@ dataclass
 class Interval:
     lb: float = -np.inf
     ub: float = np.inf
@@ -22,7 +64,7 @@ class Interval:
         assert (self.lb < self.ub) or ((self.lb == self.ub) and
                                        (self.lb_closed and self.ub_closed))
 
-    @property
+    @ property
     def size(self) -> float:
         return self.ub - self.lb
 
