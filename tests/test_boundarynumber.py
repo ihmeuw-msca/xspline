@@ -81,8 +81,16 @@ def test_ge(a_val, b_val, a_cld, b_cld):
                          [(BoundaryNumber(1), BoundaryNumber(1), True),
                           (BoundaryNumber(1, False), BoundaryNumber(1), False),
                           (BoundaryNumber(1, False), BoundaryNumber(2), True)])
-def test_xor(a, b, result):
-    assert a ^ b == result
+def test_and(a, b, result):
+    assert a & b == result
+
+
+@pytest.mark.parametrize(("a", "b", "result"),
+                         [(BoundaryNumber(1), BoundaryNumber(1), True),
+                          (BoundaryNumber(1, False), BoundaryNumber(1), True),
+                          (BoundaryNumber(1, False), BoundaryNumber(2), True)])
+def test_or(a, b, result):
+    assert a | b == result
 
 
 @pytest.mark.parametrize(("a", "b"),

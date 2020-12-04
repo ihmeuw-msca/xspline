@@ -55,10 +55,15 @@ class BoundaryNumber:
         return (self.val > other.val) or ((self.val == other.val) and
                                           (self.cld >= other.cld))
 
-    def __xor__(self, other: "BoundaryNumber") -> bool:
+    def __and__(self, other: "BoundaryNumber") -> bool:
         other = BoundaryNumber.as_boundary_number(other)
-        return (self.val < other.val) or (self.val == other.val and
-                                          self.cld and other.cld)
+        return (self.val < other.val) or ((self.val == other.val) and
+                                          (self.cld and other.cld))
+
+    def __or__(self, other: "BoundaryNumber") -> bool:
+        other = BoundaryNumber.as_boundary_number(other)
+        return (self.val < other.val) or ((self.val == other.val) and
+                                          (self.cld or other.cld))
 
     def __invert__(self) -> "BoundaryNumber":
         return BoundaryNumber(self.val, not self.cld)
@@ -68,7 +73,7 @@ class BoundaryNumber:
         return f"{lbracket}{self.val}{rbracket}"
 
 
-@dataclass
+@ dataclass
 class Interval:
     lb: Union[Number, Tuple[Number, bool], BoundaryNumber] = BoundaryNumber(-np.inf)
     ub: Union[Number, Tuple[Number, bool], BoundaryNumber] = BoundaryNumber(np.inf)
@@ -76,10 +81,10 @@ class Interval:
     def __post_init__(self):
         self.lb = BoundaryNumber.as_boundary_number(self.lb)
         self.ub = BoundaryNumber.as_boundary_number(self.ub)
-        if not self.lb ^ self.ub:
+        if not self.lb & self.ub:
             raise ValueError(f"{self} is an empty interval.")
 
-    @property
+    @ property
     def size(self) -> float:
         return self.ub.val - self.lb.val
 
@@ -87,9 +92,13 @@ class Interval:
         assert isinstance(invl, Interval)
         return self.ub == ~invl.lb
 
-    def intersects_with(self, invl: "Interval") -> bool:
+    def is_andable(self, invl: "Interval") -> bool:
         assert isinstance(invl, Interval)
-        return max(self.lb, invl.lb) ^ min(self.ub, invl.ub)
+        return max(self.lb, invl.lb) & min(self.ub, invl.ub)
+
+    def is_orable(self, invl: "Interval") -> bool:
+        assert isinstance(invl, Interval)
+        return max(self.lb, invl.lb) | min(self.ub, invl.ub)
 
     def __add__(self, invl: "Interval") -> "Interval":
         assert self.is_addable(invl)
@@ -99,11 +108,11 @@ class Interval:
         return self if invl == 0 else self.__add__(invl)
 
     def __and__(self, invl: "Interval") -> "Interval":
-        assert self.intersects_with(invl)
+        assert self.is_andable(invl)
         return Interval(max(self.lb, invl.lb), min(self.ub, invl.ub))
 
     def __or__(self, invl: "Interval") -> "Interval":
-        assert self.intersects_with(invl)
+        assert self.is_orable(invl)
         return Interval(min(self.lb, invl.lb), max(self.ub, invl.ub))
 
     def __eq__(self, invl: "Interval") -> bool:
