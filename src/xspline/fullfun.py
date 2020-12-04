@@ -3,13 +3,12 @@ Core Module
 """
 from collections.abc import Iterable
 from dataclasses import dataclass, field
-from operator import le, lt
-from typing import Callable, List, Tuple, Union
+from typing import Callable, Union
 
 import numpy as np
 
-from xspline.interval import Interval
 from xspline.funutils import check_fun_input, taylor_term
+from xspline.interval import Interval
 
 
 @dataclass

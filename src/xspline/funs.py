@@ -7,8 +7,8 @@ from dataclasses import dataclass
 import numpy as np
 
 from xspline.fullfun import FullFunction
-from xspline.interval import Interval
 from xspline.funutils import check_fun_input, taylor_term
+from xspline.interval import Interval
 
 
 @dataclass
@@ -29,9 +29,8 @@ class IndicatorFunction(FullFunction):
 
     def __post_init__(self):
         ldomain, rdomain = ~self.domain
-        const_funs = [ConstFunction(const=1.0, domain=self.domain)]
+        self.fun = ConstFunction(const=1.0, domain=self.domain)
         if ldomain is not None:
-            const_funs.insert(0, ConstFunction(const=0.0, domain=ldomain))
+            self.fun = ConstFunction(const=0.0, domain=ldomain) + self.fun
         if rdomain is not None:
-            const_funs.append(ConstFunction(const=0.0, domain=rdomain))
-        self.fun = sum(const_funs)
+            self.fun = self.fun + ConstFunction(const=0.0, domain=rdomain)

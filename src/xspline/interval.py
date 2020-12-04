@@ -2,9 +2,8 @@
 Interval Module
 """
 from dataclasses import dataclass
-from typing import List, Tuple, Union
 from numbers import Number
-from operator import le, lt, ge, gt
+from typing import Tuple, Union
 
 import numpy as np
 
