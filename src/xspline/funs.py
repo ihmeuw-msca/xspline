@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from xspline.fullfun import FullFunction
-from xspline.funutils import check_fun_input, taylor_term
+from xspline.funutils import check_fun_input, taylor_term, shift_poly
 from xspline.interval import Interval
 
 
@@ -34,3 +34,30 @@ class IndicatorFunction(FullFunction):
             self.fun = ConstFunction(const=0.0, domain=ldomain) + self.fun
         if rdomain is not None:
             self.fun = self.fun + ConstFunction(const=0.0, domain=rdomain)
+
+
+@dataclass
+class PolyFunction(FullFunction):
+    coefs: Iterable = (1.0,)
+
+    def __post_init__(self):
+        self.coefs = np.asarray(self.coefs)
+
+    @property
+    def degree(self) -> int:
+        return len(self.coefs) - 1
+
+    # TODO: Test this function
+    def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
+        data, order = check_fun_input(data, order)
+        if order == 0:
+            val = np.polyval(self.coefs[::-1], data[-1])
+        elif order > 0:
+            val = np.polyval(np.polyder(self.coefs[::-1], order), data[-1])
+        else:
+            val = np.array(list(map(
+                lambda coefs, d: np.polyval(np.polyint(coefs, -order), d),
+                shift_poly(self.coefs, data[0]),
+                data[1] - data[0]
+            )))
+        return val

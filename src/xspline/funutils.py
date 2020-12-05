@@ -3,10 +3,12 @@ Function Utility Modules
 """
 from collections.abc import Iterable
 from numbers import Number
-from typing import Tuple, Type
+from typing import Tuple, Type, Union
 
 import numpy as np
+from numpy.polynomial.polynomial import polyvander
 from scipy.interpolate import lagrange
+from scipy.special import comb
 
 from xspline.interval import Interval
 
@@ -38,6 +40,7 @@ def taylor_term(data: Iterable, order: Number) -> np.ndarray:
     return data**order/np.math.factorial(order)
 
 
+# TODO: Test this function
 def lag_fun(data: Iterable, weights: Iterable, invl: Interval) -> np.ndarray:
     assert not np.isinf(invl.size)
     assert len(weights) >= 2
@@ -45,3 +48,14 @@ def lag_fun(data: Iterable, weights: Iterable, invl: Interval) -> np.ndarray:
     data = data[-1] if data.ndim == 2 else data
     points = np.linspace(invl.lb.val, invl.ub.val, len(weights))
     return lagrange(points, weights)(data)
+
+
+# TODO: Test this function
+def shift_poly(coefs: np.ndarray, offset: Union[float, np.ndarray]) -> np.ndarray:
+    n = len(coefs)
+    coefs_mat = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n - i):
+            coefs_mat[i, j] = coefs[j + i]*comb(j + i, j)
+    offset_mat = polyvander(offset, n - 1)
+    return offset_mat.dot(coefs_mat)
