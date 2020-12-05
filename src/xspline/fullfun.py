@@ -15,7 +15,7 @@ from xspline.interval import Interval
 class FullFunction:
     domain: Interval = field(default_factory=Interval)
     support: Interval = field(default_factory=Interval)
-    fun: Callable = field(default=None)
+    fun: Callable = field(default=None, repr=False)
 
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         if self.fun is None:
