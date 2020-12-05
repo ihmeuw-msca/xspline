@@ -98,3 +98,12 @@ def test_poly_ifun(coefs, val, data):
 def test_poly_from_lagrange(points, weights, data):
     poly_fun = PolyFunction.from_lagrange(points, weights)
     assert np.allclose(poly_fun(data), lagrange(points, weights)(data))
+
+
+@pytest.mark.parametrize(("point", "fun_ders"),
+                         [(0, [1, 1, 2]),
+                          (1, [3, 3, 2]),
+                          (2, [7, 5, 2])])
+def test_poly_from_taylor(point, fun_ders):
+    poly_fun = PolyFunction.from_taylor(point, fun_ders)
+    assert np.allclose(poly_fun.coefs, [1.0, 1.0, 1.0])

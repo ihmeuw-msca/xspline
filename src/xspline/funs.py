@@ -52,6 +52,11 @@ class PolyFunction(FullFunction):
     def from_lagrange(cls, points: Iterable, weights: Iterable) -> "PolyFunction":
         return cls(coefs=lagrange(points, weights).coef[::-1])
 
+    @classmethod
+    def from_taylor(cls, point: float, fun_ders: Iterable) -> "PolyFunction":
+        coefs = [f/np.math.factorial(i) for i, f in enumerate(fun_ders)]
+        return cls(coefs=shift_poly(coefs, -point)[0])
+
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         data, order = check_fun_input(data, order)
         if order == 0:
