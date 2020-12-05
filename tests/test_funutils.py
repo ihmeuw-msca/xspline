@@ -1,9 +1,10 @@
 """
 Test Function Utility Module
 """
-import pytest
 import numpy as np
-from xspline.funutils import check_fun_input, taylor_term, check_number
+import pytest
+from xspline.funutils import (check_fun_input, check_number, shift_poly,
+                              taylor_term)
 from xspline.interval import Interval
 
 
@@ -52,3 +53,13 @@ def test_check_number_type(num, num_type):
 def test_check_number_invl(num, invl):
     with pytest.raises(AssertionError):
         check_number(num, invl=invl)
+
+
+@pytest.mark.parametrize("coefs", [np.random.randn(5)]*5)
+@pytest.mark.parametrize("offset", [np.random.randn(10)])
+@pytest.mark.parametrize("data", [np.linspace(-1.0, 1.0, 10)])
+def test_shift_poly(coefs, offset, data):
+    shifted_coefs = shift_poly(coefs, offset)
+    assert np.allclose(np.polyval(coefs[::-1], data),
+                       list(map(lambda c, d: np.polyval(c[::-1], d),
+                                shifted_coefs, data - offset)))
