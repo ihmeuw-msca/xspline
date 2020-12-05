@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.interpolate import lagrange
 
 from xspline.fullfun import FullFunction
 from xspline.funutils import check_fun_input, taylor_term, shift_poly
@@ -47,7 +48,10 @@ class PolyFunction(FullFunction):
     def degree(self) -> int:
         return len(self.coefs) - 1
 
-    # TODO: Test this function
+    @classmethod
+    def from_lagrange(cls, points: Iterable, weights: Iterable) -> "PolyFunction":
+        return cls(coefs=lagrange(points, weights).coef[::-1])
+
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         data, order = check_fun_input(data, order)
         if order == 0:

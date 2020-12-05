@@ -55,7 +55,7 @@ def test_check_number_invl(num, invl):
         check_number(num, invl=invl)
 
 
-@pytest.mark.parametrize("coefs", [np.random.randn(5)]*5)
+@pytest.mark.parametrize("coefs", [np.random.randn(5) for i in range(5)])
 @pytest.mark.parametrize("offset", [np.random.randn(10)])
 @pytest.mark.parametrize("data", [np.linspace(-1.0, 1.0, 10)])
 def test_shift_poly(coefs, offset, data):

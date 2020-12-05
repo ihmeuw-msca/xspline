@@ -3,6 +3,7 @@ Test Functions Module
 """
 import pytest
 import numpy as np
+from scipy.interpolate import lagrange
 from xspline.interval import Interval
 from xspline.funs import ConstFunction, IndicatorFunction, PolyFunction
 
@@ -89,3 +90,11 @@ def test_poly_dfun(coefs, val, data):
 def test_poly_ifun(coefs, val, data):
     poly_fun = PolyFunction(coefs=coefs)
     assert np.allclose(poly_fun(data, order=-1), val)
+
+
+@pytest.mark.parametrize("points", [np.random.randn(5) for i in range(5)])
+@pytest.mark.parametrize("weights", [np.random.randn(5)])
+@pytest.mark.parametrize("data", [np.linspace(-1.0, 1.0, 10)])
+def test_poly_from_lagrange(points, weights, data):
+    poly_fun = PolyFunction.from_lagrange(points, weights)
+    assert np.allclose(poly_fun(data), lagrange(points, weights)(data))
