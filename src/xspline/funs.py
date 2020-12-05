@@ -56,7 +56,7 @@ class PolyFunction(FullFunction):
             val = np.polyval(np.polyder(self.coefs[::-1], order), data[-1])
         else:
             val = np.array(list(map(
-                lambda coefs, d: np.polyval(np.polyint(coefs, -order), d),
+                lambda coefs, d: np.polyval(np.polyint(coefs[::-1], -order), d),
                 shift_poly(self.coefs, data[0]),
                 data[1] - data[0]
             )))

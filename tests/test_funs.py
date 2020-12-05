@@ -4,7 +4,7 @@ Test Functions Module
 import pytest
 import numpy as np
 from xspline.interval import Interval
-from xspline.funs import ConstFunction, IndicatorFunction
+from xspline.funs import ConstFunction, IndicatorFunction, PolyFunction
 
 
 @pytest.mark.parametrize("const", [1.0, 2.0, 3.0])
@@ -59,3 +59,33 @@ def test_ind_dfun(invl, data):
 def test_ind_ifun(invl, val, data):
     indic_fun = IndicatorFunction(domain=invl)
     assert np.allclose(indic_fun(data, order=-1), val)
+
+
+@pytest.mark.parametrize(("coefs", "val"),
+                         [([1.0], [1.0]*5),
+                          ([0.0, 1.0], [1.0, 2.0, 3.0, 4.0, 5.0]),
+                          ([0.0, 0.0, 1.0], [1.0, 4.0, 9.0, 16.0, 25.0])])
+@pytest.mark.parametrize("data", [[[0.0]*5, [1.0, 2.0, 3.0, 4.0, 5.0]]])
+def test_poly_fun(coefs, val, data):
+    poly_fun = PolyFunction(coefs=coefs)
+    assert np.allclose(poly_fun(data, order=0), val)
+
+
+@pytest.mark.parametrize(("coefs", "val"),
+                         [([1.0], [0.0]*5),
+                          ([0.0, 1.0], [1.0]*5),
+                          ([0.0, 0.0, 1.0], [2.0, 4.0, 6.0, 8.0, 10.0])])
+@pytest.mark.parametrize("data", [[[0.0]*5, [1.0, 2.0, 3.0, 4.0, 5.0]]])
+def test_poly_dfun(coefs, val, data):
+    poly_fun = PolyFunction(coefs=coefs)
+    assert np.allclose(poly_fun(data, order=1), val)
+
+
+@pytest.mark.parametrize(("coefs", "val"),
+                         [([1.0], [1.0, 2.0, 3.0, 4.0, 5.0]),
+                          ([0.0, 1.0], [0.5, 2.0, 4.5, 8.0, 12.5]),
+                          ([0.0, 0.0, 1.0], [1/3, 8/3, 27/3, 64/3, 125/3])])
+@pytest.mark.parametrize("data", [[[0.0]*5, [1.0, 2.0, 3.0, 4.0, 5.0]]])
+def test_poly_ifun(coefs, val, data):
+    poly_fun = PolyFunction(coefs=coefs)
+    assert np.allclose(poly_fun(data, order=-1), val)
