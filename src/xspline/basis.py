@@ -1,8 +1,6 @@
 """
 Spline Basis Module
 """
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from operator import xor
 from typing import Iterable, List
@@ -23,7 +21,7 @@ class SplineBasis(FullFunction):
                  knots: Iterable,
                  degree: int,
                  index: int,
-                 links: List[SplineBasis] = None, **kwargs):
+                 links: List["SplineBasis"] = None, **kwargs):
         self.knots = np.unique(knots)
         self.degree = check_number(degree, int, Interval(0, np.inf))
         self.index = check_number(index, int, Interval(0, len(self.knots) + self.degree - 1))
@@ -39,13 +37,13 @@ class SplineBasis(FullFunction):
                            np.inf if reach_ub else domain.ub)
         super().__init__(domain=domain, support=support, **kwargs)
 
-    def link_basis(self, basis: SplineBasis):
+    def link_basis(self, basis: "SplineBasis"):
         assert isinstance(basis, SplineBasis)
         assert basis.degree == self.degree - 1
         assert np.allclose(basis.knots, self.knots)
         self.links[basis.index - self.index + 1] = basis
 
-    def link_bases(self, bases: List[SplineBasis]):
+    def link_bases(self, bases: List["SplineBasis"]):
         assert len(bases) <= 2
         for basis in bases:
             self.link_basis(basis)
