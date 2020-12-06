@@ -4,7 +4,7 @@ Test SplineBasis Class
 import pytest
 import numpy as np
 from xspline.interval import Interval
-from xspline.basis import SplineBasis, SplineSpecs
+from xspline.basis import SplineBasis, SplineSpecs, get_spline_bases
 
 knots = [0.0, 0.5, 1.0]
 degree = 1
@@ -168,3 +168,11 @@ def test_spline_specs_copy(knots, degree, index, with_index):
         assert specs.index == specs_copy.index
     else:
         assert specs_copy.index is None
+
+
+@pytest.mark.parametrize("specs", [SplineSpecs([0.0, 0.5, 1.0], 3)])
+def test_get_spline_bases(specs):
+    bases = get_spline_bases(specs)
+    assert len(bases) == specs.degree + 1
+    assert all([all([basis.is_linked() for basis in bases[d]])
+                for d in range(len(bases))])

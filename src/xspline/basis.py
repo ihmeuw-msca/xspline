@@ -183,3 +183,24 @@ class SplineBasis(FullFunction):
 
     def __repr__(self) -> str:
         return self.specs.__str__()
+
+
+def get_spline_bases(specs: SplineSpecs) -> List[List[SplineBasis]]:
+    specs = specs.copy()
+    bases = []
+    # create bases
+    for degree in range(specs.degree + 1):
+        sub_specs = SplineSpecs(specs.knots, degree)
+        bases.append([
+            SplineBasis(SplineSpecs(specs.knots, degree, index))
+            for index in range(sub_specs.num_bases)
+        ])
+    # link bases
+    for degree in range(1, specs.degree + 1):
+        for i, basis in enumerate(bases[degree]):
+            indices = set([
+                max(0, i - 1),
+                min(i, len(bases[degree - 1]) - 1)
+            ])
+            basis.link_bases([bases[degree - 1][j] for j in indices])
+    return bases
