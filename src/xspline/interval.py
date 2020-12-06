@@ -128,8 +128,9 @@ class Interval:
         return self.lb <= num <= self.ub
 
     def __getitem__(self, index: int) -> float:
-        assert index in [0, 1]
-        return self.lb if index == 0 else self.ub
+        if index >= 2:
+            raise IndexError
+        return self.lb.val if index == 0 else self.ub.val
 
     def __repr__(self) -> str:
         lbracket = "[" if self.lb.cld else "("
