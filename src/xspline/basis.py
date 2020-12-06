@@ -48,6 +48,16 @@ class SplineSpecs:
         self.support = Interval(-np.inf if reach_lb else self.domain.lb,
                                 np.inf if reach_ub else self.domain.ub)
 
+    def __repr__(self) -> str:
+        if self.index is None:
+            return f"Spline(knots={self.knots}, degree={self.degree})"
+        else:
+            return (f"Spline(knots={self.knots}, "
+                    f"degree={self.degree}, "
+                    f"index={self.index}, "
+                    f"domain={self.domain}, "
+                    f"support={self.support})")
+
 
 class SplineBasis(FullFunction):
     """Basic building block for splines.
