@@ -75,7 +75,7 @@ ifuns = [ifun0, ifun1, ifun2]
 bases = []
 for d in range(degree + 1):
     bases.append([
-        SplineBasis(knots, d, i)
+        SplineBasis(SplineSpecs(knots, d, i))
         for i in range(len(knots) + d - 1)
     ])
 
