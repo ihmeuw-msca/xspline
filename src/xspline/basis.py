@@ -13,35 +13,62 @@ from xspline.funutils import check_fun_input, check_number
 from xspline.interval import Interval
 
 
-class SplineBasis(FullFunction):
-    """Basic building block for splines.
-    """
+@dataclass
+class SplineSpecs:
+    knots: Iterable
+    degree: int
+    index: int = field(default=None)
+    domain: Interval = field(default=None, init=False)
+    support: Interval = field(default=None, init=False)
 
-    def __init__(self,
-                 knots: Iterable,
-                 degree: int,
-                 index: int,
-                 links: List["SplineBasis"] = None, **kwargs):
-        self.knots = np.unique(knots)
-        self.degree = check_number(degree, int, Interval(0, np.inf))
-        self.index = check_number(index, int, Interval(0, len(self.knots) + self.degree - 1))
-        self.links = [None, None] if links is None else links
+    def __post_init__(self):
+        self.knots = np.unique(self.knots)
+        if self.knots.size < 2:
+            raise ValueError("Need at least two unique knots.")
+        if not (np.issubdtype(self.knots.dtype, int) or
+                np.issubdtype(self.knots.dtype, float)):
+            raise ValueError("Values in `knots` have to be integer or float.")
+        self.degree = check_number(self.degree, int, Interval(0, np.inf))
+        self.index is not None and self.set_index()
+
+    @ property
+    def num_bases(self) -> int:
+        return self.knots.size + self.degree - 1
+
+    def set_index(self, index: int = None):
+        index = self.index if index is None else index
+        self.index = check_number(index, int, Interval(0, self.num_bases))
 
         lb_index = max(self.index - self.degree, 0)
         ub_index = min(self.index + 1, len(self.knots) - 1)
         reach_lb = lb_index == 0
         reach_ub = ub_index == len(self.knots) - 1
 
-        domain = Interval(self.knots[lb_index], (self.knots[ub_index], False))
-        support = Interval(-np.inf if reach_lb else domain.lb,
-                           np.inf if reach_ub else domain.ub)
-        super().__init__(domain=domain, support=support, **kwargs)
+        self.domain = Interval(self.knots[lb_index], (self.knots[ub_index], False))
+        self.support = Interval(-np.inf if reach_lb else self.domain.lb,
+                                np.inf if reach_ub else self.domain.ub)
+
+
+class SplineBasis(FullFunction):
+    """Basic building block for splines.
+    """
+
+    def __init__(self,
+                 specs: SplineSpecs,
+                 links: List["SplineBasis"] = None,
+                 **kwargs):
+        if specs.index is None:
+            raise ValueError("Please set `specs.index` first.")
+        self.specs = specs
+        self.links = [None, None] if links is None else links
+        kwargs.update({"domain": self.specs.domain, "support": self.specs.support})
+        super().__init__(**kwargs)
 
     def link_basis(self, basis: "SplineBasis"):
         assert isinstance(basis, SplineBasis)
-        assert basis.degree == self.degree - 1
-        assert np.allclose(basis.knots, self.knots)
-        self.links[basis.index - self.index + 1] = basis
+        assert basis.specs.degree == self.specs.degree - 1
+        assert np.allclose(basis.specs.knots, self.specs.knots)
+        self.links[basis.specs.index - self.specs.index + 1] = basis
 
     def link_bases(self, bases: List["SplineBasis"]):
         assert len(bases) <= 2
@@ -49,15 +76,15 @@ class SplineBasis(FullFunction):
             self.link_basis(basis)
 
     def is_linked(self) -> bool:
-        edges = [self.index == 0,
-                 self.index == len(self.knots) + self.degree - 2]
+        edges = [self.specs.index == 0,
+                 self.specs.index == self.specs.num_bases - 1]
         links = [basis is not None for basis in self.links]
-        return self.degree == 0 or all([xor(*p) for p in zip(edges, links)])
+        return self.specs.degree == 0 or all([xor(*p) for p in zip(edges, links)])
 
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         assert self.is_linked()
         data, order = check_fun_input(data, order)
-        if self.degree == 0:
+        if self.specs.degree == 0:
             val = IndicatorFunction(domain=self.support)(data, order)
         else:
             val = np.zeros(data.shape[-1])
@@ -71,7 +98,7 @@ class SplineBasis(FullFunction):
         return val
 
     def __repr__(self) -> str:
-        return f"SplineBasis(degree={self.degree}, index={self.index}, domain={self.domain})"
+        return self.specs.__str__()
 
 
 class XSpline:

@@ -3,7 +3,7 @@ Test SplineBasis Class
 """
 import pytest
 import numpy as np
-from xspline.basis import SplineBasis
+from xspline.basis import SplineBasis, SplineSpecs
 
 knots = [0.0, 0.5, 1.0]
 degree = 1
@@ -75,7 +75,7 @@ ifuns = [ifun0, ifun1, ifun2]
 bases = []
 for d in range(degree + 1):
     bases.append([
-        SplineBasis(knots, d, i)
+        SplineBasis(SplineSpecs(knots, d, i))
         for i in range(len(knots) + d - 1)
     ])
 
@@ -105,3 +105,28 @@ def test_basis_ifun(data):
     for i, fun in enumerate(ifuns):
         assert np.allclose(fun(data),
                            bases[-1][i]([np.zeros(data.size), data], order=-1))
+
+
+@pytest.mark.parametrize("knots", [[0.0, 0.0, 0.0],
+                                   ["a", "b", "c"],
+                                   ["a", 1, 2]])
+@pytest.mark.parametrize("degree", [3])
+def test_spline_specs_check_knots(knots, degree):
+    with pytest.raises(ValueError):
+        SplineSpecs(knots, degree)
+
+
+@pytest.mark.parametrize("knots", [[0.0, 1.0, 2.0]])
+@pytest.mark.parametrize("degree", ["a", -1])
+def test_spline_specs_check_degree(knots, degree):
+    with pytest.raises(AssertionError):
+        SplineSpecs(knots, degree)
+
+
+@pytest.mark.parametrize("knots", [[0, 1, 2],
+                                   [0.0, 0.0, 1.0, 2.0],
+                                   (0.0, 1.0, 1.0, 2.0)])
+@pytest.mark.parametrize("degree", [0, 1, 2])
+def test_spline_specs(knots, degree):
+    specs = SplineSpecs(knots, degree)
+    assert specs.num_bases == degree + 2
