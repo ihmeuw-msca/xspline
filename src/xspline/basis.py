@@ -99,38 +99,3 @@ class SplineBasis(FullFunction):
 
     def __repr__(self) -> str:
         return self.specs.__str__()
-
-
-class XSpline:
-    def __init__(self, knots: Iterable, degree: int,
-                 l_linx: bool = False, r_linx: bool = False):
-        self.knots = np.unique(knots)
-        self.degree = check_number(degree, int, Interval(0, np.inf))
-        self.num_bases = len(self.knots) + self.degree - 1
-        self.l_linx = l_linx
-        self.r_linx = r_linx
-        self.bases = []
-        for d in range(self.degree + 1):
-            self.bases.append([
-                SplineBasis(self.knots, d, i)
-                for i in range(len(self.knots) + d - 1)
-            ])
-
-        for d in range(1, self.degree + 1):
-            bases = self.bases[d]
-            bases_prev = self.bases[d - 1]
-            for i, basis in enumerate(bases):
-                indices = set([
-                    max(0, i - 1),
-                    min(i, len(bases_prev) - 1)
-                ])
-                basis.link_bases([bases_prev[j] for j in indices])
-
-    def design_mat(self, data: np.ndarray, order: int = 0) -> np.ndarray:
-        data = np.asarray(data)
-        if data.ndim == 1 and order < 0:
-            data = np.vstack([np.repeat(data.min(), data.size), data])
-        return np.hstack([
-            fun(data, order)[:, None]
-            for fun in self.bases[-1]
-        ])
