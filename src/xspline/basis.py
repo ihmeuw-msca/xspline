@@ -13,6 +13,25 @@ from xspline.funutils import check_fun_input, check_number
 from xspline.interval import Interval
 
 
+@dataclass
+class SplineSpecs:
+    knots: Iterable
+    degree: int
+
+    def __post_init__(self):
+        self.knots = np.unique(self.knots)
+        if self.knots.size < 2:
+            raise ValueError("Need at least two unique knots.")
+        if not (np.issubdtype(self.knots.dtype, int) or
+                np.issubdtype(self.knots.dtype, float)):
+            raise ValueError("Values in `knots` have to be integer or float.")
+        self.degree = check_number(self.degree, int, Interval(0, np.inf))
+
+    @ property
+    def num_bases(self) -> int:
+        return self.knots.size + self.degree - 1
+
+
 class SplineBasis(FullFunction):
     """Basic building block for splines.
     """
