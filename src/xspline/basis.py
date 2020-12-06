@@ -34,7 +34,7 @@ class SplineBasis(FullFunction):
         reach_lb = lb_index == 0
         reach_ub = ub_index == len(self.knots) - 1
 
-        domain = Interval(self.knots[lb_index], (self.knots[ub_index], reach_ub))
+        domain = Interval(self.knots[lb_index], (self.knots[ub_index], False))
         support = Interval(-np.inf if reach_lb else domain.lb,
                            np.inf if reach_ub else domain.ub)
         super().__init__(domain=domain, support=support, **kwargs)
@@ -58,6 +58,7 @@ class SplineBasis(FullFunction):
 
     def __call__(self, data: Iterable, order: int = 0) -> np.ndarray:
         assert self.is_linked()
+        data, order = check_fun_input(data, order)
         if self.degree == 0:
             val = IndicatorFunction(domain=self.support)(data, order)
         else:
