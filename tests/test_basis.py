@@ -153,3 +153,18 @@ def test_spline_specs_index(knots, degree, index):
     assert specs.index is None
     assert specs.domain is None
     assert specs.support is None
+
+
+@pytest.mark.parametrize("knots", [[0, 1, 2]])
+@pytest.mark.parametrize("degree", [0])
+@pytest.mark.parametrize("index", [0, 1])
+@pytest.mark.parametrize("with_index", [True, False])
+def test_spline_specs_copy(knots, degree, index, with_index):
+    specs = SplineSpecs(knots, degree, index)
+    specs_copy = specs.copy(with_index=with_index)
+    assert np.allclose(specs.knots, specs_copy.knots)
+    assert specs.degree == specs_copy.degree
+    if with_index:
+        assert specs.index == specs_copy.index
+    else:
+        assert specs_copy.index is None

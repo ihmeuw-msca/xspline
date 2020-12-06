@@ -113,6 +113,15 @@ class SplineSpecs:
                                (knots[ub_index], False))
         return support
 
+    def copy(self, with_index: bool = False) -> "SplineSpecs":
+        knots = self._knots.copy()
+        degree = self._degree
+        index = self._index if with_index else None
+        return SplineSpecs(knots, degree, index)
+
+    def __copy__(self, with_index: bool = False) -> "SplineSpecs":
+        return self.copy(with_index=with_index)
+
     def __repr__(self) -> str:
         if self.index is None:
             return f"Spline(knots={self.knots}, degree={self.degree})"
