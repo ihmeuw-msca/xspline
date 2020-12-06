@@ -3,7 +3,7 @@ Spline Basis Module
 """
 from dataclasses import dataclass, field
 from operator import xor
-from typing import Iterable, List
+from typing import Iterable, List, Tuple, Union
 
 import numpy as np
 
@@ -13,40 +13,105 @@ from xspline.funutils import check_fun_input, check_number
 from xspline.interval import Interval
 
 
-@dataclass
 class SplineSpecs:
-    knots: Iterable
-    degree: int
-    index: int = field(default=None)
-    domain: Interval = field(default=None, init=False)
-    support: Interval = field(default=None, init=False)
+    def __init__(self, knots: Iterable, degree: int, index: int = None):
+        self._knots = self._check_knots(knots)
+        self._degree = self._check_degree(degree)
+        self._num_bases = self._get_num_bases()
+        self._index = self._check_index(index)
+        self._domain = self._get_domain()
+        self._support = self._get_support()
 
-    def __post_init__(self):
-        self.knots = np.unique(self.knots)
-        if self.knots.size < 2:
+    def _check_knots(self, knots: Iterable) -> np.ndarray:
+        knots = np.unique(knots)
+        if knots.size < 2:
             raise ValueError("Need at least two unique knots.")
-        if not (np.issubdtype(self.knots.dtype, int) or
-                np.issubdtype(self.knots.dtype, float)):
+        if not (np.issubdtype(knots.dtype, int) or
+                np.issubdtype(knots.dtype, float)):
             raise ValueError("Values in `knots` have to be integer or float.")
-        self.degree = check_number(self.degree, int, Interval(0, np.inf))
-        self.index is not None and self.set_index()
+        return knots
 
-    @ property
+    def _check_degree(self, degree: int) -> int:
+        return check_number(degree, int, Interval(0, np.inf))
+
+    def _check_index(self, index: Union[None, int]) -> Union[None, int]:
+        if index is not None:
+            index = check_number(index, int, Interval(0, self.num_bases - 1))
+        return index
+
+    @property
+    def knots(self) -> np.ndarray:
+        return self._knots
+
+    @property
+    def degree(self) -> int:
+        return self._degree
+
+    @property
+    def index(self) -> int:
+        return self._index
+
+    @property
     def num_bases(self) -> int:
+        return self._num_bases
+
+    @property
+    def domain(self) -> Interval:
+        return self._domain
+
+    @property
+    def support(self) -> Interval:
+        return self._support
+
+    @knots.setter
+    def knots(self, knots: Iterable):
+        self._knots = self._check_knots(knots)
+        self._num_bases = self._get_num_bases()
+        self._domain = self._get_domain()
+        self._support = self._get_support()
+
+    @degree.setter
+    def degree(self, degree: int):
+        self._degree = self._check_degree(degree)
+        self._num_bases = self._get_num_bases()
+        self._domain = self._get_domain()
+        self._support = self._get_support()
+
+    @index.setter
+    def index(self, index: int):
+        self._index = self._check_index(index)
+        self._domain = self._get_domain()
+        self._support = self._get_support()
+
+    def _get_boundary_knots_indices(self) -> Tuple[int, int]:
+        lb_index = max(self.index - self.degree, 0)
+        ub_index = min(self.index + 1, self.knots.size - 1)
+        return lb_index, ub_index
+
+    def _get_num_bases(self) -> int:
         return self.knots.size + self.degree - 1
 
-    def set_index(self, index: int = None):
-        index = self.index if index is None else index
-        self.index = check_number(index, int, Interval(0, self.num_bases))
+    def _get_domain(self) -> Interval:
+        if self.index is None:
+            domain = None
+        else:
+            knots = self.knots.copy()
+            lb_index, ub_index = self._get_boundary_knots_indices()
+            domain = Interval((knots[lb_index], True),
+                              (knots[ub_index], False))
+        return domain
 
-        lb_index = max(self.index - self.degree, 0)
-        ub_index = min(self.index + 1, len(self.knots) - 1)
-        reach_lb = lb_index == 0
-        reach_ub = ub_index == len(self.knots) - 1
-
-        self.domain = Interval(self.knots[lb_index], (self.knots[ub_index], False))
-        self.support = Interval(-np.inf if reach_lb else self.domain.lb,
-                                np.inf if reach_ub else self.domain.ub)
+    def _get_support(self) -> Interval:
+        if self.index is None:
+            support = None
+        else:
+            knots = self.knots.copy().astype(float)
+            knots[0] = -np.inf
+            knots[-1] = np.inf
+            lb_index, ub_index = self._get_boundary_knots_indices()
+            support = Interval((knots[lb_index], True),
+                               (knots[ub_index], False))
+        return support
 
     def __repr__(self) -> str:
         if self.index is None:
