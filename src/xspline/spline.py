@@ -25,7 +25,7 @@ class XSpline:
             check_number(lxorder, int, Interval(0, self.specs.degree))
         rxorder = self.specs.degree if rxorder is None else \
             check_number(rxorder, int, Interval(0, self.specs.degree))
-        self.xorders = [lxorder, rxorder]
+        self.xorders = (lxorder, rxorder)
 
         self.domain = Interval(self.specs.knots[0], (self.specs.knots[-1], False))
         self.funs = self._get_spline_funs()
@@ -50,4 +50,4 @@ class XSpline:
         ])
 
     def __repr__(self) -> str:
-        return self.specs.__str__()
+        return self.specs.__str__() + f" + xorders={self.xorders}"
