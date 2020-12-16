@@ -1,4 +1,4 @@
-name: test-python-packages
+name: python-build
 on: [push]
 jobs:
   build:
