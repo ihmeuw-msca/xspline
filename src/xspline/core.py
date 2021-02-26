@@ -651,7 +651,7 @@ class XSpline:
         """
         mat = np.vstack([
             self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases)
+            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return mat
 
@@ -679,7 +679,7 @@ class XSpline:
         """
         dmat = np.vstack([
             self.dfun(x, order, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases)
+            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return dmat
 
@@ -712,7 +712,7 @@ class XSpline:
         """
         imat = np.vstack([
             self.ifun(a, x, order, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases)
+            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return imat
 
