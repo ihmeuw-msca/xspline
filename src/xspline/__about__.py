@@ -7,7 +7,7 @@ __title__ = "xspline"
 __summary__ = "xspline: Advanced spline tools"
 __uri__ = "https://github.com/zhengp0/xspline"
 
-__version__ = "0.0.5"
+__version__ = "0.0.7"
 
 __author__ = "Peng Zheng"
 __email__ = "zhengp@uw.edu"
