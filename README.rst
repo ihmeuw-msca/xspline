@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.com/zhengp0/xspline.svg?branch=main
-    :target: https://travis-ci.com/zhengp0/xspline
+.. image:: https://github.com/zhengp0/xspline/workflows/python-build/badge.svg
+    :target: https://github.com/zhengp0/xspline/actions
 
 .. image:: https://badge.fury.io/py/xspline.svg
     :target: https://badge.fury.io/py/xspline
