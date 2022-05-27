@@ -1,4 +1,6 @@
 # utility functions for the bsplinex class
+from functools import reduce
+
 import numpy as np
 
 
@@ -445,5 +447,5 @@ def outer_flatten(*args):
         numpy.ndarray:
         1D numpy array that store the flattened outer product.
     """
-    result = np.prod(np.ix_(*args))
+    result = reduce(np.multiply, np.ix_(*args))
     return result.reshape(result.size,)
