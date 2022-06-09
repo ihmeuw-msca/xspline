@@ -12,19 +12,19 @@ def bspline_domain(knots: ArrayLike, degree: int, idx: int) -> NDArray:
 
     Parameters
     ----------
-        knots
-            1D array that stores the knots of the splines.
-        degree
-            A non-negative integer that indicates the degree of the polynomial.
-        idx
-            A non-negative integer that indicates the index in the spline bases
-            list.
+    knots
+        1D array that stores the knots of the splines.
+    degree
+        A non-negative integer that indicates the degree of the polynomial.
+    idx
+        A non-negative integer that indicates the index in the spline bases
+        list.
 
     Returns
     -------
-        NDArray
-            1D array with two elements represents that left and right end of the
-            support of the spline basis.
+    NDArray
+        1D array with two elements represents that left and right end of the
+        support of the spline basis.
 
     """
     knots = np.sort(knots)
@@ -52,19 +52,19 @@ def bspline_domain_noext(knots: ArrayLike, degree: int, idx: int) -> NDArray:
 
     Parameters
     ----------
-        knots
-            1D array that stores the knots of the splines.
-        degree
-            A non-negative integer that indicates the degree of the polynomial.
-        idx
-            A non-negative integer that indicates the index in the spline bases
-            list.
+    knots
+        1D array that stores the knots of the splines.
+    degree
+        A non-negative integer that indicates the degree of the polynomial.
+    idx
+        A non-negative integer that indicates the index in the spline bases
+        list.
 
     Returns
     -------
-        NDArray
-            1D array with two elements represents that left and right end of the
-            support of the spline basis.
+    NDArray
+        1D array with two elements represents that left and right end of the
+        support of the spline basis.
 
     """
     knots = np.sort(knots)
