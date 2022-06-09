@@ -1,42 +1,33 @@
-# -*- coding: utf-8 -*-
-"""
-    core
-    ~~~~
+from typing import List
 
-    core module contains main functions and classes.
-"""
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
 from . import utils
 
 
-def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
-    r"""Compute the support for the spline basis, knots degree and the index of
+def bspline_domain(knots: ArrayLike, degree: int, idx: int) -> NDArray:
+    """Compute the support for the spline basis, knots degree and the index of
     the basis.
 
-    Args:
-        knots (numpy.ndarray):
+    Parameters
+    ----------
+    knots
         1D array that stores the knots of the splines.
-
-        degree (int):
+    degree
         A non-negative integer that indicates the degree of the polynomial.
-
-        idx (int):
+    idx
         A non-negative integer that indicates the index in the spline bases
         list.
 
-        l_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at left end.
-        Default to be False.
-
-        r_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at right end.
-        Default to be False.
-
-    Returns:
-        numpy.ndarray:
+    Returns
+    -------
+    NDArray
         1D array with two elements represents that left and right end of the
         support of the spline basis.
+
     """
+    knots = np.sort(knots)
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -47,43 +38,36 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
     lb = knots[max(idx - degree, 0)]
     ub = knots[min(idx + 1, num_intervals)]
 
-    if idx == 0 and l_extra:
+    if idx == 0:
         lb = -np.inf
-    if idx == num_splines - 1 and r_extra:
+    if idx == num_splines - 1:
         ub = np.inf
 
     return np.array([lb, ub])
 
 
-def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
-    r"""Compute the spline basis.
+def bspline_domain_noext(knots: ArrayLike, degree: int, idx: int) -> NDArray:
+    """Compute the support for the spline basis, knots degree and the index of
+    the basis.
 
-    Args:
-        x (float | numpy.ndarray):
-        Scalar or numpy array that store the independent variables.
-
-        knots (numpy.ndarray):
+    Parameters
+    ----------
+    knots
         1D array that stores the knots of the splines.
-
-        degree (int):
+    degree
         A non-negative integer that indicates the degree of the polynomial.
-
-        idx (int):
+    idx
         A non-negative integer that indicates the index in the spline bases
         list.
 
-        l_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at left end.
-        Default to be False.
+    Returns
+    -------
+    NDArray
+        1D array with two elements represents that left and right end of the
+        support of the spline basis.
 
-        r_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at right end.
-        Default to be False.
-
-    Returns:
-        float | numpy.ndarray:
-        Function values of the corresponding spline bases.
     """
+    knots = np.sort(knots)
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -91,67 +75,106 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
     if idx == -1:
         idx = num_splines - 1
 
-    b = bspline_domain(knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
+    lb = knots[max(idx - degree, 0)]
+    ub = knots[min(idx + 1, num_intervals)]
+
+    return np.array([lb, ub])
+
+
+def bspline_fun(
+    x: float | ArrayLike,
+    knots: ArrayLike,
+    degree: int,
+    idx: int
+) -> float | NDArray:
+    """Compute the spline basis.
+
+    Parameters
+    ----------
+    x
+        Scalar or numpy array that store the independent variables.
+    knots
+        1D array that stores the knots of the splines.
+    degree
+        A non-negative integer that indicates the degree of the polynomial.
+    idx
+        A non-negative integer that indicates the index in the spline bases
+        list.
+
+    Returns
+    -------
+    float | NDArray:
+        Function values of the corresponding spline bases.
+
+    """
+    if not np.isscalar(x):
+        x = np.asarray(x)
+    knots = np.sort(knots)
+    num_knots = knots.size
+    num_intervals = num_knots - 1
+    num_splines = num_intervals + degree
+
+    if idx == -1:
+        idx = num_splines - 1
+
+    b = bspline_domain(knots, degree, idx)
 
     if degree == 0:
         f = utils.indicator_f(x, b, r_close=(idx == num_splines - 1))
         return f
 
     if idx == 0:
-        b_effect = bspline_domain(knots, degree, idx)
+        b_effect = bspline_domain_noext(knots, degree, idx)
         y = utils.indicator_f(x, b)
         z = utils.linear_rf(x, b_effect)
         return y*(z**degree)
 
     if idx == num_splines - 1:
-        b_effect = bspline_domain(knots, degree, idx)
+        b_effect = bspline_domain_noext(knots, degree, idx)
         y = utils.indicator_f(x, b, r_close=True)
         z = utils.linear_lf(x, b_effect)
         return y*(z**degree)
 
-    lf = bspline_fun(x, knots, degree - 1, idx - 1,
-                     l_extra=l_extra, r_extra=r_extra)
-    lf *= utils.linear_lf(x, bspline_domain(knots, degree - 1, idx - 1))
+    lf = bspline_fun(x, knots, degree - 1, idx - 1)
+    lf *= utils.linear_lf(x, bspline_domain_noext(knots, degree - 1, idx - 1))
 
-    rf = bspline_fun(x, knots, degree - 1, idx,
-                     l_extra=l_extra, r_extra=r_extra)
-    rf *= utils.linear_rf(x, bspline_domain(knots, degree - 1, idx))
+    rf = bspline_fun(x, knots, degree - 1, idx)
+    rf *= utils.linear_rf(x, bspline_domain_noext(knots, degree - 1, idx))
 
     return lf + rf
 
 
-def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
-    r"""Compute the derivative of the spline basis.
+def bspline_dfun(
+    x: float | ArrayLike,
+    knots: ArrayLike,
+    degree: int,
+    order: int,
+    idx: int
+) -> float | NDArray:
+    """Compute the derivative of the spline basis.
 
-    Args:
-        x (float | numpy.ndarray):
+    Parameters
+    ----------
+    x
         Scalar or numpy array that store the independent variables.
-
-        knots (numpy.ndarray):
+    knots
         1D array that stores the knots of the splines.
-
-        degree (int):
+    degree
         A non-negative integer that indicates the degree of the polynomial.
-
-        order (int):
+    order
         A non-negative integer that indicates the order of differentiation.
+    idx
+        A non-negative integer that indicates the index in the spline bases list.
 
-        idx (int):
-        A non-negative integer that indicates the index in the spline bases
-        list.
-
-        l_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at left end.
-        Default to be False.
-
-        r_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at right end.
-        Default to be False.
-
-    Returns:
-        float | numpy.ndarray:
+    Returns
+    -------
+    float | NDArray
         Derivative values of the corresponding spline bases.
+
     """
+    if not np.isscalar(x):
+        x = np.asarray(x)
+    knots = np.sort(knots)
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -160,8 +183,7 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
         idx = num_splines - 1
 
     if order == 0:
-        return bspline_fun(x, knots, degree, idx,
-                           l_extra=l_extra, r_extra=r_extra)
+        return bspline_fun(x, knots, degree, idx)
 
     if order > degree:
         if np.isscalar(x):
@@ -172,63 +194,63 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
     if idx == 0:
         rdf = 0.0
     else:
-        b = bspline_domain(knots, degree - 1, idx - 1)
+        b = bspline_domain_noext(knots, degree - 1, idx - 1)
         d = b[1] - b[0]
         f = (x - b[0])/d
-        rdf = f*bspline_dfun(x, knots, degree - 1, order, idx - 1,
-                             l_extra=l_extra, r_extra=r_extra)
-        rdf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx - 1,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        rdf = f*bspline_dfun(x, knots, degree - 1, order, idx - 1)
+        rdf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx - 1) / d
 
     if idx == num_splines - 1:
         ldf = 0.0
     else:
-        b = bspline_domain(knots, degree - 1, idx)
+        b = bspline_domain_noext(knots, degree - 1, idx)
         d = b[0] - b[1]
         f = (x - b[1])/d
-        ldf = f*bspline_dfun(x, knots, degree - 1, order, idx,
-                             l_extra=l_extra, r_extra=r_extra)
-        ldf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        ldf = f*bspline_dfun(x, knots, degree - 1, order, idx)
+        ldf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx) / d
 
     return ldf + rdf
 
 
-def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
-    r"""Compute the integral of the spline basis.
+def bspline_ifun(
+    a: float | ArrayLike,
+    x: float | ArrayLike,
+    knots: ArrayLike,
+    degree: int,
+    order: int,
+    idx: int
+) -> float | NDArray:
+    """Compute the integral of the spline basis.
 
-    Args:
-        a (float | numpy.ndarray):
-        Scalar or numpy array that store the starting point of the integration.
-
-        x (float | numpy.ndarray):
-        Scalar or numpy array that store the ending point of the integration.
-
-        knots (numpy.ndarray):
+    Parameters
+    ----------
+    a
+        Scalar or numpy array that store the starting point of the
+        integration.
+    x
+        Scalar or numpy array that store the ending point of the
+        integration.
+    knots
         1D array that stores the knots of the splines.
-
-        degree (int):
+    degree
         A non-negative integer that indicates the degree of the polynomial.
-
-        order (int):
+    order
         A non-negative integer that indicates the order of integration.
-
-        idx (int):
+    idx
         A non-negative integer that indicates the index in the spline bases
         list.
 
-        l_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at left end.
-        Default to be False.
-
-        r_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at right end.
-        Default to be False.
-
-    Returns:
-        float | numpy.ndarray:
+    Returns
+    -------
+    float | NDArray
         Integral values of the corresponding spline bases.
+
     """
+    if not np.isscalar(a):
+        a = np.asarray(a)
+    if not np.isscalar(x):
+        x = np.asarray(x)
+    knots = np.sort(knots)
     num_knots = knots.size
     num_intervals = num_knots - 1
     num_splines = num_intervals + degree
@@ -237,62 +259,58 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
         idx = num_splines - 1
 
     if order == 0:
-        return bspline_fun(x, knots, degree, idx,
-                           l_extra=l_extra, r_extra=r_extra)
+        return bspline_fun(x, knots, degree, idx)
 
     if degree == 0:
-        b = bspline_domain(knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
+        b = bspline_domain(knots, degree, idx)
         return utils.indicator_if(a, x, order, b)
 
     if idx == 0:
         rif = 0.0
     else:
-        b = bspline_domain(knots, degree - 1, idx - 1)
+        b = bspline_domain_noext(knots, degree - 1, idx - 1)
         d = b[1] - b[0]
         f = (x - b[0]) / d
-        rif = f*bspline_ifun(a, x, knots, degree - 1, order, idx - 1,
-                             l_extra=l_extra, r_extra=r_extra)
-        rif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx - 1,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        rif = f*bspline_ifun(a, x, knots, degree - 1, order, idx - 1)
+        rif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx - 1)/d
 
     if idx == num_splines - 1:
         lif = 0.0
     else:
-        b = bspline_domain(knots, degree - 1, idx)
+        b = bspline_domain_noext(knots, degree - 1, idx)
         d = b[0] - b[1]
         f = (x - b[1]) / d
-        lif = f*bspline_ifun(a, x, knots, degree - 1, order, idx,
-                             l_extra=l_extra, r_extra=r_extra)
-        lif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        lif = f*bspline_ifun(a, x, knots, degree - 1, order, idx)
+        lif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx)/d
 
     return lif + rif
 
 
 class XSpline:
     """XSpline main class of the package.
+
+    Parameters
+    ----------
+    knots
+        1D numpy array that store the knots, must including that boundary knots.
+
+    degree
+        A non-negative integer that indicates the degree of the spline.
+
+    l_linear
+        A bool variable, that if using the linear tail at left end.
+
+    r_linear
+        A bool variable, that if using the linear tail at right end.
+
     """
 
     def __init__(self,
-                 knots,
-                 degree,
-                 l_linear=False,
-                 r_linear=False,
+                 knots: ArrayLike,
+                 degree: int,
+                 l_linear: bool = False,
+                 r_linear: bool = False,
                  include_first_basis: bool = True):
-        r"""Constructor of the XSpline class.
-
-        knots (numpy.ndarray):
-        1D numpy array that store the knots, must including that boundary knots.
-
-        degree (int):
-        A non-negative integer that indicates the degree of the spline.
-
-        l_linear (bool, optional):
-        A bool variable, that if using the linear tail at left end.
-
-        r_linear (bool, optional):
-        A bool variable, that if using the linear tail at right end.
-        """
         # pre-process the knots vector
         knots = list(set(knots))
         knots = np.sort(np.array(knots))
@@ -323,31 +341,23 @@ class XSpline:
 
         self.num_spline_bases = self.inner_knots.size - 1 + self.degree - self.basis_start
 
-    def domain(self, idx, l_extra=False, r_extra=False):
+    def domain(self, idx: int) -> NDArray:
         """Return the support of the XSpline.
 
-        idx (int):
-        A non-negative integer that indicates the index in the spline bases
-        list.
+        Parameters
+        ----------
+        idx
+            A non-negative integer that indicates the index in the spline bases
+            list.
 
-        l_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at left end.
-        Default to be False.
+        Returns
+        -------
+        NDArray
+            1D array with two elements represents that left and right end of
+            the support of the spline basis.
 
-        r_extra (bool, optional):
-        A optional bool variable indicates that if extrapolate at right end.
-        Default to be False.
-
-        Returns:
-            numpy.ndarray:
-            1D array with two elements represents that left and right end of the
-            support of the spline basis.
         """
-        inner_domain = bspline_domain(self.inner_knots,
-                                      self.degree,
-                                      idx,
-                                      l_extra=l_extra,
-                                      r_extra=r_extra)
+        inner_domain = bspline_domain(self.inner_knots, self.degree, idx)
         lb = inner_domain[0]
         ub = inner_domain[1]
 
@@ -356,36 +366,25 @@ class XSpline:
 
         return np.array([lb, ub])
 
-    def fun(self, x, idx, l_extra=False, r_extra=False):
-        r"""Compute the spline basis.
+    def fun(self, x: ArrayLike, idx: int) -> float | NDArray:
+        """Compute the spline basis.
 
-        Args:
-            x (float | numpy.ndarray):
+        Parameters
+        ----------        
+        x
             Scalar or numpy array that store the independent variables.
-
-            idx (int):
+        idx
             A non-negative integer that indicates the index in the spline bases
             list.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            float | numpy.ndarray:
+        Returns
+        -------
+        float | NDArray
             Function values of the corresponding spline bases.
+
         """
         if not self.l_linear and not self.r_linear:
-            return bspline_fun(x,
-                               self.inner_knots,
-                               self.degree,
-                               idx,
-                               l_extra=l_extra,
-                               r_extra=r_extra)
+            return bspline_fun(x, self.inner_knots, self.degree, idx)
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -395,7 +394,7 @@ class XSpline:
         m_idx = np.array([True] * x.size)
 
         if self.l_linear:
-            l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
+            l_idx = (x < self.inner_lb)
             m_idx &= (x >= self.inner_lb)
 
             inner_lb_yun = bspline_fun(self.inner_lb,
@@ -410,7 +409,7 @@ class XSpline:
             f[l_idx] = inner_lb_yun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
 
         if self.r_linear:
-            u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
+            u_idx = (x > self.inner_ub)
             m_idx &= (x <= self.inner_ub)
 
             inner_ub_yun = bspline_fun(self.inner_ub,
@@ -424,55 +423,41 @@ class XSpline:
 
             f[u_idx] = inner_ub_yun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
 
-        f[m_idx] = bspline_fun(x[m_idx],
-                               self.inner_knots,
-                               self.degree,
-                               idx,
-                               l_extra=l_extra,
-                               r_extra=r_extra)
+        f[m_idx] = bspline_fun(x[m_idx], self.inner_knots, self.degree, idx)
 
         if x_is_scalar:
             return f[0]
         else:
             return f
 
-    def dfun(self, x, order, idx, l_extra=False, r_extra=False):
-        r"""Compute the derivative of the spline basis.
+    def dfun(self, x: float | ArrayLike, order: int, idx: int) -> float | NDArray:
+        """Compute the derivative of the spline basis.
 
-        Args:
-            x (float | numpy.ndarray):
+        Parameters
+        ----------
+        x
             Scalar or numpy array that store the independent variables.
-
-            order (int):
+        order
             A non-negative integer that indicates the order of differentiation.
-
-            idx (int):
+        idx 
             A non-negative integer that indicates the index in the spline bases
             list.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            float | numpy.ndarray:
+        Returns
+        -------
+        float | NDArray
             Derivative values of the corresponding spline bases.
+
         """
         if order == 0:
-            return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+            return self.fun(x, idx)
 
         if (not self.l_linear) and (not self.r_linear):
             return bspline_dfun(x,
                                 self.knots,
                                 self.degree,
                                 order,
-                                idx,
-                                l_extra=l_extra,
-                                r_extra=r_extra)
+                                idx)
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -482,7 +467,7 @@ class XSpline:
         m_idx = np.array([True] * x.size)
 
         if self.l_linear:
-            l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
+            l_idx = (x < self.inner_lb)
             m_idx &= (x >= self.inner_lb)
 
             if order == 1:
@@ -493,7 +478,7 @@ class XSpline:
                 dy[l_idx] = np.repeat(inner_lb_dy, np.sum(l_idx))
 
         if self.r_linear:
-            u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
+            u_idx = (x > self.inner_ub)
             m_idx &= (x <= self.inner_ub)
 
             if order == 1:
@@ -507,57 +492,51 @@ class XSpline:
                                  self.inner_knots,
                                  self.degree,
                                  order,
-                                 idx,
-                                 l_extra=l_extra,
-                                 r_extra=r_extra)
+                                 idx)
 
         if x_is_scalar:
             return dy[0]
         else:
             return dy
 
-    def ifun(self, a, x, order, idx, l_extra=False, r_extra=False):
-        r"""Compute the integral of the spline basis.
+    def ifun(
+        self,
+        a: float | ArrayLike,
+        x: float | ArrayLike,
+        order: int,
+        idx: int
+    ) -> float | NDArray:
+        """Compute the integral of the spline basis.
 
-        Args:
-            a (float | numpy.ndarray):
+        Parameters
+        ----------
+        a 
             Scalar or numpy array that store the starting point of the
             integration.
-
-            x (float | numpy.ndarray):
+        x 
             Scalar or numpy array that store the ending point of the
             integration.
-
-            order (int):
+        order 
             A non-negative integer that indicates the order of integration.
-
-            idx (int):
+        idx 
             A non-negative integer that indicates the index in the spline bases
             list.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            float | numpy.ndarray:
+        Returns
+        -------
+        float | NDArray
             Integral values of the corresponding spline bases.
+
         """
         if order == 0:
-            return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+            return self.fun(x, idx)
 
         if (not self.l_linear) and (not self.r_linear):
             return bspline_ifun(a, x,
                                 self.knots,
                                 self.degree,
                                 order,
-                                idx,
-                                l_extra=l_extra,
-                                r_extra=r_extra)
+                                idx)
         # verify the inputs
         assert np.all(a <= x)
 
@@ -588,8 +567,7 @@ class XSpline:
             return bspline_ifun(a, x,
                                 self.inner_knots,
                                 self.degree,
-                                order, idx,
-                                l_extra=l_extra, r_extra=r_extra)
+                                order, idx)
 
         def r_piece(a, x, order):
             return utils.linear_if(a, x, order,
@@ -605,113 +583,90 @@ class XSpline:
 
         funcs = []
         knots = []
-        if not l_extra:
-            funcs.append(zero_piece)
         if self.l_linear:
             funcs.append(l_piece)
         funcs.append(m_piece)
         if self.r_linear:
             funcs.append(r_piece)
-        if not r_extra:
-            funcs.append(zero_piece)
 
-        if not l_extra:
-            knots.append(self.lb)
-            knots.append(self.inner_lb)
         if self.l_linear:
             knots.append(self.inner_lb)
         if self.r_linear:
             knots.append(self.inner_ub)
-        if not r_extra:
-            knots.append(self.inner_ub)
-            knots.append(self.ub)
 
         knots = np.sort(list(set(knots)))
 
         return utils.pieces_if(a, x, order, funcs, knots)
 
-    def design_mat(self, x, l_extra=False, r_extra=False):
-        r"""Compute the design matrix of spline basis.
+    def design_mat(self, x: float | ArrayLike) -> NDArray:
+        """Compute the design matrix of spline basis.
 
-        Args:
-            x (float | numpy.ndarray):
+        Parameters
+        ----------
+        x 
             Scalar or numpy array that store the independent variables.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            numpy.ndarray:
+        Returns
+        -------
+        NDArray
             Return design matrix.
+
         """
         mat = np.vstack([
-            self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+            self.fun(x, idx)
             for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return mat
 
-    def design_dmat(self, x, order, l_extra=False, r_extra=False):
-        r"""Compute the design matrix of spline basis derivatives.
+    def design_dmat(self, x: float | ArrayLike, order: int) -> NDArray:
+        """Compute the design matrix of spline basis derivatives.
 
-        Args:
-            x (float | numpy.ndarray):
+        Parameters
+        ----------
+        x
             Scalar or numpy array that store the independent variables.
-
-            order (int):
+        order 
             A non-negative integer that indicates the order of differentiation.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            numpy.ndarray:
+        Returns
+        -------
+        NDArray
             Return design matrix.
+
         """
         dmat = np.vstack([
-            self.dfun(x, order, idx, l_extra=l_extra, r_extra=r_extra)
+            self.dfun(x, order, idx)
             for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return dmat
 
-    def design_imat(self, a, x, order, l_extra=False, r_extra=False):
-        r"""Compute the design matrix of the integrals of the spline bases.
+    def design_imat(
+        self,
+        a: float | ArrayLike,
+        x: float | ArrayLike,
+        order: int
+    ) -> NDArray:
+        """Compute the design matrix of the integrals of the spline bases.
 
-        Args:
-            a (float | numpy.ndarray):
+        Parameters
+        ----------
+        a
             Scalar or numpy array that store the starting point of the
             integration.
-
-            x (float | numpy.ndarray):
+        x
             Scalar or numpy array that store the ending point of the
             integration.
-
-            order (int):
+        order 
             A non-negative integer that indicates the order of integration.
 
-            l_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at left end.
-            Default to be False.
-
-            r_extra (bool, optional):
-            A optional bool variable indicates that if extrapolate at right end.
-            Default to be False.
-
-        Returns:
-            numpy.ndarray:
+        Returns
+        -------
+        NDArray
             Return design matrix.
+
         """
         imat = np.vstack([
-            self.ifun(a, x, order, idx, l_extra=l_extra, r_extra=r_extra)
+            self.ifun(a, x, order, idx)
             for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return imat
@@ -720,7 +675,7 @@ class XSpline:
         """Compute highest order of derivative in domain.
 
         Returns:
-            numpy.ndarray:
+            NDArray:
             1D array that contains highest order of derivative for intervals.
         """
         # compute the last dmat for the inner domain
@@ -750,7 +705,7 @@ class NDXSpline:
         Args:
             ndim (int):
                 Number of dimension.
-            knots_list (list{numpy.ndarray}):
+            knots_list (list{NDArray}):
                 List of knots for every dimension.
             degree_list (list{int}):
                 List of degree for every dimension.
@@ -787,41 +742,28 @@ class NDXSpline:
         self.num_intervals = self.num_intervals_list.prod()
         self.num_spline_bases = self.num_spline_bases_list.prod()
 
-    def design_mat(self, x_list,
-                   is_grid=True,
-                   l_extra_list=None,
-                   r_extra_list=None):
+    def design_mat(self, x_list: List[float | ArrayLike], is_grid: bool = True):
         """Design matrix of the spline basis.
 
-        Args:
-            x_list (list{numpy.ndarray}):
-                A list of coordinates for each dimension, they should have the
-                same dimension or come in matrix form.
-            is_grid (bool, optional):
-                If `True` treat the coordinates from `x_list` as the grid points
-                and compute the mesh grid from it, otherwise, treat each group
-                of the coordinates independent.
-            l_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the left side for each
-                dimension.
-            r_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the right side for each
-                dimension.
+        Parameters
+        ----------
+        x_list
+            A list of coordinates for each dimension, they should have the
+            same dimension or come in matrix form.
+        is_grid
+            If `True` treat the coordinates from `x_list` as the grid points
+            and compute the mesh grid from it, otherwise, treat each group
+            of the coordinates independent.
 
-        Returns:
-            numpy.ndarray:
-                Design matrix.
+        Returns
+        -------
+        NDArray
+            Design matrix.
+
         """
-        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
-        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
-
         assert len(x_list) == self.ndim
-        assert len(l_extra_list) == self.ndim
-        assert len(r_extra_list) == self.ndim
 
-        mat_list = [spline.design_mat(x_list[i],
-                                      l_extra=l_extra_list[i],
-                                      r_extra=r_extra_list[i])
+        mat_list = [spline.design_mat(x_list[i])
                     for i, spline in enumerate(self.spline_list)]
 
         if is_grid:
@@ -844,45 +786,32 @@ class NDXSpline:
 
         return np.ascontiguousarray(np.vstack(mat).T)
 
-    def design_dmat(self, x_list, n_list,
-                    is_grid=True,
-                    l_extra_list=None,
-                    r_extra_list=None):
+    def design_dmat(self, x_list, n_list, is_grid=True):
         """Design matrix of the derivatives of spline basis.
 
-        Args:
-            x_list (list{numpy.ndarray}):
-                A list of coordinates for each dimension, they should have the
-                same dimension or come in matrix form.
-            n_list (list{int}):
-                A list of integers indicates the order of differentiation for
-                each dimension.
-            is_grid (bool, optional):
-                If `True` treat the coordinates from `x_list` as the grid points
-                and compute the mesh grid from it, otherwise, treat each group
-                of the coordinates independent.
-            l_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the left side for each
-                dimension.
-            r_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the right side for each
-                dimension.
+        Parameters
+        ----------
+        x_list
+            A list of coordinates for each dimension, they should have the
+            same dimension or come in matrix form.
+        n_list
+            A list of integers indicates the order of differentiation for
+            each dimension.
+        is_grid
+            If `True` treat the coordinates from `x_list` as the grid points
+            and compute the mesh grid from it, otherwise, treat each group
+            of the coordinates independent.
 
-        Returns:
-            numpy.ndarray:
-                Differentiation design matrix.
+        Returns
+        -------
+        NDArray:
+            Differentiation design matrix.
         """
-        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
-        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
 
         assert len(x_list) == self.ndim
         assert len(n_list) == self.ndim
-        assert len(l_extra_list) == self.ndim
-        assert len(r_extra_list) == self.ndim
 
-        dmat_list = [spline.design_dmat(x_list[i], n_list[i],
-                                        l_extra=l_extra_list[i],
-                                        r_extra=r_extra_list[i])
+        dmat_list = [spline.design_dmat(x_list[i], n_list[i])
                      for i, spline in enumerate(self.spline_list)]
 
         if is_grid:
@@ -905,48 +834,36 @@ class NDXSpline:
 
         return np.ascontiguousarray(np.vstack(dmat).T)
 
-    def design_imat(self, a_list, x_list, n_list,
-                    is_grid=True,
-                    l_extra_list=None,
-                    r_extra_list=None):
+    def design_imat(self, a_list, x_list, n_list, is_grid=True):
         """Design matrix of the spline basis.
 
-        Args:
-            a_list (list{numpy.ndarray}):
-                Start of integration of coordinates for each dimension.
-            x_list (list{numpy.ndarray}):
-                A list of coordinates for each dimension, they should have the
-                same dimension or come in matrix form.
-            n_list (list{int}):
-                A list of integers indicates the order of integration for
-                each dimension.
-            is_grid (bool, optional):
-                If `True` treat the coordinates from `x_list` as the grid points
-                and compute the mesh grid from it, otherwise, treat each group
-                of the coordinates independent.
-            l_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the left side for each
-                dimension.
-            r_extra_list (list{bool} | None, optional):
-                Indicators of if extrapolate in the right side for each
-                dimension.
+        Parameters
+        ----------
+        a_list
+            Start of integration of coordinates for each dimension.
+        x_list
+            A list of coordinates for each dimension, they should have the
+            same dimension or come in matrix form.
+        n_list
+            A list of integers indicates the order of integration for
+            each dimension.
+        is_grid
+            If `True` treat the coordinates from `x_list` as the grid points
+            and compute the mesh grid from it, otherwise, treat each group
+            of the coordinates independent.
+            dimension.
 
-        Returns:
-            numpy.ndarray:
-                Integration design matrix.
+        Returns
+        -------
+        NDArray
+            Integration design matrix.
+
         """
-        l_extra_list = utils.option_to_list(l_extra_list, self.ndim)
-        r_extra_list = utils.option_to_list(r_extra_list, self.ndim)
-
         assert len(a_list) == self.ndim
         assert len(x_list) == self.ndim
         assert len(n_list) == self.ndim
-        assert len(l_extra_list) == self.ndim
-        assert len(r_extra_list) == self.ndim
 
-        imat_list = [spline.design_imat(a_list[i], x_list[i], n_list[i],
-                                        l_extra=l_extra_list[i],
-                                        r_extra=r_extra_list[i])
+        imat_list = [spline.design_imat(a_list[i], x_list[i], n_list[i])
                      for i, spline in enumerate(self.spline_list)]
 
         if is_grid:
@@ -972,9 +889,11 @@ class NDXSpline:
     def last_dmat(self):
         """Highest order of derivative matrix.
 
-        Returns:
-            numpy.ndarray:
-                Design matrix contain the highest order of derivative.
+        Returns
+        -------
+        NDArray
+            Design matrix contain the highest order of derivative.
+
         """
         mat_list = [spline.last_dmat() for spline in self.spline_list]
 

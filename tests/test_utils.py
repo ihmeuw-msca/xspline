@@ -5,6 +5,8 @@
 
     unit tests for xspline.utils
 """
+from functools import reduce
+
 import numpy as np
 import pytest
 from xspline import utils
@@ -169,7 +171,7 @@ def test_utils_option_to_list(option, size):
                          [(np.arange(2), np.arange(3)),
                           (np.arange(2), np.arange(3), np.arange(4))])
 def test_utils_outer_flatten(args):
-    result = np.prod(np.ix_(*args))
+    result = reduce(np.multiply, np.ix_(*args))
     result = result.reshape(result.size,)
     my_result = utils.outer_flatten(*args)
 
