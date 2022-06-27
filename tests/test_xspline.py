@@ -39,8 +39,8 @@ def test_domain(knots, degree, idx, l_linear, r_linear):
     assert my_domain[1] == ub
 
 
-@pytest.mark.parametrize("l_linear", [True, False])
-@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_linear", [True])
+@pytest.mark.parametrize("r_linear", [True])
 @pytest.mark.parametrize("idx", [0, -1])
 def test_fun(knots, degree, idx, l_linear, r_linear):
     xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
@@ -60,8 +60,8 @@ def test_fun(knots, degree, idx, l_linear, r_linear):
     assert np.linalg.norm(my_y - tr_y) < 1e-10
 
 
-@pytest.mark.parametrize("l_linear", [True, False])
-@pytest.mark.parametrize("r_linear", [True, False])
+@pytest.mark.parametrize("l_linear", [True])
+@pytest.mark.parametrize("r_linear", [True])
 @pytest.mark.parametrize("order", [1])
 @pytest.mark.parametrize("idx", [0, -1])
 def test_dfun(knots, degree, order, idx, l_linear, r_linear):
@@ -142,7 +142,7 @@ def test_design_dmat(knots, degree, order, x, l_linear, r_linear):
                                np.linspace(0.5, 2.0, 100)])
 def test_design_imat(knots, degree, order, x, l_linear, r_linear):
     xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
-    imat = xs.design_imat(x[0], x, order)
+    imat = xs.design_imat(np.repeat(x[0], x.size), x, order)
 
     assert imat.shape == (x.size, xs.num_spline_bases)
 

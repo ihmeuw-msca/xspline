@@ -4,6 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from . import utils
+from ._bspline import bspl_der, bspl_int, bspl_val
 
 
 def bspline_domain(knots: ArrayLike, degree: int, idx: int) -> NDArray:
@@ -79,211 +80,6 @@ def bspline_domain_noext(knots: ArrayLike, degree: int, idx: int) -> NDArray:
     ub = knots[min(idx + 1, num_intervals)]
 
     return np.array([lb, ub])
-
-
-def bspline_fun(
-    x: float | ArrayLike,
-    knots: ArrayLike,
-    degree: int,
-    idx: int
-) -> float | NDArray:
-    """Compute the spline basis.
-
-    Parameters
-    ----------
-    x
-        Scalar or numpy array that store the independent variables.
-    knots
-        1D array that stores the knots of the splines.
-    degree
-        A non-negative integer that indicates the degree of the polynomial.
-    idx
-        A non-negative integer that indicates the index in the spline bases
-        list.
-
-    Returns
-    -------
-    float | NDArray:
-        Function values of the corresponding spline bases.
-
-    """
-    if not np.isscalar(x):
-        x = np.asarray(x)
-    knots = np.sort(knots)
-    num_knots = knots.size
-    num_intervals = num_knots - 1
-    num_splines = num_intervals + degree
-
-    if idx == -1:
-        idx = num_splines - 1
-
-    b = bspline_domain(knots, degree, idx)
-
-    if degree == 0:
-        f = utils.indicator_f(x, b, r_close=(idx == num_splines - 1))
-        return f
-
-    if idx == 0:
-        b_effect = bspline_domain_noext(knots, degree, idx)
-        y = utils.indicator_f(x, b)
-        z = utils.linear_rf(x, b_effect)
-        return y*(z**degree)
-
-    if idx == num_splines - 1:
-        b_effect = bspline_domain_noext(knots, degree, idx)
-        y = utils.indicator_f(x, b, r_close=True)
-        z = utils.linear_lf(x, b_effect)
-        return y*(z**degree)
-
-    lf = bspline_fun(x, knots, degree - 1, idx - 1)
-    lf *= utils.linear_lf(x, bspline_domain_noext(knots, degree - 1, idx - 1))
-
-    rf = bspline_fun(x, knots, degree - 1, idx)
-    rf *= utils.linear_rf(x, bspline_domain_noext(knots, degree - 1, idx))
-
-    return lf + rf
-
-
-def bspline_dfun(
-    x: float | ArrayLike,
-    knots: ArrayLike,
-    degree: int,
-    order: int,
-    idx: int
-) -> float | NDArray:
-    """Compute the derivative of the spline basis.
-
-    Parameters
-    ----------
-    x
-        Scalar or numpy array that store the independent variables.
-    knots
-        1D array that stores the knots of the splines.
-    degree
-        A non-negative integer that indicates the degree of the polynomial.
-    order
-        A non-negative integer that indicates the order of differentiation.
-    idx
-        A non-negative integer that indicates the index in the spline bases list.
-
-    Returns
-    -------
-    float | NDArray
-        Derivative values of the corresponding spline bases.
-
-    """
-    if not np.isscalar(x):
-        x = np.asarray(x)
-    knots = np.sort(knots)
-    num_knots = knots.size
-    num_intervals = num_knots - 1
-    num_splines = num_intervals + degree
-
-    if idx == -1:
-        idx = num_splines - 1
-
-    if order == 0:
-        return bspline_fun(x, knots, degree, idx)
-
-    if order > degree:
-        if np.isscalar(x):
-            return 0.0
-        else:
-            return np.zeros(len(x))
-
-    if idx == 0:
-        rdf = 0.0
-    else:
-        b = bspline_domain_noext(knots, degree - 1, idx - 1)
-        d = b[1] - b[0]
-        f = (x - b[0])/d
-        rdf = f*bspline_dfun(x, knots, degree - 1, order, idx - 1)
-        rdf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx - 1) / d
-
-    if idx == num_splines - 1:
-        ldf = 0.0
-    else:
-        b = bspline_domain_noext(knots, degree - 1, idx)
-        d = b[0] - b[1]
-        f = (x - b[1])/d
-        ldf = f*bspline_dfun(x, knots, degree - 1, order, idx)
-        ldf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx) / d
-
-    return ldf + rdf
-
-
-def bspline_ifun(
-    a: float | ArrayLike,
-    x: float | ArrayLike,
-    knots: ArrayLike,
-    degree: int,
-    order: int,
-    idx: int
-) -> float | NDArray:
-    """Compute the integral of the spline basis.
-
-    Parameters
-    ----------
-    a
-        Scalar or numpy array that store the starting point of the
-        integration.
-    x
-        Scalar or numpy array that store the ending point of the
-        integration.
-    knots
-        1D array that stores the knots of the splines.
-    degree
-        A non-negative integer that indicates the degree of the polynomial.
-    order
-        A non-negative integer that indicates the order of integration.
-    idx
-        A non-negative integer that indicates the index in the spline bases
-        list.
-
-    Returns
-    -------
-    float | NDArray
-        Integral values of the corresponding spline bases.
-
-    """
-    if not np.isscalar(a):
-        a = np.asarray(a)
-    if not np.isscalar(x):
-        x = np.asarray(x)
-    knots = np.sort(knots)
-    num_knots = knots.size
-    num_intervals = num_knots - 1
-    num_splines = num_intervals + degree
-
-    if idx == -1:
-        idx = num_splines - 1
-
-    if order == 0:
-        return bspline_fun(x, knots, degree, idx)
-
-    if degree == 0:
-        b = bspline_domain(knots, degree, idx)
-        return utils.indicator_if(a, x, order, b)
-
-    if idx == 0:
-        rif = 0.0
-    else:
-        b = bspline_domain_noext(knots, degree - 1, idx - 1)
-        d = b[1] - b[0]
-        f = (x - b[0]) / d
-        rif = f*bspline_ifun(a, x, knots, degree - 1, order, idx - 1)
-        rif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx - 1)/d
-
-    if idx == num_splines - 1:
-        lif = 0.0
-    else:
-        b = bspline_domain_noext(knots, degree - 1, idx)
-        d = b[0] - b[1]
-        f = (x - b[1]) / d
-        lif = f*bspline_ifun(a, x, knots, degree - 1, order, idx)
-        lif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx)/d
-
-    return lif + rif
 
 
 class XSpline:
@@ -384,7 +180,12 @@ class XSpline:
 
         """
         if not self.l_linear and not self.r_linear:
-            return bspline_fun(x, self.inner_knots, self.degree, idx)
+            return bspl_val(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                x
+            )
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -393,37 +194,55 @@ class XSpline:
         f = np.zeros(x.size)
         m_idx = np.array([True] * x.size)
 
+        if idx == -1:
+            idx = self.inner_knots.size + self.degree - 2
+
         if self.l_linear:
             l_idx = (x < self.inner_lb)
             m_idx &= (x >= self.inner_lb)
 
-            inner_lb_yun = bspline_fun(self.inner_lb,
-                                       self.inner_knots,
-                                       self.degree,
-                                       idx)
-            inner_lb_dfun = bspline_dfun(self.inner_lb,
-                                         self.inner_knots,
-                                         self.degree,
-                                         1, idx)
+            inner_lb_fun = bspl_val(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                np.array([self.inner_lb])
+            )[0]
+            inner_lb_dfun = bspl_der(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                1,
+                np.array([self.inner_lb])
+            )[0]
 
-            f[l_idx] = inner_lb_yun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
+            f[l_idx] = inner_lb_fun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
 
         if self.r_linear:
             u_idx = (x > self.inner_ub)
             m_idx &= (x <= self.inner_ub)
 
-            inner_ub_yun = bspline_fun(self.inner_ub,
-                                       self.inner_knots,
-                                       self.degree,
-                                       idx)
-            inner_ub_dfun = bspline_dfun(self.inner_ub,
-                                         self.inner_knots,
-                                         self.degree,
-                                         1, idx)
+            inner_ub_fun = bspl_val(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                np.array([self.inner_ub])
+            )[0]
+            inner_ub_dfun = bspl_der(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                1,
+                np.array([self.inner_ub])
+            )[0]
 
-            f[u_idx] = inner_ub_yun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
+            f[u_idx] = inner_ub_fun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
 
-        f[m_idx] = bspline_fun(x[m_idx], self.inner_knots, self.degree, idx)
+        f[m_idx] = bspl_val(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            x[m_idx]
+        )
 
         if x_is_scalar:
             return f[0]
@@ -453,11 +272,13 @@ class XSpline:
             return self.fun(x, idx)
 
         if (not self.l_linear) and (not self.r_linear):
-            return bspline_dfun(x,
-                                self.knots,
-                                self.degree,
-                                order,
-                                idx)
+            return bspl_der(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                order,
+                x
+            )
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -466,15 +287,21 @@ class XSpline:
         dy = np.zeros(x.size)
         m_idx = np.array([True] * x.size)
 
+        if idx == -1:
+            idx = self.inner_knots.size + self.degree - 2
+
         if self.l_linear:
             l_idx = (x < self.inner_lb)
             m_idx &= (x >= self.inner_lb)
 
             if order == 1:
-                inner_lb_dy = bspline_dfun(self.inner_lb,
-                                           self.inner_knots,
-                                           self.degree,
-                                           order, idx)
+                inner_lb_dy = bspl_der(
+                    self.inner_knots,
+                    self.degree,
+                    idx - self.degree,
+                    1,
+                    np.array([self.inner_lb])
+                )[0]
                 dy[l_idx] = np.repeat(inner_lb_dy, np.sum(l_idx))
 
         if self.r_linear:
@@ -482,17 +309,22 @@ class XSpline:
             m_idx &= (x <= self.inner_ub)
 
             if order == 1:
-                inner_ub_dy = bspline_dfun(self.inner_ub,
-                                           self.inner_knots,
-                                           self.degree,
-                                           order, idx)
+                inner_ub_dy = bspl_der(
+                    self.inner_knots,
+                    self.degree,
+                    idx - self.degree,
+                    1,
+                    np.array([self.inner_ub])
+                )[0]
                 dy[u_idx] = np.repeat(inner_ub_dy, np.sum(u_idx))
 
-        dy[m_idx] = bspline_dfun(x[m_idx],
-                                 self.inner_knots,
-                                 self.degree,
-                                 order,
-                                 idx)
+        dy[m_idx] = bspl_der(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            order,
+            x[m_idx]
+        )
 
         if x_is_scalar:
             return dy[0]
@@ -532,31 +364,51 @@ class XSpline:
             return self.fun(x, idx)
 
         if (not self.l_linear) and (not self.r_linear):
-            return bspline_ifun(a, x,
-                                self.knots,
-                                self.degree,
-                                order,
-                                idx)
+            ly = bspl_int(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                -order,
+                a
+            )
+            ry = bspl_int(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                -order,
+                a
+            )
+            return ry - ly
+
         # verify the inputs
         assert np.all(a <= x)
 
-        # function and derivative values at inner lb and inner rb
-        inner_lb_y = bspline_fun(self.inner_lb,
-                                 self.inner_knots,
-                                 self.degree,
-                                 idx)
-        inner_ub_y = bspline_fun(self.inner_ub,
-                                 self.inner_knots,
-                                 self.degree,
-                                 idx)
-        inner_lb_dy = bspline_dfun(self.inner_lb,
-                                   self.inner_knots,
-                                   self.degree,
-                                   1, idx)
-        inner_ub_dy = bspline_dfun(self.inner_ub,
-                                   self.inner_knots,
-                                   self.degree,
-                                   1, idx)
+        inner_lb_y = bspl_val(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            np.array([self.inner_lb])
+        )[0]
+        inner_ub_y = bspl_val(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            np.array([self.inner_ub])
+        )[0]
+        inner_lb_dy = bspl_der(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            1,
+            np.array([self.inner_lb])
+        )[0]
+        inner_ub_dy = bspl_der(
+            self.inner_knots,
+            self.degree,
+            idx - self.degree,
+            1,
+            np.array([self.inner_ub])
+        )[0]
 
         # there are in total 5 pieces functions
         def l_piece(a, x, order):
@@ -564,10 +416,21 @@ class XSpline:
                                    self.inner_lb, inner_lb_y, inner_lb_dy)
 
         def m_piece(a, x, order):
-            return bspline_ifun(a, x,
-                                self.inner_knots,
-                                self.degree,
-                                order, idx)
+            ry = bspl_int(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                -order,
+                x
+            )
+            ly = bspl_int(
+                self.inner_knots,
+                self.degree,
+                idx - self.degree,
+                -order,
+                a
+            )
+            return ry - ly
 
         def r_piece(a, x, order):
             return utils.linear_if(a, x, order,
@@ -905,10 +768,3 @@ class NDXSpline:
             mat.append(utils.outer_flatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(mat).T)
-
-
-# TODO:
-# 1. bspline function pass in too many default every time
-# 2. name of f, df and if
-# 3. the way to deal with the scalar vs array.
-# 4. keep the naming scheme consistent.
