@@ -43,13 +43,13 @@ def spl_evl(t: NDArray,
     else:
         ii = np.maximum(np.minimum([i, i + 1, i + k, i + k + 1], t.size - 1), 0)
 
-        val0 = 0.0
-        val1 = 0.0
+        val0 = np.zeros(x.shape, dtype=x.dtype)
+        val1 = np.zeros(x.shape, dtype=x.dtype)
 
-        if ii[0] != ii[2]:
+        if t[ii[0]] != t[ii[2]]:
             n0 = spl_evl(t, k - 1, i, x, cache=cache)
             val0 = (x - t[ii[0]])*n0/(t[ii[2]] - t[ii[0]])
-        if ii[1] != ii[3]:
+        if t[ii[1]] != t[ii[3]]:
             n1 = spl_evl(t, k - 1, i + 1, x, cache=cache)
             val1 = (t[ii[3]] - x)*n1/(t[ii[3]] - t[ii[1]])
 
@@ -57,4 +57,38 @@ def spl_evl(t: NDArray,
 
     if cache is not None:
         cache[(k, i, 0)] = val
+    return val
+
+
+def spl_der(t: NDArray,
+            k: int,
+            i: int,
+            p: int,
+            x: NDArray,
+            cache: Optional[dict] = None) -> NDArray:
+    if (cache is not None) and ((k, i, p) in cache):
+        return cache[(k, i, p)]
+
+    if p == 0:
+        return spl_evl(t, k, i, x, cache=cache)
+
+    if p > k:
+        return np.zeros(x.shape, dtype=x.dtype)
+
+    ii = np.maximum(np.minimum([i, i + 1, i + k, i + k + 1], t.size - 1), 0)
+
+    val0 = np.zeros(x.shape, dtype=x.dtype)
+    val1 = np.zeros(x.shape, dtype=x.dtype)
+
+    if t[ii[0]] != t[ii[2]]:
+        n0 = spl_der(t, k - 1, i, p - 1, x, cache=cache)
+        val0 = k*n0/(t[ii[2]] - t[ii[0]])
+    if t[ii[1]] != t[ii[3]]:
+        n1 = spl_der(t, k - 1, i + 1, p - 1, x, cache=cache)
+        val1 = k*n1/(t[ii[3]] - t[ii[1]])
+
+    val = val0 - val1
+
+    if cache is not None:
+        cache[(k, i, p)] = val
     return val
