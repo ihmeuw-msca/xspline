@@ -8,8 +8,7 @@ def spl_evl(t: NDArray,
             k: int,
             i: int,
             x: NDArray,
-            cache: Optional[dict] = None,
-            use_cache: bool = True) -> NDArray:
+            cache: Optional[dict] = None) -> NDArray:
     """Evaluate basis spline functions.
 
     Parameters
@@ -25,11 +24,7 @@ def spl_evl(t: NDArray,
         Points where the function is evaluated.
     cache
         Optional cache dictionary to save computation. Default to be `None`.
-    use_cache
-        Instruction of whether to use cache. Default to be `True`. When it is
-        `True`, it will use values in the `cache` variable when possible.
-        Furthermore if `True` and `cache=None`, it will convert `cache` to an
-        empty dictionary and pass it to the consequent recursive function calls.
+        When `cache=None`, cache will not be used in the computation.
 
     Returns
     -------
@@ -37,8 +32,7 @@ def spl_evl(t: NDArray,
         Spline values evaluated at given points.
 
     """
-    cache = {} if use_cache and cache is None else cache
-    if use_cache and (k, i) in cache:
+    if (cache is not None) and ((k, i) in cache):
         return cache[(k, i)]
 
     if k == 0:
@@ -53,14 +47,14 @@ def spl_evl(t: NDArray,
         val1 = 0.0
 
         if ii[0] != ii[2]:
-            n0 = spl_evl(t, k - 1, i, x, cache=cache, use_cache=use_cache)
+            n0 = spl_evl(t, k - 1, i, x, cache=cache)
             val0 = (x - t[ii[0]])*n0/(t[ii[2]] - t[ii[0]])
         if ii[1] != ii[3]:
-            n1 = spl_evl(t, k - 1, i + 1, x, cache=cache, use_cache=use_cache)
+            n1 = spl_evl(t, k - 1, i + 1, x, cache=cache)
             val1 = (t[ii[3]] - x)*n1/(t[ii[3]] - t[ii[1]])
 
         val = val0 + val1
 
-    if use_cache:
+    if cache is not None:
         cache[(k, i)] = val
     return val
