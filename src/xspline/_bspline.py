@@ -6,12 +6,12 @@ from numpy.typing import NDArray
 from .utils import indicator_if
 
 
-def spl_evl(t: NDArray,
-            k: int,
-            i: int,
-            x: NDArray,
-            cache: Optional[dict] = None) -> NDArray:
-    """Evaluate basis spline functions.
+def bspl_val(t: NDArray,
+             k: int,
+             i: int,
+             x: NDArray,
+             cache: Optional[dict] = None) -> NDArray:
+    """Evaluate basis-spline functions.
 
     Parameters
     ----------
@@ -49,10 +49,10 @@ def spl_evl(t: NDArray,
         val1 = np.zeros(x.shape, dtype=x.dtype)
 
         if t[ii[0]] != t[ii[2]]:
-            n0 = spl_evl(t, k - 1, i, x, cache=cache)
+            n0 = bspl_val(t, k - 1, i, x, cache=cache)
             val0 = (x - t[ii[0]])*n0/(t[ii[2]] - t[ii[0]])
         if t[ii[1]] != t[ii[3]]:
-            n1 = spl_evl(t, k - 1, i + 1, x, cache=cache)
+            n1 = bspl_val(t, k - 1, i + 1, x, cache=cache)
             val1 = (t[ii[3]] - x)*n1/(t[ii[3]] - t[ii[1]])
 
         val = val0 + val1
@@ -62,13 +62,13 @@ def spl_evl(t: NDArray,
     return val
 
 
-def spl_der(t: NDArray,
-            k: int,
-            i: int,
-            p: int,
-            x: NDArray,
-            cache: Optional[dict] = None) -> NDArray:
-    """Evaluate derivatives of basis spline functions.
+def bspl_der(t: NDArray,
+             k: int,
+             i: int,
+             p: int,
+             x: NDArray,
+             cache: Optional[dict] = None) -> NDArray:
+    """Evaluate derivatives of basis-spline functions.
 
     Parameters
     ----------
@@ -81,7 +81,7 @@ def spl_der(t: NDArray,
         `len(t) - 2`.
     p
         Order of differentiation, assume to be non-negative. When `p=0`, it will
-        return the basis spline function value from `spl_evl`.
+        return the basis spline function value from `bspl_val`.
     x
         Points where the function is evaluated.
     cache
@@ -98,7 +98,7 @@ def spl_der(t: NDArray,
         return cache[(k, i, p)]
 
     if p == 0:
-        return spl_evl(t, k, i, x, cache=cache)
+        return bspl_val(t, k, i, x, cache=cache)
 
     if p > k:
         return np.zeros(x.shape, dtype=x.dtype)
@@ -109,10 +109,10 @@ def spl_der(t: NDArray,
     val1 = np.zeros(x.shape, dtype=x.dtype)
 
     if t[ii[0]] != t[ii[2]]:
-        n0 = spl_der(t, k - 1, i, p - 1, x, cache=cache)
+        n0 = bspl_der(t, k - 1, i, p - 1, x, cache=cache)
         val0 = k*n0/(t[ii[2]] - t[ii[0]])
     if t[ii[1]] != t[ii[3]]:
-        n1 = spl_der(t, k - 1, i + 1, p - 1, x, cache=cache)
+        n1 = bspl_der(t, k - 1, i + 1, p - 1, x, cache=cache)
         val1 = k*n1/(t[ii[3]] - t[ii[1]])
 
     val = val0 - val1
@@ -122,13 +122,13 @@ def spl_der(t: NDArray,
     return val
 
 
-def spl_int(t: NDArray,
-            k: int,
-            i: int,
-            p: int,
-            x: NDArray,
-            cache: Optional[dict] = None) -> NDArray:
-    """Evaluate integrals of basis spline functions.
+def bspl_int(t: NDArray,
+             k: int,
+             i: int,
+             p: int,
+             x: NDArray,
+             cache: Optional[dict] = None) -> NDArray:
+    """Evaluate integrals of basis-spline functions.
 
     Parameters
     ----------
@@ -143,7 +143,7 @@ def spl_int(t: NDArray,
         Order of integration, assume to be non-positive (we use negative number
         to denote the order of integration to distinguish with differentiation).
         When `p=0`, it will return the basis spline function value from
-        `spl_evl`.
+        `bspl_val`.
     x
         Points where the function is evaluated.
     cache
@@ -160,7 +160,7 @@ def spl_int(t: NDArray,
         return cache[(k, i, p)]
 
     if p == 0:
-        return spl_evl(t, k, i, x, cache=cache)
+        return bspl_val(t, k, i, x, cache=cache)
 
     ii = np.maximum(np.minimum([i, i + 1, i + k, i + k + 1], t.size - 1), 0)
     if k == 0:
@@ -175,13 +175,13 @@ def spl_int(t: NDArray,
 
         if t[ii[0]] != t[ii[2]]:
             val0 = (
-                (x - t[ii[0]])*spl_int(t, k - 1, i, p, x, cache=cache) +
-                p*spl_int(t, k - 1, i, p - 1, x, cache=cache)
+                (x - t[ii[0]])*bspl_int(t, k - 1, i, p, x, cache=cache) +
+                p*bspl_int(t, k - 1, i, p - 1, x, cache=cache)
             )/(t[ii[2]] - t[ii[0]])
         if t[ii[1]] != t[ii[3]]:
             val1 = (
-                (t[ii[3]] - x)*spl_int(t, k - 1, i + 1, p, x, cache=cache) -
-                p*spl_int(t, k - 1, i + 1, p - 1, x, cache=cache)
+                (t[ii[3]] - x)*bspl_int(t, k - 1, i + 1, p, x, cache=cache) -
+                p*bspl_int(t, k - 1, i + 1, p - 1, x, cache=cache)
             )/(t[ii[3]] - t[ii[1]])
 
         val = val0 + val1
