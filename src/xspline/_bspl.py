@@ -6,6 +6,33 @@ from numpy.typing import NDArray
 from .utils import indicator_if
 
 
+def bspl_evl(t: NDArray,
+             k: int,
+             i: int,
+             p: int,
+             x: NDArray,
+             use_cache: bool = True) -> NDArray:
+    if x.ndim == 2:
+        val0 = _bspl_evl(t, k, i, p, x[0], use_cache=use_cache)
+        val1 = _bspl_evl(t, k, i, p, x[1], use_cache=use_cache)
+        return val1 - val0
+    return _bspl_evl(t, k, i, p, x, use_cache=use_cache)
+
+
+def _bspl_evl(t: NDArray,
+              k: int,
+              i: int,
+              p: int,
+              x: NDArray,
+              use_cache: bool = True) -> NDArray:
+    cache = {} if use_cache else None
+    if p < 0:
+        return bspl_int(t, k, i, p, x, cache=cache)
+    if p > 0:
+        return bspl_der(t, k, i, p, x, cache=cache)
+    return bspl_val(t, k, i, x, cache=cache)
+
+
 def bspl_val(t: NDArray,
              k: int,
              i: int,
