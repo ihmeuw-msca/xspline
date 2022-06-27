@@ -128,6 +128,34 @@ def spl_int(t: NDArray,
             p: int,
             x: NDArray,
             cache: Optional[dict] = None) -> NDArray:
+    """Evaluate integrals of basis spline functions.
+
+    Parameters
+    ----------
+    t
+        Knots of the spline, assume to be non-decreasing sequence.
+    k
+        Degree of the spline, assume to be non-negative.
+    i
+        Index of the basis spline function, assume to be between `-k` and
+        `len(t) - 2`.
+    p
+        Order of integration, assume to be non-positive (we use negative number
+        to denote the order of integration to distinguish with differentiation).
+        When `p=0`, it will return the basis spline function value from
+        `spl_evl`.
+    x
+        Points where the function is evaluated.
+    cache
+        Optional cache dictionary to save computation. Default to be `None`.
+        When `cache=None`, cache will not be used in the computation.
+
+    Returns
+    -------
+    NDArray
+        Spline integral values evaluated at given points.
+
+    """
     if (cache is not None) and ((k, i, p) in cache):
         return cache[(k, i, p)]
 
