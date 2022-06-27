@@ -20,25 +20,6 @@ def degree():
     return 1
 
 
-@pytest.mark.parametrize("l_linear", [True, False])
-@pytest.mark.parametrize("r_linear", [True, False])
-@pytest.mark.parametrize("idx", [0, -1])
-def test_domain(knots, degree, idx, l_linear, r_linear):
-    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
-    my_domain = xs.domain(idx)
-    if idx == 0:
-        lb = -np.inf
-    else:
-        lb = xs.inner_knots[-2]
-    if idx == -1:
-        ub = np.inf
-    else:
-        ub = xs.inner_knots[1]
-
-    assert my_domain[0] == lb
-    assert my_domain[1] == ub
-
-
 @pytest.mark.parametrize("l_linear", [True])
 @pytest.mark.parametrize("r_linear", [True])
 @pytest.mark.parametrize("idx", [0, -1])
@@ -80,33 +61,33 @@ def test_dfun(knots, degree, order, idx, l_linear, r_linear):
     assert np.linalg.norm(my_dy - tr_dy) < 1e-10
 
 
-@pytest.mark.parametrize("l_linear", [True, False])
-@pytest.mark.parametrize("r_linear", [True, False])
-@pytest.mark.parametrize("order", [1])
-@pytest.mark.parametrize("idx", [0, -1])
-def test_ifun(knots, degree, order, idx, l_linear, r_linear):
-    xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
-    if idx == 0:
-        x = np.linspace(xs.knots[0] - 1.0, xs.knots[1], 101)
-    else:
-        x = np.linspace(xs.knots[-2], xs.knots[-1], 101)
+# @pytest.mark.parametrize("l_linear", [True, False])
+# @pytest.mark.parametrize("r_linear", [True, False])
+# @pytest.mark.parametrize("order", [1])
+# @pytest.mark.parametrize("idx", [0, -1])
+# def test_ifun(knots, degree, order, idx, l_linear, r_linear):
+#     xs = XSpline(knots, degree, l_linear=l_linear, r_linear=r_linear)
+#     if idx == 0:
+#         x = np.linspace(xs.knots[0] - 1.0, xs.knots[1], 101)
+#     else:
+#         x = np.linspace(xs.knots[-2], xs.knots[-1], 101)
 
-    domain = xs.domain(idx)
-    lb = domain[0]
-    ub = domain[1]
-    v_idx = (x >= lb) & (x <= ub)
-    tr_iy = np.zeros(x.size)
+#     domain = xs.domain(idx)
+#     lb = domain[0]
+#     ub = domain[1]
+#     v_idx = (x >= lb) & (x <= ub)
+#     tr_iy = np.zeros(x.size)
 
-    if idx == 0:
-        def ifun(a):
-            return 0.5*(xs.inner_knots[1] - a)**2 / \
-                (xs.inner_knots[0] - xs.inner_knots[1])
-    else:
-        def ifun(a):
-            return 0.5*(a - xs.inner_knots[-2])**2 / \
-                (xs.inner_knots[-1] - xs.inner_knots[-2])
+#     if idx == 0:
+#         def ifun(a):
+#             return 0.5*(xs.inner_knots[1] - a)**2 / \
+#                 (xs.inner_knots[0] - xs.inner_knots[1])
+#     else:
+#         def ifun(a):
+#             return 0.5*(a - xs.inner_knots[-2])**2 / \
+#                 (xs.inner_knots[-1] - xs.inner_knots[-2])
 
-    tr_iy[v_idx] = ifun(x[v_idx]) - ifun(lb)
+#     tr_iy[v_idx] = ifun(x[v_idx]) - ifun(lb)
 
 
 @pytest.mark.parametrize("l_linear", [True, False])

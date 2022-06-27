@@ -7,81 +7,6 @@ from . import utils
 from ._bspline import bspl_der, bspl_int, bspl_val
 
 
-def bspline_domain(knots: ArrayLike, degree: int, idx: int) -> NDArray:
-    """Compute the support for the spline basis, knots degree and the index of
-    the basis.
-
-    Parameters
-    ----------
-    knots
-        1D array that stores the knots of the splines.
-    degree
-        A non-negative integer that indicates the degree of the polynomial.
-    idx
-        A non-negative integer that indicates the index in the spline bases
-        list.
-
-    Returns
-    -------
-    NDArray
-        1D array with two elements represents that left and right end of the
-        support of the spline basis.
-
-    """
-    knots = np.sort(knots)
-    num_knots = knots.size
-    num_intervals = num_knots - 1
-    num_splines = num_intervals + degree
-
-    if idx == -1:
-        idx = num_splines - 1
-
-    lb = knots[max(idx - degree, 0)]
-    ub = knots[min(idx + 1, num_intervals)]
-
-    if idx == 0:
-        lb = -np.inf
-    if idx == num_splines - 1:
-        ub = np.inf
-
-    return np.array([lb, ub])
-
-
-def bspline_domain_noext(knots: ArrayLike, degree: int, idx: int) -> NDArray:
-    """Compute the support for the spline basis, knots degree and the index of
-    the basis.
-
-    Parameters
-    ----------
-    knots
-        1D array that stores the knots of the splines.
-    degree
-        A non-negative integer that indicates the degree of the polynomial.
-    idx
-        A non-negative integer that indicates the index in the spline bases
-        list.
-
-    Returns
-    -------
-    NDArray
-        1D array with two elements represents that left and right end of the
-        support of the spline basis.
-
-    """
-    knots = np.sort(knots)
-    num_knots = knots.size
-    num_intervals = num_knots - 1
-    num_splines = num_intervals + degree
-
-    if idx == -1:
-        idx = num_splines - 1
-
-    lb = knots[max(idx - degree, 0)]
-    ub = knots[min(idx + 1, num_intervals)]
-
-    return np.array([lb, ub])
-
-
 class XSpline:
     """XSpline main class of the package.
 
@@ -136,31 +61,6 @@ class XSpline:
         self.inner_ub = self.inner_knots[-1]
 
         self.num_spline_bases = self.inner_knots.size - 1 + self.degree - self.basis_start
-
-    def domain(self, idx: int) -> NDArray:
-        """Return the support of the XSpline.
-
-        Parameters
-        ----------
-        idx
-            A non-negative integer that indicates the index in the spline bases
-            list.
-
-        Returns
-        -------
-        NDArray
-            1D array with two elements represents that left and right end of
-            the support of the spline basis.
-
-        """
-        inner_domain = bspline_domain(self.inner_knots, self.degree, idx)
-        lb = inner_domain[0]
-        ub = inner_domain[1]
-
-        lb = self.lb if inner_domain[0] == self.inner_lb else lb
-        ub = self.ub if inner_domain[1] == self.inner_ub else ub
-
-        return np.array([lb, ub])
 
     def fun(self, x: ArrayLike, idx: int) -> float | NDArray:
         """Compute the spline basis.
