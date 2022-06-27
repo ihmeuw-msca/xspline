@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from . import utils
-from ._bspline import bspl_der, bspl_int, bspl_val
+from ._bspl import bspl_der, bspl_int, bspl_val
 
 
 class XSpline:
@@ -218,8 +218,8 @@ class XSpline:
 
     def ifun(
         self,
-        a: float | ArrayLike,
-        x: float | ArrayLike,
+        a: ArrayLike,
+        x: ArrayLike,
         order: int,
         idx: int
     ) -> float | NDArray:
@@ -241,7 +241,7 @@ class XSpline:
 
         Returns
         -------
-        float | NDArray
+        NDArray
             Integral values of the corresponding spline bases.
 
         """
@@ -418,26 +418,6 @@ class XSpline:
             for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
         ]).T
         return imat
-
-    def last_dmat(self):
-        """Compute highest order of derivative in domain.
-
-        Returns:
-            NDArray:
-            1D array that contains highest order of derivative for intervals.
-        """
-        # compute the last dmat for the inner domain
-        dmat = self.design_dmat(self.inner_knots[:-1], self.degree)
-
-        if self.l_linear:
-            dmat = np.vstack((self.design_dmat(np.array([self.inner_lb]), 1),
-                              dmat))
-
-        if self.r_linear:
-            dmat = np.vstack((dmat,
-                              self.design_dmat(np.array([self.inner_ub]), 1)))
-
-        return dmat
 
 
 class NDXSpline:
@@ -633,23 +613,3 @@ class NDXSpline:
                 imat.append(np.prod(bases_list, axis=0))
 
         return np.ascontiguousarray(np.vstack(imat).T)
-
-    def last_dmat(self):
-        """Highest order of derivative matrix.
-
-        Returns
-        -------
-        NDArray
-            Design matrix contain the highest order of derivative.
-
-        """
-        mat_list = [spline.last_dmat() for spline in self.spline_list]
-
-        mat = []
-        for i in range(self.num_spline_bases):
-            index_list = utils.order_to_index(i, self.num_spline_bases_list)
-            bases_list = [mat_list[j][:, index_list[j]]
-                          for j in range(self.ndim)]
-            mat.append(utils.outer_flatten(*bases_list))
-
-        return np.ascontiguousarray(np.vstack(mat).T)
