@@ -32,8 +32,8 @@ def spl_evl(t: NDArray,
         Spline values evaluated at given points.
 
     """
-    if (cache is not None) and ((k, i) in cache):
-        return cache[(k, i)]
+    if (cache is not None) and ((k, i, 0) in cache):
+        return cache[(k, i, 0)]
 
     if k == 0:
         val = np.zeros(x.shape, dtype=x.dtype)
@@ -56,5 +56,5 @@ def spl_evl(t: NDArray,
         val = val0 + val1
 
     if cache is not None:
-        cache[(k, i)] = val
+        cache[(k, i, 0)] = val
     return val
