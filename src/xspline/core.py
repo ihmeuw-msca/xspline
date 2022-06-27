@@ -80,10 +80,10 @@ class XSpline:
         """
         if not self.l_linear and not self.r_linear:
             return bspl_val(
+                x,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                x
             )
 
         f = np.zeros(x.size)
@@ -97,17 +97,17 @@ class XSpline:
             m_idx &= (x >= self.inner_lb)
 
             inner_lb_fun = bspl_val(
+                np.array([self.inner_lb]),
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                np.array([self.inner_lb])
             )[0]
             inner_lb_dfun = bspl_der(
+                np.array([self.inner_lb]),
+                1,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                1,
-                np.array([self.inner_lb])
             )[0]
 
             f[l_idx] = inner_lb_fun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
@@ -117,26 +117,26 @@ class XSpline:
             m_idx &= (x <= self.inner_ub)
 
             inner_ub_fun = bspl_val(
+                np.array([self.inner_ub]),
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                np.array([self.inner_ub])
             )[0]
             inner_ub_dfun = bspl_der(
+                np.array([self.inner_ub]),
+                1,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                1,
-                np.array([self.inner_ub])
             )[0]
 
             f[u_idx] = inner_ub_fun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
 
         f[m_idx] = bspl_val(
+            x[m_idx],
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            x[m_idx]
         )
 
         return f
@@ -165,11 +165,11 @@ class XSpline:
 
         if (not self.l_linear) and (not self.r_linear):
             return bspl_der(
+                x,
+                order,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                order,
-                x
             )
 
         dy = np.zeros(x.size)
@@ -184,11 +184,11 @@ class XSpline:
 
             if order == 1:
                 inner_lb_dy = bspl_der(
+                    np.array([self.inner_lb]),
+                    1,
                     self.inner_knots,
                     self.degree,
                     idx - self.degree,
-                    1,
-                    np.array([self.inner_lb])
                 )[0]
                 dy[l_idx] = np.repeat(inner_lb_dy, np.sum(l_idx))
 
@@ -198,20 +198,20 @@ class XSpline:
 
             if order == 1:
                 inner_ub_dy = bspl_der(
+                    np.array([self.inner_ub]),
+                    1,
                     self.inner_knots,
                     self.degree,
                     idx - self.degree,
-                    1,
-                    np.array([self.inner_ub])
                 )[0]
                 dy[u_idx] = np.repeat(inner_ub_dy, np.sum(u_idx))
 
         dy[m_idx] = bspl_der(
+            x[m_idx],
+            order,
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            order,
-            x[m_idx]
         )
 
         return dy
@@ -250,18 +250,18 @@ class XSpline:
 
         if (not self.l_linear) and (not self.r_linear):
             ly = bspl_int(
+                a,
+                -order,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                -order,
-                a
             )
             ry = bspl_int(
+                a,
+                -order,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                -order,
-                a
             )
             return ry - ly
 
@@ -269,30 +269,30 @@ class XSpline:
         assert np.all(a <= x)
 
         inner_lb_y = bspl_val(
+            np.array([self.inner_lb]),
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            np.array([self.inner_lb])
         )[0]
         inner_ub_y = bspl_val(
+            np.array([self.inner_ub]),
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            np.array([self.inner_ub])
         )[0]
         inner_lb_dy = bspl_der(
+            np.array([self.inner_lb]),
+            1,
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            1,
-            np.array([self.inner_lb])
         )[0]
         inner_ub_dy = bspl_der(
+            np.array([self.inner_ub]),
+            1,
             self.inner_knots,
             self.degree,
             idx - self.degree,
-            1,
-            np.array([self.inner_ub])
         )[0]
 
         # there are in total 5 pieces functions
@@ -302,18 +302,18 @@ class XSpline:
 
         def m_piece(a, x, order):
             ry = bspl_int(
+                x,
+                -order,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                -order,
-                x
             )
             ly = bspl_int(
+                a,
+                -order,
                 self.inner_knots,
                 self.degree,
                 idx - self.degree,
-                -order,
-                a
             )
             return ry - ly
 
