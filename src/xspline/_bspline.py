@@ -3,6 +3,8 @@ from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 
+from .utils import indicator_if
+
 
 def spl_evl(t: NDArray,
             k: int,
@@ -114,6 +116,47 @@ def spl_der(t: NDArray,
         val1 = k*n1/(t[ii[3]] - t[ii[1]])
 
     val = val0 - val1
+
+    if cache is not None:
+        cache[(k, i, p)] = val
+    return val
+
+
+def spl_int(t: NDArray,
+            k: int,
+            i: int,
+            p: int,
+            x: NDArray,
+            cache: Optional[dict] = None) -> NDArray:
+    if (cache is not None) and ((k, i, p) in cache):
+        return cache[(k, i, p)]
+
+    if p == 0:
+        return spl_evl(t, k, i, x, cache=cache)
+
+    ii = np.maximum(np.minimum([i, i + 1, i + k, i + k + 1], t.size - 1), 0)
+    if k == 0:
+        val = np.zeros(x.shape, dtype=x.dtype)
+        if t[ii[0]] != t[ii[1]]:
+            indices = x > t[ii[0]]
+            val[indices] = indicator_if(t[ii[0]], x[indices], -p,
+                                        np.array([t[ii[0]], t[ii[1]]]))
+    else:
+        val0 = np.zeros(x.shape, dtype=x.dtype)
+        val1 = np.zeros(x.shape, dtype=x.dtype)
+
+        if t[ii[0]] != t[ii[2]]:
+            val0 = (
+                (x - t[ii[0]])*spl_int(t, k - 1, i, p, x, cache=cache) +
+                p*spl_int(t, k - 1, i, p - 1, x, cache=cache)
+            )/(t[ii[2]] - t[ii[0]])
+        if t[ii[1]] != t[ii[3]]:
+            val1 = (
+                (t[ii[3]] - x)*spl_int(t, k - 1, i + 1, p, x, cache=cache) -
+                p*spl_int(t, k - 1, i + 1, p - 1, x, cache=cache)
+            )/(t[ii[3]] - t[ii[1]])
+
+        val = val0 + val1
 
     if cache is not None:
         cache[(k, i, p)] = val
