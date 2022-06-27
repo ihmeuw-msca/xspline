@@ -33,7 +33,6 @@ class XSpline:
                  r_linear: bool = False,
                  include_first_basis: bool = True):
         # pre-process the knots vector
-        knots = list(set(knots))
         knots = np.sort(np.array(knots))
 
         self.knots = knots
@@ -62,7 +61,7 @@ class XSpline:
 
         self.num_spline_bases = self.inner_knots.size - 1 + self.degree - self.basis_start
 
-    def fun(self, x: ArrayLike, idx: int) -> float | NDArray:
+    def fun(self, x: ArrayLike, idx: int) -> NDArray:
         """Compute the spline basis.
 
         Parameters
@@ -75,7 +74,7 @@ class XSpline:
 
         Returns
         -------
-        float | NDArray
+        NDArray
             Function values of the corresponding spline bases.
 
         """
@@ -86,10 +85,6 @@ class XSpline:
                 idx - self.degree,
                 x
             )
-
-        x_is_scalar = np.isscalar(x)
-        if x_is_scalar:
-            x = np.array([x])
 
         f = np.zeros(x.size)
         m_idx = np.array([True] * x.size)
@@ -144,12 +139,9 @@ class XSpline:
             x[m_idx]
         )
 
-        if x_is_scalar:
-            return f[0]
-        else:
-            return f
+        return f
 
-    def dfun(self, x: float | ArrayLike, order: int, idx: int) -> float | NDArray:
+    def dfun(self, x: ArrayLike, order: int, idx: int) -> NDArray:
         """Compute the derivative of the spline basis.
 
         Parameters
@@ -164,7 +156,7 @@ class XSpline:
 
         Returns
         -------
-        float | NDArray
+        NDArray
             Derivative values of the corresponding spline bases.
 
         """
@@ -179,10 +171,6 @@ class XSpline:
                 order,
                 x
             )
-
-        x_is_scalar = np.isscalar(x)
-        if x_is_scalar:
-            x = np.array([x])
 
         dy = np.zeros(x.size)
         m_idx = np.array([True] * x.size)
@@ -226,10 +214,7 @@ class XSpline:
             x[m_idx]
         )
 
-        if x_is_scalar:
-            return dy[0]
-        else:
-            return dy
+        return dy
 
     def ifun(
         self,
