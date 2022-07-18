@@ -18,7 +18,7 @@ class EvalFunction:
     def get_int(params: tuple, x: NDArray, p: int) -> NDArray:
         raise NotImplementedError
 
-    def __call__(self, params: tuple, x: NDArray, p: int) -> NDArray:
+    def __call__(self, params: tuple, x: NDArray, p: int = 0) -> NDArray:
         if x.size == 0:
             return np.array([], dtype=x.dtype)
         if p >= 0 and x.ndim == 2:
