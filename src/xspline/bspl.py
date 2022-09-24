@@ -10,7 +10,7 @@ def cache_bspl(function: RawFunction) -> RawFunction:
 
     def wrapper_function(*args, **kwargs) -> NDArray:
         key = tuple(
-            map(lambda x: id(x) if isinstance(x, np.ndarray) else x, args)
+            tuple(x.ravel()) if isinstance(x, np.ndarray) else x for x in args
         )
         if key in cache:
             return cache[key]
