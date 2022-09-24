@@ -22,7 +22,6 @@ def cache_bspl(function: RawFunction) -> RawFunction:
     def cache_clear():
         cache.clear()
 
-    wrapper_function.cache = cache
     wrapper_function.cache_clear = cache_clear
     return wrapper_function
 
@@ -121,12 +120,8 @@ class Bspl(BundleXFunction):
     def __init__(self, params: BsplParams) -> None:
         super().__init__(params, bspl_val, bspl_der, bspl_int)
         # partial strip the attributes, need to relink them
-        # need a better solution
-        self.val_fun.cache = bspl_val.cache
         self.val_fun.cache_clear = bspl_val.cache_clear
-        self.der_fun.cache = bspl_der.cache
         self.der_fun.cache_clear = bspl_der.cache_clear
-        self.int_fun.cache = bspl_int.cache
         self.int_fun.cache_clear = bspl_int.cache_clear
 
     def cache_clear(self) -> None:
