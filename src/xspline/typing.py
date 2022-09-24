@@ -12,6 +12,7 @@ IFunction = Callable[[NDArray, NegativeInt], NDArray]
 RawVFunction = Callable[[tuple, NDArray], NDArray]
 RawDFunction = Callable[[tuple, NDArray, PositiveInt], NDArray]
 RawIFunction = Callable[[tuple, NDArray, NegativeInt], NDArray]
+RawFunction = RawVFunction | RawDFunction | RawIFunction
 
 BoundaryPoint = tuple[float, bool]
 IndiParams = tuple[BoundaryPoint, BoundaryPoint]
@@ -21,9 +22,5 @@ BsplParams = tuple[tuple[float, ...], int, int]
 
 class XFunction(Protocol):
 
-    def __call__(self,
-                 x: NDArray,
-                 order: int = 0,
-                 start: Optional[NDArray] = None,
-                 **kwargs) -> NDArray:
+    def __call__(self, x: NDArray, order: int = 0, start: Optional[NDArray] = None, **kwargs) -> NDArray:
         ...

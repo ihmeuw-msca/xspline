@@ -1,7 +1,7 @@
 import numpy as np
 
-from xspline.bundle import BundleXFunction
 from xspline.typing import NDArray, NegativeInt, PolyParams, PositiveInt
+from xspline.xfunction import BundleXFunction
 
 
 def poly_val(params: PolyParams, x: NDArray) -> NDArray:

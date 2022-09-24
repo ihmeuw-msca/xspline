@@ -2,8 +2,8 @@ from math import factorial
 
 import numpy as np
 
-from xspline.bundle import BundleXFunction
 from xspline.typing import IndiParams, NDArray, NegativeInt, PositiveInt
+from xspline.xfunction import BundleXFunction
 
 
 def indi_val(params: IndiParams, x: NDArray) -> NDArray:
