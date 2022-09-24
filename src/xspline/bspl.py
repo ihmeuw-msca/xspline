@@ -1,8 +1,7 @@
 import numpy as np
 
 from xspline.indi import indi_int
-from xspline.typing import (BsplParams, NDArray, NegativeInt, PositiveInt,
-                            RawFunction)
+from xspline.typing import BsplParams, NDArray, RawFunction
 from xspline.xfunction import BundleXFunction
 
 
@@ -55,7 +54,7 @@ def bspl_val(params: BsplParams, x: NDArray) -> NDArray:
 
 
 @cache_bspl
-def bspl_der(params: BsplParams, x: NDArray, order: PositiveInt) -> NDArray:
+def bspl_der(params: BsplParams, x: NDArray, order: int) -> NDArray:
     # knots, degree, and index
     t, k, i = params
 
@@ -83,7 +82,7 @@ def bspl_der(params: BsplParams, x: NDArray, order: PositiveInt) -> NDArray:
 
 
 @cache_bspl
-def bspl_int(params: BsplParams, x: NDArray, order: NegativeInt) -> NDArray:
+def bspl_int(params: BsplParams, x: NDArray, order: int) -> NDArray:
     # knots, degree, and index
     t, k, i = params
 

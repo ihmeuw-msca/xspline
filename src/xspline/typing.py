@@ -1,17 +1,14 @@
-from typing import Annotated, Callable, Optional, Protocol
+from typing import Callable, Optional, Protocol
 
 from numpy.typing import NDArray
 
-PositiveInt = Annotated[int, "positive"]
-NegativeInt = Annotated[int, "negative"]
-
 VFunction = Callable[[NDArray], NDArray]
-DFunction = Callable[[NDArray, PositiveInt], NDArray]
-IFunction = Callable[[NDArray, NegativeInt], NDArray]
+DFunction = Callable[[NDArray, int], NDArray]
+IFunction = Callable[[NDArray, int], NDArray]
 
 RawVFunction = Callable[[tuple, NDArray], NDArray]
-RawDFunction = Callable[[tuple, NDArray, PositiveInt], NDArray]
-RawIFunction = Callable[[tuple, NDArray, NegativeInt], NDArray]
+RawDFunction = Callable[[tuple, NDArray, int], NDArray]
+RawIFunction = Callable[[tuple, NDArray, int], NDArray]
 RawFunction = RawVFunction | RawDFunction | RawIFunction
 
 BoundaryPoint = tuple[float, bool]

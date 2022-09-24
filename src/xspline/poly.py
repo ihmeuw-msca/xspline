@@ -1,6 +1,6 @@
 import numpy as np
 
-from xspline.typing import NDArray, NegativeInt, PolyParams, PositiveInt
+from xspline.typing import NDArray, PolyParams
 from xspline.xfunction import BundleXFunction
 
 
@@ -8,11 +8,11 @@ def poly_val(params: PolyParams, x: NDArray) -> NDArray:
     return np.polyval(params, x)
 
 
-def poly_der(params: PolyParams, x: NDArray, order: PositiveInt) -> NDArray:
+def poly_der(params: PolyParams, x: NDArray, order: int) -> NDArray:
     return np.polyval(np.polyder(params, order), x)
 
 
-def poly_int(params: PolyParams, x: NDArray, order: NegativeInt) -> NDArray:
+def poly_int(params: PolyParams, x: NDArray, order: int) -> NDArray:
     return np.polyval(np.polyint(params, -order), x)
 
 

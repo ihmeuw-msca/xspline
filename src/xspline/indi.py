@@ -2,7 +2,7 @@ from math import factorial
 
 import numpy as np
 
-from xspline.typing import IndiParams, NDArray, NegativeInt, PositiveInt
+from xspline.typing import IndiParams, NDArray
 from xspline.xfunction import BundleXFunction
 
 
@@ -20,11 +20,11 @@ def indi_val(params: IndiParams, x: NDArray) -> NDArray:
     return val
 
 
-def indi_der(params: IndiParams, x: NDArray, order: PositiveInt) -> NDArray:
+def indi_der(params: IndiParams, x: NDArray, order: int) -> NDArray:
     return np.zeros(x.size, dtype=x.dtype)
 
 
-def indi_int(params: IndiParams, x: NDArray, order: NegativeInt) -> NDArray:
+def indi_int(params: IndiParams, x: NDArray, order: int) -> NDArray:
     # lower and upper bounds
     lb, ub = params
 
