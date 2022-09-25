@@ -5,5 +5,6 @@
 
     xspline package
 """
-from .core import *
-from . import utils
+from .bspl import Bspl
+from .indi import Indi
+from .poly import Poly
