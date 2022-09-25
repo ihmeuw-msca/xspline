@@ -1,8 +1,9 @@
 from math import factorial
 
 import numpy as np
+from numpy.typing import NDArray
 
-from xspline.typing import IndiParams, NDArray
+from xspline.typing import IndiParams
 from xspline.xfunction import BundleXFunction
 
 

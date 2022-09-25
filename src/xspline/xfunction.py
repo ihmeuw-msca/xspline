@@ -3,8 +3,9 @@ from functools import partial
 from math import factorial
 
 import numpy as np
+from numpy.typing import NDArray
 
-from xspline.typing import (BoundaryPoint, NDArray, RawDFunction, RawIFunction,
+from xspline.typing import (BoundaryPoint, RawDFunction, RawIFunction,
                             RawVFunction)
 
 

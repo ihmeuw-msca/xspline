@@ -1,6 +1,7 @@
 import numpy as np
+from numpy.typing import NDArray
 
-from xspline.typing import NDArray, PolyParams
+from xspline.typing import PolyParams
 from xspline.xfunction import BundleXFunction
 
 

@@ -1,7 +1,8 @@
 import numpy as np
+from numpy.typing import NDArray
 
 from xspline.indi import indi_int
-from xspline.typing import BsplParams, NDArray, RawFunction
+from xspline.typing import BsplParams, RawFunction
 from xspline.xfunction import BundleXFunction
 
 
