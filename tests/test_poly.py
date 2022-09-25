@@ -26,7 +26,7 @@ def truth(x: NDArray, order: int) -> NDArray:
 @pytest.mark.parametrize("params", params)
 @pytest.mark.parametrize("x", x)
 @pytest.mark.parametrize("order", order)
-def test_poly_eval(params, x, order):
+def test_poly(params, x, order):
     poly = Poly(params)
     z = x
     if order < 0:
