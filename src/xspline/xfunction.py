@@ -10,7 +10,7 @@ from xspline.typing import (BoundaryPoint, NDArray, RawDFunction, RawIFunction,
 
 def taylor_term(x: NDArray, order: int) -> NDArray:
     if x.ndim == 2:
-        x = np.diff(x, axis=0)
+        x = np.diff(x, axis=0)[0]
     return x**order/factorial(order)
 
 
@@ -102,7 +102,7 @@ class BundleXFunction(XFunction):
             return self.val_fun(x)
         if order > 0:
             return self.der_fun(x, order)
-        dx = np.diff(x, axis=0)
+        dx = np.diff(x, axis=0)[0]
         val = self.int_fun(x[1], order)
         for i in range(-order):
             val -= self.int_fun(x[0], order + i)*taylor_term(dx, i)
