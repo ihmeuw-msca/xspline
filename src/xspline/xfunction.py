@@ -5,8 +5,8 @@ from math import factorial
 import numpy as np
 from numpy.typing import NDArray
 
-from xspline.typing import (BoundaryPoint, RawDFunction, RawIFunction,
-                            RawVFunction)
+from xspline.typing import (BoundaryPoint, Callable, RawDFunction,
+                            RawIFunction, RawVFunction)
 
 
 def taylor_term(x: NDArray, order: int) -> NDArray:
@@ -18,21 +18,27 @@ def taylor_term(x: NDArray, order: int) -> NDArray:
 class XFunction(ABC):
 
     @abstractmethod
+    def fun(self, x: NDArray, order: int = 0) -> NDArray:
+        ...
+
     def __call__(self, x: NDArray, order: int = 0) -> NDArray:
         """Function returns function values, derivatives and definite integrals.
 
         Parameters
         ----------
         x
-            Data points where the function is evaluated.
+            Data points where the function is evaluated. If `order >= 0` and
+            `x` is a 2d array with two rows, the difference between the rows
+            will be used for function evaluation. If `order < 0` and `x` is a
+            2d array with two rows, the rows will be treated as the starting and
+            ending points for definite interval. If `order < 0` and `x` is a
+            1d array, function will use the smallest number in `x` as the
+            starting point of the definite interval.
         order
             Order of differentiation or integration. When `order = 0`, function
             value will be returned. When `order > 0` function derviative will
-            be returned. When `order < 0`, `start` argument is requried and
-            function integral will be returned. Default is `0`.
-        start
-            Starting points for the definite integral. This is required when
-            `order < 0`. Default is `None`.
+            be returned. When `order < 0`, function integral will be returned.
+            Default is `0`.
 
         Returns
         -------
@@ -42,25 +48,35 @@ class XFunction(ABC):
         Raises
         ------
         ValueError
-            Raised when `order >= 0` and `x` is not a 1d array. Please proivde a
-            1d array when compute function values and derivatives.
-        ValueError
-            Raised when `order < 0` and `x` is not a 2d array with two rows.
-            Please provide a 2d array with two rows when compute function
-            definite integrals.
+            Raised when `x` is not a scalar, 1d array or 2d array with two rows.
 
         """
-        if order >= 0:
-            if x.ndim != 1:
-                raise ValueError("please provide a 1d array when compute "
-                                 "function values and derivatives")
-        if order < 0:
-            if x.ndim != 2 or len(x) != 2:
-                raise ValueError("please provide a 2d array with two rows when "
-                                 "compute function definite integrals")
+        # validate
+        x = np.asarray(x, dtype=float)
+        if (x.ndim not in [0, 1, 2]) or (x.ndim == 2 and len(x) != 2):
+            raise ValueError("please provide a scalar, a 1d array, or 2d array "
+                             "with two rows")
 
+        # special case, empty array
         if x.size == 0:
-            return np.array([], dtype=x.dtype)
+            return np.empty(shape=x.shape, dtype=x.dtype)
+
+        # reshape array
+        isscalar = x.ndim == 0
+        if isscalar:
+            x = x.ravel()
+        if order >= 0 and x.ndim == 2:
+            x = x[1] - x[0]
+        if order < 0 and x.ndim == 1:
+            x = np.vstack([np.repeat(x.min(), x.size), x])
+
+        # call fun
+        result = self.fun(x, order)
+
+        # return scalar if input is scalar
+        if isscalar:
+            result = result[0]
+        return result
 
     def add(self, other: "XFunction", sep: BoundaryPoint) -> "XFunction":
 
@@ -97,8 +113,7 @@ class BundleXFunction(XFunction):
         self.der_fun = partial(der_fun, params)
         self.int_fun = partial(int_fun, params)
 
-    def __call__(self, x: NDArray, order: int = 0) -> NDArray:
-        super().__call__(x, order=order)
+    def fun(self, x: NDArray, order: int = 0) -> NDArray:
         if order == 0:
             return self.val_fun(x)
         if order > 0:
