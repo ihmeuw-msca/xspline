@@ -5,8 +5,8 @@ from math import factorial
 import numpy as np
 from numpy.typing import NDArray
 
-from xspline.typing import (BoundaryPoint, Callable, RawDFunction,
-                            RawIFunction, RawVFunction)
+from xspline.typing import (BoundaryPoint, RawDFunction, RawIFunction,
+                            RawVFunction)
 
 
 def taylor_term(x: NDArray, order: int) -> NDArray:
@@ -54,8 +54,8 @@ class XFunction(ABC):
         # validate
         x = np.asarray(x, dtype=float)
         if (x.ndim not in [0, 1, 2]) or (x.ndim == 2 and len(x) != 2):
-            raise ValueError("please provide a scalar, a 1d array, or 2d array "
-                             "with two rows")
+            raise ValueError("please provide a scalar, an 1d array, or a 2d "
+                             "array with two rows")
 
         # special case, empty array
         if x.size == 0:
