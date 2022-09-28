@@ -115,19 +115,16 @@ def bspl_int(params: BsplParams, x: NDArray, order: int) -> NDArray:
     return val
 
 
+def clear_bspl_cache() -> None:
+    bspl_val.cache_clear()
+    bspl_der.cache_clear()
+    bspl_int.cache_clear()
+
+
 class Bspl(BundleXFunction):
 
     def __init__(self, params: BsplParams) -> None:
         super().__init__(params, bspl_val, bspl_der, bspl_int)
-        # partial strip the attributes, need to relink them
-        self.val_fun.cache_clear = bspl_val.cache_clear
-        self.der_fun.cache_clear = bspl_der.cache_clear
-        self.int_fun.cache_clear = bspl_int.cache_clear
-
-    def cache_clear(self) -> None:
-        self.val_fun.cache_clear()
-        self.der_fun.cache_clear()
-        self.int_fun.cache_clear()
 
 
 def get_bspl_funs(knots: tuple[float, ...], degree: int) -> tuple[Bspl]:

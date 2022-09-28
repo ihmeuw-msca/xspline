@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from xspline.bspl import Bspl
+from xspline.bspl import Bspl, clear_bspl_cache
 
 knots = (0.0, 0.5, 1.0)
 degree = 2
@@ -27,7 +27,7 @@ def test_bspl_val(index):
     )
     assert np.allclose(my_val, tr_val)
 
-    bspl.cache_clear()
+    clear_bspl_cache()
 
 
 @pytest.mark.parametrize("index", indices)
@@ -45,7 +45,7 @@ def test_bspl_der(index):
     )
     assert np.allclose(my_val, tr_val)
 
-    bspl.cache_clear()
+    clear_bspl_cache()
 
 
 @pytest.mark.parametrize("index", indices)
@@ -72,4 +72,4 @@ def test_bspl_int(index):
     )
     assert np.allclose(my_val, tr_val)
 
-    bspl.cache_clear()
+    clear_bspl_cache()
