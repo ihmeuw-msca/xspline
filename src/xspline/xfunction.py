@@ -122,15 +122,13 @@ class BundleXFunction(XFunction):
         self.der_fun = partial(der_fun, params)
         self.int_fun = partial(int_fun, params)
 
-        def fun(x: NDArray, order: int = 0) -> NDArray:
-            if order == 0:
-                return self.val_fun(x)
-            if order > 0:
-                return self.der_fun(x, order)
-            dx = np.diff(x, axis=0)[0]
-            val = self.int_fun(x[1], order)
-            for i in range(-order):
-                val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
-            return val
-
-        super().__init__(fun=fun)
+    def fun(self, x: NDArray, order: int = 0) -> NDArray:
+        if order == 0:
+            return self.val_fun(x)
+        if order > 0:
+            return self.der_fun(x, order)
+        dx = np.diff(x, axis=0)[0]
+        val = self.int_fun(x[1], order)
+        for i in range(-order):
+            val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
+        return val
