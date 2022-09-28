@@ -15,6 +15,31 @@ class XFunction:
         if not hasattr(self, "fun"):
             self.fun = fun
 
+    def _check_args(self, x: NDArray, order: int) -> tuple[NDArray, int, bool]:
+        x, order = np.asarray(x, dtype=float), int(order)
+        if (x.ndim not in [0, 1, 2]) or (x.ndim == 2 and len(x) != 2):
+            raise ValueError("please provide a scalar, an 1d array, or a 2d "
+                             "array with two rows")
+
+        # special case, empty array
+        if x.size == 0:
+            return np.empty(shape=x.shape, dtype=x.dtype)
+
+        # reshape array
+        isscalar = x.ndim == 0
+        if isscalar:
+            x = x.ravel()
+        if order >= 0 and x.ndim == 2:
+            x = x[1] - x[0]
+        if order < 0 and x.ndim == 1:
+            x = np.vstack([np.repeat(x.min(), x.size), x])
+
+        # check interval bounds
+        if order < 0 and (x[0] > x[1]).any():
+            raise ValueError("to integrate, `x` must satisfy `x[0] <= x[1]`")
+
+        return x, order, isscalar
+
     def __call__(self, x: NDArray, order: int = 0) -> NDArray:
         """Function returns function values, derivatives and definite integrals.
 
@@ -49,35 +74,13 @@ class XFunction:
             Raised when `order < 0` and `any(x[0] > x[1])`.
 
         """
-        # validate
         if getattr(self, "fun", None) is None:
             raise AttributeError("please provide the function implementation")
-        x = np.asarray(x, dtype=float)
-        if (x.ndim not in [0, 1, 2]) or (x.ndim == 2 and len(x) != 2):
-            raise ValueError("please provide a scalar, an 1d array, or a 2d "
-                             "array with two rows")
 
-        # special case, empty array
-        if x.size == 0:
-            return np.empty(shape=x.shape, dtype=x.dtype)
+        x, order, isscalar = self._check_args(x, order)
 
-        # reshape array
-        isscalar = x.ndim == 0
-        if isscalar:
-            x = x.ravel()
-        if order >= 0 and x.ndim == 2:
-            x = x[1] - x[0]
-        if order < 0 and x.ndim == 1:
-            x = np.vstack([np.repeat(x.min(), x.size), x])
-
-        # check interval bounds
-        if order < 0 and (x[0] > x[1]).any():
-            raise ValueError("to integrate, `x` must satisfy `x[0] <= x[1]`")
-
-        # call fun
         result = self.fun(x, order)
 
-        # return scalar if input is scalar
         if isscalar:
             result = result[0]
         return result
