@@ -1,5 +1,6 @@
 from functools import partial
 from math import factorial
+from operator import attrgetter
 from typing import Optional
 
 import numpy as np
@@ -85,7 +86,7 @@ class XFunction:
             result = result[0]
         return result
 
-    def add(self, other: "XFunction", sep: BoundaryPoint) -> "XFunction":
+    def append(self, other: "XFunction", sep: BoundaryPoint) -> "XFunction":
 
         def fun(x: NDArray, order: int = 0) -> NDArray:
             left = x <= sep[0] if sep[1] else x < sep[0]
@@ -135,3 +136,44 @@ class BundleXFunction(XFunction):
         for i in range(-order):
             val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
         return val
+
+
+class BasisXFunction(XFunction):
+
+    coefs = property(attrgetter("_coefs"))
+
+    def __init__(self,
+                 basis_funs: tuple[XFunction],
+                 coefs: Optional[NDArray] = None) -> None:
+        if not all(isinstance(fun, XFunction) for fun in basis_funs):
+            raise TypeError("basis functions must all be instances of "
+                            "`XFunction`")
+        self.basis_funs = tuple(basis_funs)
+        self.coefs = coefs
+
+    @property
+    def num_basis_funs(self) -> int:
+        return len(self.basis_funs)
+
+    @coefs.setter
+    def coefs(self, coefs: Optional[NDArray]) -> None:
+        if coefs is not None:
+            coefs = np.asarray(coefs, dtype=float).ravel()
+            if coefs.size != self.num_basis_funs:
+                raise ValueError("number of coeffcients does not match number "
+                                 "of basis functions")
+        self._coefs = coefs
+
+    def get_design_mat(self, x: NDArray,
+                       order: int = 0,
+                       check_args: bool = True) -> NDArray:
+        if check_args:
+            x, order, _ = self._check_args(x, order)
+        return np.vstack([fun.fun(x, order) for fun in self.basis_funs]).T
+
+    def fun(self, x: NDArray, order: int = 0) -> NDArray:
+        if self.coefs is None:
+            raise ValueError("please provide the coefficients for the basis "
+                             "functions")
+        design_mat = self.get_design_mat(x, order=order, check_args=False)
+        return design_mat.dot(self.coefs)

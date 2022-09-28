@@ -128,3 +128,9 @@ class Bspl(BundleXFunction):
         self.val_fun.cache_clear()
         self.der_fun.cache_clear()
         self.int_fun.cache_clear()
+
+
+def get_bspl_funs(knots: tuple[float, ...], degree: int) -> tuple[Bspl]:
+    return tuple(
+        Bspl((knots, degree, i)) for i in range(-degree, len(knots) - 1)
+    )

@@ -5,7 +5,7 @@ import pytest
 from numpy.typing import NDArray
 from xspline.xfunction import XFunction
 
-# test add function
+# test append function
 sep = (1.0, False)
 
 
@@ -24,7 +24,7 @@ def fun1(x: NDArray, order: int = 0) -> NDArray:
     return dx**(-order) / factorial(-order)
 
 
-my_fun = fun0.add(fun1, sep)
+my_fun = fun0.append(fun1, sep)
 
 
 def tr_fun(x: NDArray, order: int = 0) -> NDArray:
@@ -38,7 +38,7 @@ def tr_fun(x: NDArray, order: int = 0) -> NDArray:
 
 
 @pytest.mark.parametrize("order", [-2, -1, 0, 1, 2])
-def test_add(order):
+def test_append(order):
     x = np.linspace(0.0, 2.0, 101)
     my_val = my_fun(x, order=order)
     tr_val = tr_fun(x, order=order)
