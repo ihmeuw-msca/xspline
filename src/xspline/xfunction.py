@@ -151,15 +151,11 @@ class BasisXFunction(XFunction):
         self.basis_funs = tuple(basis_funs)
         self.coefs = coefs
 
-    @property
-    def num_basis_funs(self) -> int:
-        return len(self.basis_funs)
-
     @coefs.setter
     def coefs(self, coefs: Optional[NDArray]) -> None:
         if coefs is not None:
             coefs = np.asarray(coefs, dtype=float).ravel()
-            if coefs.size != self.num_basis_funs:
+            if coefs.size != len(self):
                 raise ValueError("number of coeffcients does not match number "
                                  "of basis functions")
         self._coefs = coefs
@@ -177,3 +173,6 @@ class BasisXFunction(XFunction):
                              "functions")
         design_mat = self.get_design_mat(x, order=order, check_args=False)
         return design_mat.dot(self.coefs)
+
+    def __len__(self) -> int:
+        return len(self.basis_funs)

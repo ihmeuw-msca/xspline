@@ -37,7 +37,8 @@ class XSpline(BasisXFunction):
         self.ldegree, self.rdegree = ldegree, rdegree
         super().__init__(funs, coefs=coefs)
 
-    def get_design_mat(self, x: NDArray, order: int = 0, check_args: bool = True) -> NDArray:
+    def get_design_mat(self, x: NDArray,
+                       order: int = 0, check_args: bool = True) -> NDArray:
         design_mat = super().get_design_mat(x, order, check_args)
         clear_bspl_cache()
         return design_mat
