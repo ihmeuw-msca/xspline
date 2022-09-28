@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
 from functools import partial
 from math import factorial
+from typing import Optional
 
 import numpy as np
 from numpy.typing import NDArray
 
-from xspline.typing import (BoundaryPoint, RawDFunction, RawIFunction,
-                            RawVFunction)
+from xspline.typing import (BoundaryPoint, Callable, RawDFunction,
+                            RawIFunction, RawVFunction)
 
 
 def taylor_term(x: NDArray, order: int) -> NDArray:
@@ -15,11 +15,11 @@ def taylor_term(x: NDArray, order: int) -> NDArray:
     return x**order/factorial(order)
 
 
-class XFunction(ABC):
+class XFunction:
 
-    @abstractmethod
-    def fun(self, x: NDArray, order: int = 0) -> NDArray:
-        ...
+    def __init__(self, fun: Optional[Callable] = None) -> None:
+        if not hasattr(self, "fun"):
+            self.fun = fun
 
     def __call__(self, x: NDArray, order: int = 0) -> NDArray:
         """Function returns function values, derivatives and definite integrals.
@@ -47,11 +47,15 @@ class XFunction(ABC):
 
         Raises
         ------
+        AttributeError
+            Raised when the function implementation is not provided.
         ValueError
             Raised when `x` is not a scalar, 1d array or 2d array with two rows.
 
         """
         # validate
+        if getattr(self, "fun", None) is None:
+            raise AttributeError("please provide the function implementation")
         x = np.asarray(x, dtype=float)
         if (x.ndim not in [0, 1, 2]) or (x.ndim == 2 and len(x) != 2):
             raise ValueError("please provide a scalar, an 1d array, or a 2d "
@@ -113,13 +117,15 @@ class BundleXFunction(XFunction):
         self.der_fun = partial(der_fun, params)
         self.int_fun = partial(int_fun, params)
 
-    def fun(self, x: NDArray, order: int = 0) -> NDArray:
-        if order == 0:
-            return self.val_fun(x)
-        if order > 0:
-            return self.der_fun(x, order)
-        dx = np.diff(x, axis=0)[0]
-        val = self.int_fun(x[1], order)
-        for i in range(-order):
-            val -= self.int_fun(x[0], order + i)*taylor_term(dx, i)
-        return val
+        def fun(x: NDArray, order: int = 0) -> NDArray:
+            if order == 0:
+                return self.val_fun(x)
+            if order > 0:
+                return self.der_fun(x, order)
+            dx = np.diff(x, axis=0)[0]
+            val = self.int_fun(x[1], order)
+            for i in range(-order):
+                val -= self.int_fun(x[0], order + i)*taylor_term(dx, i)
+            return val
+
+        super().__init__(fun=fun)
