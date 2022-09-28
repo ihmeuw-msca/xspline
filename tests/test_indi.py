@@ -5,7 +5,7 @@ from xspline.indi import Indi
 
 # define parameters
 params = [((1.0, True), (2.0, False))]
-x = [np.linspace(-1, 2, 101)]
+x = [np.linspace(1, 2, 101)]
 order = [-2, -1, 0, 1, 2]
 
 

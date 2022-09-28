@@ -9,12 +9,6 @@ from xspline.typing import (BoundaryPoint, Callable, RawDFunction,
                             RawIFunction, RawVFunction)
 
 
-def taylor_term(x: NDArray, order: int) -> NDArray:
-    if x.ndim == 2:
-        x = np.diff(x, axis=0)[0]
-    return x**order/factorial(order)
-
-
 class XFunction:
 
     def __init__(self, fun: Optional[Callable] = None) -> None:
@@ -51,6 +45,8 @@ class XFunction:
             Raised when the function implementation is not provided.
         ValueError
             Raised when `x` is not a scalar, 1d array or 2d array with two rows.
+        ValueError
+            Raised when `order < 0` and `any(x[0] > x[1])`.
 
         """
         # validate
@@ -74,6 +70,10 @@ class XFunction:
         if order < 0 and x.ndim == 1:
             x = np.vstack([np.repeat(x.min(), x.size), x])
 
+        # check interval bounds
+        if order < 0 and (x[0] > x[1]).any():
+            raise ValueError("to integrate, `x` must satisfy `x[0] <= x[1]`")
+
         # call fun
         result = self.fun(x, order)
 
@@ -85,24 +85,29 @@ class XFunction:
     def add(self, other: "XFunction", sep: BoundaryPoint) -> "XFunction":
 
         def fun(x: NDArray, order: int = 0) -> NDArray:
-            li = x <= sep[0] if sep[1] else x < sep[0]
-            ri = ~li
+            left = x <= sep[0] if sep[1] else x < sep[0]
 
-            val = np.zeros(x.size, dtype=x.dtype)
             if order >= 0:
-                val[li] = self(x[li], order)
-                val[ri] = other(x[ri], order)
-            else:
-                val[li] = self(x[li], order)
-                if ri.any():
-                    lx = np.repeat(sep[0], ri.sum())
-                    rx = np.vstack([lx, x[ri]])
-                    for i in range(order + 1, 0):
-                        val[ri] += self(lx, order)*taylor_term(rx, i - order)
-                    val[ri] += self(lx, order) + other(rx, order)
-            return val
+                return np.where(left, self.fun(x, order), other.fun(x, order))
 
-        return fun
+            lboth, rboth = left.all(axis=0), (~left).all(axis=0)
+            landr = (~lboth) & (~rboth)
+
+            result = np.zeros(x.shape[1], dtype=x.dtype)
+            result[lboth] = self.fun(x[:, lboth], order)
+            result[rboth] = other.fun(x[:, rboth], order)
+
+            if landr.any():
+                lx = np.insert(x[np.ix_([0], landr)], 1, sep[0], axis=0)
+                rx = np.insert(x[np.ix_([1], landr)], 0, sep[0], axis=0)
+                dx = x[1][landr] - sep[0]
+
+                for i in range(1, -order):
+                    result[landr] += self.fun(lx, order + i) * (dx**i / factorial(i))
+                result[landr] += self.fun(lx, order) + other.fun(rx, order)
+            return result
+
+        return XFunction(fun)
 
 
 class BundleXFunction(XFunction):
@@ -125,7 +130,7 @@ class BundleXFunction(XFunction):
             dx = np.diff(x, axis=0)[0]
             val = self.int_fun(x[1], order)
             for i in range(-order):
-                val -= self.int_fun(x[0], order + i)*taylor_term(dx, i)
+                val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
             return val
 
         super().__init__(fun=fun)

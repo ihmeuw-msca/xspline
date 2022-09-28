@@ -5,7 +5,7 @@ from xspline.poly import Poly
 
 # define the parameters
 params = [(12, -6, 2)]
-x = [np.linspace(-1, 2, 101)]
+x = [np.linspace(1.0, 2, 101)]
 order = [-2, -1, 0, 1, 2]
 
 
