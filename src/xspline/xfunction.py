@@ -27,7 +27,8 @@ class XFunction:
         if isscalar:
             x = x.ravel()
         if order >= 0 and x.ndim == 2:
-            x = x[1] - x[0]
+            raise ValueError("please provide an 1d array for function value "
+                             "defivative computation")
         if order < 0 and x.ndim == 1:
             x = np.vstack([np.repeat(x.min(), x.size), x])
 
@@ -43,13 +44,11 @@ class XFunction:
         Parameters
         ----------
         x
-            Data points where the function is evaluated. If `order >= 0` and
-            `x` is a 2d array with two rows, the difference between the rows
-            will be used for function evaluation. If `order < 0` and `x` is a
-            2d array with two rows, the rows will be treated as the starting and
-            ending points for definite interval. If `order < 0` and `x` is a
-            1d array, function will use the smallest number in `x` as the
-            starting point of the definite interval.
+            Data points where the function is evaluated. If `order < 0` and `x` 
+            is a 2d array with two rows, the rows will be treated as the
+            starting and ending points for definite interval. If `order < 0` and
+            `x` is a 1d array, function will use the smallest number in `x` as
+            the starting point of the definite interval.
         order
             Order of differentiation or integration. When `order = 0`, function
             value will be returned. When `order > 0` function derviative will
@@ -67,6 +66,8 @@ class XFunction:
             Raised when the function implementation is not provided.
         ValueError
             Raised when `x` is not a scalar, 1d array or 2d array with two rows.
+        ValueErorr
+            Raised when `order >= 0` and `x` is a 2d array.
         ValueError
             Raised when `order < 0` and `any(x[0] > x[1])`.
 

@@ -75,8 +75,8 @@ def test_check_args_2(xfun, order):
     """check collapes behavior when x dimension is 2, and compute val or der
     """
     x = np.ones((2, 3))
-    x, _, _ = xfun._check_args(x, order=order)
-    assert np.allclose(x, 0.0)
+    with pytest.raises(ValueError):
+        xfun._check_args(x, order=order)
 
 
 def test_check_args_3(xfun):
