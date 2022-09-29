@@ -122,6 +122,27 @@ def clear_bspl_cache() -> None:
 
 
 class Bspl(BundleXFunction):
+    """Basis spline function.
+
+    Parameters
+    ----------
+    params
+        This is a tuple that contains knots, degree and index of the basis
+        function.
+
+    Example
+    -------
+    >>> bspl = Bspl(((0.0, 1.0), 1, 0)) # knots=(0.0, 1.0), degree=2, index=0
+    >>> bspl([0.0, 1.0])
+    array([0., 1.])
+    >>> bspl([0.0, 1.0], order=1)
+    array([1., 1.])
+    >>> bspl([0.0, 1.0], order=2)
+    array([0., 0.])
+    >>> bspl([0.0, 1.0], order=-1)
+    array([0. , 0.5])
+
+    """
 
     def __init__(self, params: BsplParams) -> None:
         super().__init__(params, bspl_val, bspl_der, bspl_int)

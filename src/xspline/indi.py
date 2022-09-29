@@ -42,6 +42,27 @@ def indi_int(params: IndiParams, x: NDArray, order: int) -> NDArray:
 
 
 class Indi(BundleXFunction):
+    """Indicator function.
+
+    Parameters
+    ----------
+    params
+        This is a tuple contains the lower and upper bounds of the indicator
+        function. For each bound it consists of a number for the location of the
+        bound and a boolean for the inclusion of the bound. For example, if we
+        pass in `((0.0, True), (1.0, False))`, this represents interval [0, 1).
+
+    Example
+    -------
+    >>> indi = Indi(((0.0, True), (1.0, False)))
+    >>> indi([-1.0, 0.0, 1.0])
+    array([0., 1., 0.])
+    >>> indi([-1.0, 0.0, 1.0], order=1)
+    array([0., 0., 0.])
+    >>> indi([-1.0, 0.0, 1.0], order=-1)
+    array([0., 0., 1.])
+
+    """
 
     def __init__(self, params: IndiParams) -> None:
         super().__init__(params, indi_val, indi_der, indi_int)

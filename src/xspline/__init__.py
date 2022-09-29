@@ -1,3 +1,9 @@
+from .bspl import Bspl
+from .indi import Indi
+from .poly import Poly
+from .xfunction import BasisXFunction, BundleXFunction, XFunction
+from .xspl import XSpline
+
 __all__ = [
     "Bspl",
     "Indi",
@@ -7,9 +13,3 @@ __all__ = [
     "BundleXFunction",
     "XFunction",
 ]
-
-from .bspl import Bspl
-from .indi import Indi
-from .poly import Poly
-from .xfunction import BasisXFunction, BundleXFunction, XFunction
-from .xspl import XSpline

@@ -20,6 +20,26 @@ def poly_int(params: PolyParams, x: NDArray, order: int) -> NDArray:
 
 
 class Poly(BundleXFunction):
+    """Polynomial function. A simple wrapper for the numpy poly functions.
+
+    Parameters
+    ----------
+    params
+        This a tuple contains coefficients for the terms in polynomial.
+
+    Example
+    -------
+    >>> poly = Poly((1.0, 0.0))
+    >>> poly([0.0, 1.0])
+    array([0.0, 1.0])
+    >>> poly([0.0, 1.0], order=1)
+    array([1.0, 1.0])
+    >>> poly([0.0, 1.0], order=2)
+    array([0.0, 0.0])
+    >>> poly([0.0, 1.0]], order=-1)
+    array([0.0, 0.5])
+
+    """
 
     def __init__(self, params: PolyParams) -> None:
         super().__init__(params, poly_val, poly_der, poly_int)
