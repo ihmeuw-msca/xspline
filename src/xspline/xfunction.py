@@ -142,7 +142,7 @@ class BasisXFunction(XFunction):
     coefs = property(attrgetter("_coefs"))
 
     def __init__(self,
-                 basis_funs: tuple[XFunction],
+                 basis_funs: tuple[XFunction, ...],
                  coefs: Optional[NDArray] = None) -> None:
         if not all(isinstance(fun, XFunction) for fun in basis_funs):
             raise TypeError("basis functions must all be instances of "
