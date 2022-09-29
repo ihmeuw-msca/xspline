@@ -101,3 +101,11 @@ def test_scalar_input_output(xfun):
     x = 1.0
     y = xfun(x)
     assert np.isscalar(y)
+
+
+def test_empty_input_output(xfun):
+    """check when input is an empty array, output is also an empty array.
+    """
+    x = np.array([], dtype=float)
+    y = xfun(x)
+    assert y.size == 0 and y.shape == (0,)

@@ -22,10 +22,6 @@ class XFunction:
             raise ValueError("please provide a scalar, an 1d array, or a 2d "
                              "array with two rows")
 
-        # special case, empty array
-        if x.size == 0:
-            return np.empty(shape=x.shape, dtype=x.dtype)
-
         # reshape array
         isscalar = x.ndim == 0
         if isscalar:
@@ -80,6 +76,8 @@ class XFunction:
 
         x, order, isscalar = self._check_args(x, order)
 
+        if x.size == 0:
+            return np.empty(shape=x.shape, dtype=x.dtype)
         result = self.fun(x, order)
 
         if isscalar:
