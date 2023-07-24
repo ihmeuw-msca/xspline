@@ -2,7 +2,6 @@ from __future__ import annotations
 from functools import partial
 from math import factorial
 from operator import attrgetter
-from typing import Optional
 
 import numpy as np
 
@@ -226,7 +225,7 @@ class BasisXFunction(XFunction):
     coefs = property(attrgetter("_coefs"))
 
     def __init__(
-        self, basis_funs: tuple[XFunction, ...], coefs: Optional[NDArray] = None
+        self, basis_funs: tuple[XFunction, ...], coefs: NDArray | None = None
     ) -> None:
         if not all(isinstance(fun, XFunction) for fun in basis_funs):
             raise TypeError("basis functions must all be instances of " "`XFunction`")
@@ -234,7 +233,7 @@ class BasisXFunction(XFunction):
         self.coefs = coefs
 
     @coefs.setter
-    def coefs(self, coefs: Optional[NDArray]) -> None:
+    def coefs(self, coefs: NDArray | None) -> None:
         if coefs is not None:
             coefs = np.asarray(coefs, dtype=float).ravel()
             if coefs.size != len(self):
