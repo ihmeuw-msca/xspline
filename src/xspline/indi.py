@@ -1,13 +1,28 @@
 from math import factorial
 
 import numpy as np
-from numpy.typing import NDArray
 
-from xspline.typing import IndiParams
+from xspline.typing import IndiParams, NDArray
 from xspline.xfunction import BundleXFunction
 
 
 def indi_val(params: IndiParams, x: NDArray) -> NDArray:
+    """Indicator value function,
+
+    Parameters
+    ----------
+    params
+        Indicator parameters as a tuple consists of lower and upper bound of
+        the interval corresponding to the indicator function.
+    x
+        Data points.
+
+    Returns
+    -------
+    describe
+        Indicator function value.
+
+    """
     # lower and upper bounds
     lb, ub = params
 
@@ -22,21 +37,54 @@ def indi_val(params: IndiParams, x: NDArray) -> NDArray:
 
 
 def indi_der(params: IndiParams, x: NDArray, order: int) -> NDArray:
+    """Indicator derivative function. Since indicator function is a piecewise
+    constant function, its derivative will always be zero.
+
+    Parameters
+    ----------
+    params
+        Indicator parameters as a tuple consists of lower and upper bound of
+        the interval corresponding to the indicator function.
+    x
+        Data points.
+
+    Returns
+    -------
+    describe
+        Indicator deviative value.
+
+    """
     return np.zeros(x.size, dtype=x.dtype)
 
 
 def indi_int(params: IndiParams, x: NDArray, order: int) -> NDArray:
+    """Indicator definite integral function. It is a piecewise polynomial
+    function.
+
+    Parameters
+    ----------
+    params
+        Indicator parameters as a tuple consists of lower and upper bound of
+        the interval corresponding to the indicator function.
+    x
+        Data points.
+
+    Returns
+    -------
+    describe
+        Indicator definite integral value.
+
+    """
     # lower and upper bounds
     lb, ub = params
 
     val = np.zeros(x.size, dtype=x.dtype)
     ind0 = (x >= lb[0]) & (x <= ub[0])
     ind1 = x > ub[0]
-    val[ind0] = (x[ind0] - lb[0])**(-order)/factorial(-order)
+    val[ind0] = (x[ind0] - lb[0]) ** (-order) / factorial(-order)
     for i in range(-order):
-        val[ind1] += (
-            ((ub[0] - lb[0])**(-order - i)/factorial(-order - i)) *
-            ((x[ind1] - ub[0])**i/factorial(i))
+        val[ind1] += ((ub[0] - lb[0]) ** (-order - i) / factorial(-order - i)) * (
+            (x[ind1] - ub[0]) ** i / factorial(i)
         )
     return val
 
