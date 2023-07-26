@@ -19,7 +19,7 @@ class XSpline(BasisXFunction):
         Left extrapolation polynomial degree.
     rdegree
         Right extrapolation polynomial degree.
-    coefs
+    coef
         The coefficients for linear combining the spline basis.
 
     """
@@ -30,7 +30,7 @@ class XSpline(BasisXFunction):
         degree: int,
         ldegree: Optional[int] = None,
         rdegree: Optional[int] = None,
-        coefs: Optional[NDArray] = None,
+        coef: Optional[NDArray] = None,
     ) -> None:
         # validate inputs
         knots, degree = tuple(sorted(map(float, knots))), int(degree)
@@ -52,7 +52,7 @@ class XSpline(BasisXFunction):
 
         self.knots, self.degree = knots, degree
         self.ldegree, self.rdegree = ldegree, rdegree
-        super().__init__(funs, coefs=coefs)
+        super().__init__(funs, coef=coef)
 
     def get_design_mat(
         self, x: NDArray, order: int = 0, check_args: bool = True
