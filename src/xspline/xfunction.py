@@ -19,23 +19,17 @@ class XFunction:
     """Function interface that provide easy access to function value,
     derivatives and definite integrals.
 
-    There are two different ways to use this class, either use this class to
-    wrap around a function that aligns with the ``XFunction`` function call
-    interface. The added benefit is ``XFunction`` will automatic check and parse
-    the inputs. The other way is to inherit this class and implement a ``fun``
-    member function for the function call.
-
     Parameters
     ----------
     fun
-        Optional function implementation. If this is ``None``, it will require
-        user to implement ``fun`` class member function.
+        Function implementation.
+
+    TODO: describe the interface of the function implementation
 
     """
 
-    def __init__(self, fun: Callable | None = None) -> None:
-        if not hasattr(self, "fun"):
-            self.fun = fun
+    def __init__(self, fun: Callable) -> None:
+        self._fun = fun
 
     def _check_args(self, x: NDArray, order: int) -> tuple[NDArray, int, bool]:
         x, order = np.asarray(x, dtype=float), int(order)
@@ -96,17 +90,12 @@ class XFunction:
             Raised when `order < 0` and `any(x[0] > x[1])`.
 
         """
-        if getattr(self, "fun", None) is None:
-            raise AttributeError("please provide the function implementation")
-
         x, order, isscalar = self._check_args(x, order)
-
         if x.size == 0:
             return np.empty(shape=x.shape, dtype=x.dtype)
-        result = self.fun(x, order)
-
+        result = self._fun(x, order)
         if isscalar:
-            result = result[0]
+            return result[0]
         return result
 
     def append(self, other: XFunction, sep: BoundaryPoint) -> XFunction:
@@ -122,19 +111,20 @@ class XFunction:
             function and after the the ``other`` function.
 
         """
+        lfun, rfun = self._fun, other._fun
 
         def fun(x: NDArray, order: int = 0) -> NDArray:
             left = x <= sep[0] if sep[1] else x < sep[0]
 
             if order >= 0:
-                return np.where(left, self.fun(x, order), other.fun(x, order))
+                return np.where(left, lfun(x, order), rfun(x, order))
 
             lboth, rboth = left.all(axis=0), (~left).all(axis=0)
             landr = (~lboth) & (~rboth)
 
             result = np.zeros(x.shape[1], dtype=x.dtype)
-            result[lboth] = self.fun(x[:, lboth], order)
-            result[rboth] = other.fun(x[:, rboth], order)
+            result[lboth] = lfun(x[:, lboth], order)
+            result[rboth] = rfun(x[:, rboth], order)
 
             if landr.any():
                 lx = np.insert(x[np.ix_([0], landr)], 1, sep[0], axis=0)
@@ -142,8 +132,8 @@ class XFunction:
                 dx = x[1][landr] - sep[0]
 
                 for i in range(1, -order):
-                    result[landr] += self.fun(lx, order + i) * (dx**i / factorial(i))
-                result[landr] += self.fun(lx, order) + other.fun(rx, order)
+                    result[landr] += lfun(lx, order + i) * (dx**i / factorial(i))
+                result[landr] += lfun(lx, order) + rfun(rx, order)
             return result
 
         return XFunction(fun)
@@ -180,32 +170,18 @@ class BundleXFunction(XFunction):
         self.der_fun = partial(der_fun, params)
         self.int_fun = partial(int_fun, params)
 
-    def fun(self, x: NDArray, order: int = 0) -> NDArray:
-        """Function implementation, aligns with the ``XFunction`` function call
-        interface.
+        def fun(x: NDArray, order: int = 0) -> NDArray:
+            if order == 0:
+                return self.val_fun(x)
+            if order > 0:
+                return self.der_fun(x, order)
+            dx = np.diff(x, axis=0)[0]
+            val = self.int_fun(x[1], order)
+            for i in range(-order):
+                val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
+            return val
 
-        Parameters
-        ----------
-        x
-            Data points
-        order
-            Order of differentiation/integration.
-
-        Returns
-        -------
-        describe
-            Function value, derivatives or definite integrals.
-
-        """
-        if order == 0:
-            return self.val_fun(x)
-        if order > 0:
-            return self.der_fun(x, order)
-        dx = np.diff(x, axis=0)[0]
-        val = self.int_fun(x[1], order)
-        for i in range(-order):
-            val -= self.int_fun(x[0], order + i) * (dx**i / factorial(i))
-        return val
+        super().__init__(fun)
 
 
 class BasisXFunction(XFunction):
@@ -231,6 +207,16 @@ class BasisXFunction(XFunction):
             raise TypeError("basis functions must all be instances of " "`XFunction`")
         self.basis_funs = tuple(basis_funs)
         self.coefs = coefs
+
+        def fun(x: NDArray, order: int = 0) -> NDArray:
+            if self.coefs is None:
+                raise ValueError(
+                    "please provide the coefficients for the basis " "functions"
+                )
+            design_mat = self.get_design_mat(x, order=order, check_args=False)
+            return design_mat.dot(self.coefs)
+
+        super().__init__(fun)
 
     @coefs.setter
     def coefs(self, coefs: NDArray | None) -> None:
@@ -265,36 +251,7 @@ class BasisXFunction(XFunction):
         """
         if check_args:
             x, order, _ = self._check_args(x, order)
-        return np.vstack([fun.fun(x, order) for fun in self.basis_funs]).T
-
-    def fun(self, x: NDArray, order: int = 0) -> NDArray:
-        """Function implementation, aligns with the ``XFunction`` function call
-        interface.
-
-        Parameters
-        ----------
-        x
-            Data points
-        order
-            Order of differentiation/integration.
-
-        Returns
-        -------
-        describe
-            Function value, derivatives or definite integrals.
-
-        Raises
-        ------
-        ValueError
-            Raised when the ``coefs`` is not provided.
-
-        """
-        if self.coefs is None:
-            raise ValueError(
-                "please provide the coefficients for the basis " "functions"
-            )
-        design_mat = self.get_design_mat(x, order=order, check_args=False)
-        return design_mat.dot(self.coefs)
+        return np.vstack([xfun._fun(x, order) for xfun in self.basis_funs]).T
 
     def __len__(self) -> int:
         """Number of basis functions."""
