@@ -79,3 +79,35 @@ XSpline can be used to obtain definite integrals.
     ax[1].plot(x, idesign_mat)
 
 .. image:: images/readme_usage_2.png
+
+XSpline can extrapolate with different polynomial options
+
+.. code-block:: python
+
+    np.random.seed(123)
+    # constant extrapolation one the left and linear extrapolation on the right
+    spline = XSpline(
+        knots=[0, 0.25, 0.5, 0.75, 1],
+        degree=3,
+        ldegree=0,
+        rdegree=1,
+        coef=np.random.randn(len(spline)),
+    )
+    x = np.arange(-0.5, 1.51, 0.01)
+    y, design_mat = spline(x), spline.get_design_mat(x)
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3))
+    ax[0].plot(x, y)
+    ax[1].plot(x, design_mat)
+    for i in range(len(ax)):
+        ax[i].vlines(
+            [0, 1],
+            ymin=0,
+            ymax=1,
+            transform=ax[i].get_xaxis_transform(),
+            linestyle="--",
+            linewidth=1,
+            color="grey",
+        )
+
+.. image:: images/readme_usage_3.png
