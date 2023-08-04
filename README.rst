@@ -1,8 +1,15 @@
-.. image:: https://github.com/zhengp0/xspline/workflows/python-build/badge.svg
+.. image:: https://img.shields.io/pypi/l/xspline
+    :target: https://github.com/zhengp0/xspline/LICENSE
+
+.. image:: https://img.shields.io/pypi/v/xspline
+    :target: https://pypi.org/project/xspline
+
+.. image:: https://img.shields.io/github/actions/workflow/status/zhengp0/xspline/python-build.yml?branch=main
     :target: https://github.com/zhengp0/xspline/actions
 
-.. image:: https://badge.fury.io/py/xspline.svg
-    :target: https://badge.fury.io/py/xspline
+.. image:: https://img.shields.io/badge/docs-here-green
+    :target: https://zhengp0.github.io/xspline
+
 
 XSpline
 =======
