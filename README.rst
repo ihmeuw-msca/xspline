@@ -29,7 +29,7 @@ XSpline requires python 3.10 or higher. XSpline only depends on ``numpy>=1.25.1`
 Usage
 -----
 
-There are two main use-cases.
+You can use XSpline as a univariate function or use it to get design matrix.
 
 .. code-block:: python
     
@@ -41,30 +41,41 @@ There are two main use-cases.
     x = np.arange(0, 1.01, 0.01)
 
 
-one is to use XSpline as a univariate function. In this case, user must provide
+One is to use XSpline as a univariate function. In this case, user must provide
 coefficients for the spline bases.
 
 .. code-block:: python
 
     np.random.seed(123)
     spline.coef = np.random.randn(len(spline))
-    y = spline(x)
+    y, design_mat = spline(x), spline.get_design_mat(x)
 
-    fig, ax = plt.subplots(figsize=(8, 3))
-    ax.plot(x, y)
-    ax.set_title("Usecase 1", loc="left")
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3))
+    ax[0].plot(x, y)
+    ax[1].plot(x, design_mat)
 
 .. image:: images/readme_usage_0.png
-    :alt: usecase_1
 
-The other is to obtain the design matrix for other modeling uses.
+XSpline can be used to obtain derivatives.
 
 .. code-block:: python
 
-    design_mat = spline.get_design_mat(x)
+    dy, ddesign_mat = spline(x, order=1), spline.get_design_mat(x, order=1)
 
-    fig, ax = plt.subplots(figsize=(8, 3))
-    ax.plot(x, design_mat)
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3))
+    ax[0].plot(x, dy)
+    ax[1].plot(x, ddesign_mat)
 
 .. image:: images/readme_usage_1.png
-    :alt: usecase_2
+
+XSpline can be used to obtain definite integrals.
+
+.. code-block:: python
+
+    iy, idesign_mat = spline(x, order=-1), spline.get_design_mat(x, order=-1)
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 3))
+    ax[0].plot(x, iy)
+    ax[1].plot(x, idesign_mat)
+
+.. image:: images/readme_usage_2.png
