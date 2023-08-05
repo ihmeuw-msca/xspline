@@ -15,7 +15,7 @@ authors = [
 dependencies = ["numpy>=1.25.1"]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest", "pytest-cov"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "furo"]
 
 [project.urls]

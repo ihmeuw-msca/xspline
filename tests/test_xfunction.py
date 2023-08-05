@@ -22,7 +22,7 @@ def test_append(order):
         if order > 0:
             return np.zeros(x.size, dtype=x.dtype)
         dx = x[1] - x[0]
-        return dx**(-order) / factorial(-order)
+        return dx ** (-order) / factorial(-order)
 
     my_fun = fun0.append(fun1, sep)
 
@@ -33,7 +33,7 @@ def test_append(order):
         if order > 0:
             return np.zeros(x.size, dtype=x.dtype)
         z = np.maximum(0.0, x - sep[0])
-        return z**(-order) / factorial(-order)
+        return z ** (-order) / factorial(-order)
 
     x = np.linspace(0.0, 2.0, 101)
     my_val = my_fun(x, order=order)
@@ -50,21 +50,20 @@ def xfun():
         if order > 0:
             return np.zeros(x.size, dtype=x.dtype)
         dx = x[1] - x[0]
-        return dx**(-order) / factorial(-order)
+        return dx ** (-order) / factorial(-order)
+
     return fun
 
 
 def test_check_args_0(xfun):
-    """check value error, when x dimension is greater than 2
-    """
+    """check value error, when x dimension is greater than 2"""
     x = np.ones((2, 2, 2))
     with pytest.raises(ValueError):
         xfun(x)
 
 
 def test_check_args_1(xfun):
-    """check value error, when x dimension is 2 but x have more rows than 2
-    """
+    """check value error, when x dimension is 2 but x have more rows than 2"""
     x = np.ones((3, 2))
     with pytest.raises(ValueError):
         xfun(x)
@@ -72,40 +71,35 @@ def test_check_args_1(xfun):
 
 @pytest.mark.parametrize("order", [0, 1])
 def test_check_args_2(xfun, order):
-    """check collapes behavior when x dimension is 2, and compute val or der
-    """
+    """check collapes behavior when x dimension is 2, and compute val or der"""
     x = np.ones((2, 3))
     with pytest.raises(ValueError):
         xfun._check_args(x, order=order)
 
 
 def test_check_args_3(xfun):
-    """check extend behavior when x dimension is 1, and compute integral
-    """
+    """check extend behavior when x dimension is 1, and compute integral"""
     x = np.ones(3)
     x, _, _ = xfun._check_args(x, order=-1)
     assert np.allclose(x, np.ones((2, 3)))
 
 
 def test_check_args_4(xfun):
-    """check when x is a scalar
-    """
+    """check when x is a scalar"""
     x = 1.0
     x, _, isscalar = xfun._check_args(x, 0)
     assert isscalar and x.shape == (1,) and np.allclose(x, 1.0)
 
 
 def test_scalar_input_output(xfun):
-    """check when input is a scalar, output is also a scalar
-    """
+    """check when input is a scalar, output is also a scalar"""
     x = 1.0
     y = xfun(x)
     assert np.isscalar(y)
 
 
 def test_empty_input_output(xfun):
-    """check when input is an empty array, output is also an empty array.
-    """
+    """check when input is an empty array, output is also an empty array."""
     x = np.array([], dtype=float)
     y = xfun(x)
     assert y.size == 0 and y.shape == (0,)

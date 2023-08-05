@@ -16,12 +16,10 @@ def test_degree_error(degree):
         XSpline(knots, degree)
 
 
-@pytest.mark.parametrize(("degree", "sdegree", "result"),
-                         [(2, None, 2),
-                          (1, None, 1),
-                          (2, 1, 1),
-                          (2, 3, 2),
-                          (2, -1, -1)])
+@pytest.mark.parametrize(
+    ("degree", "sdegree", "result"),
+    [(2, None, 2), (1, None, 1), (2, 1, 1), (2, 3, 2), (2, -1, -1)],
+)
 def test_ldegree_rdegree(degree, sdegree, result):
     knots = (0.0, 1.0)
     xspline = XSpline(knots, degree, ldegree=sdegree, rdegree=sdegree)

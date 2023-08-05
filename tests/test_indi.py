@@ -12,7 +12,7 @@ order = [-2, -1, 0, 1, 2]
 def truth(x: NDArray, order: int) -> NDArray:
     result = np.zeros(x.size)
     index0 = (x >= 1.0) & (x < 2)
-    index1 = (x >= 2.0)
+    index1 = x >= 2.0
     if order == 0:
         result[index0] = 1.0
         return result
@@ -25,7 +25,7 @@ def truth(x: NDArray, order: int) -> NDArray:
         result[index1] = 1.0
         return result
     if order == -2:
-        result[index0] = 0.5*x[index0]**2 - x[index0] + 0.5
+        result[index0] = 0.5 * x[index0] ** 2 - x[index0] + 0.5
         result[index1] = x[index1] - 1.5
         return result
     raise ValueError("not support value for 'order'")
@@ -39,6 +39,4 @@ def test_indi(params, x, order):
     z = x
     if order < 0:
         z = np.vstack([np.ones(x.size), x])
-    assert np.allclose(
-        indi(z, order), truth(x, order)
-    )
+    assert np.allclose(indi(z, order), truth(x, order))

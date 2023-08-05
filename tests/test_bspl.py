@@ -23,7 +23,7 @@ def test_bspl_val(index):
     tr_val = np.where(
         x < knots[1],
         np.polyval(sub_poly_params[0], x),
-        np.polyval(sub_poly_params[1], x)
+        np.polyval(sub_poly_params[1], x),
     )
     assert np.allclose(my_val, tr_val)
 
@@ -33,15 +33,13 @@ def test_bspl_val(index):
 @pytest.mark.parametrize("index", indices)
 def test_bspl_der(index):
     bspl = Bspl((knots, degree, index))
-    sub_poly_params = list(
-        map(lambda c: np.polyder(c, 1), poly_params[index + degree])
-    )
+    sub_poly_params = list(map(lambda c: np.polyder(c, 1), poly_params[index + degree]))
 
     my_val = bspl(x, order=1)
     tr_val = np.where(
         x < knots[1],
         np.polyval(sub_poly_params[0], x),
-        np.polyval(sub_poly_params[1], x)
+        np.polyval(sub_poly_params[1], x),
     )
     assert np.allclose(my_val, tr_val)
 
@@ -51,16 +49,14 @@ def test_bspl_der(index):
 @pytest.mark.parametrize("index", indices)
 def test_bspl_int(index):
     bspl = Bspl((knots, degree, index))
-    sub_poly_params = list(
-        map(lambda c: np.polyint(c, 1), poly_params[index + degree])
-    )
+    sub_poly_params = list(map(lambda c: np.polyint(c, 1), poly_params[index + degree]))
     offsets = [
         -np.polyval(sub_poly_params[0], 0.25),
-        -np.polyval(sub_poly_params[1], knots[1]) +
-        (
-            np.polyval(sub_poly_params[0], knots[1]) -
-            np.polyval(sub_poly_params[0], 0.25)
-        )
+        -np.polyval(sub_poly_params[1], knots[1])
+        + (
+            np.polyval(sub_poly_params[0], knots[1])
+            - np.polyval(sub_poly_params[0], 0.25)
+        ),
     ]
     a = 0.25
     x = np.vstack([np.repeat(a, 76), np.linspace(a, knots[2], 76)])
