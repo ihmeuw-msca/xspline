@@ -10,6 +10,9 @@
 .. image:: https://img.shields.io/badge/docs-here-green
     :target: https://zhengp0.github.io/xspline
 
+.. image:: https://codecov.io/gh/zhengp0/xspline/branch/main/graph/badge.svg?token=WUV5OR77N8 
+    :target: https://codecov.io/gh/zhengp0/xspline
+
 
 XSpline
 =======
