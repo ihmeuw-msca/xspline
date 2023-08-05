@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xspline"
+version = "0.1.0"
+description = "Advanced spline package that provides b-spline bases, their derivatives and integrals"
+readme = "REDME.rst"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "IHME Math Sciences", email = "ihme.math.sciences@gmail.com" },
+]
+dependencies = ["numpy>=1.25.1"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+docs = ["sphinx", "sphinx-autodoc-typehints", "furo"]
+
+[project.urls]
+github = "https://github.com/zhengp0/xspline"
+
+[tool.sphinx]
+project = "xspline"
+author = "IHME Math Sciences"
+copyright = "2023, IHME Math Sciences"
+version = "0.1.0"
