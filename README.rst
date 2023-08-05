@@ -13,6 +13,9 @@
 .. image:: https://codecov.io/gh/zhengp0/xspline/branch/main/graph/badge.svg?token=WUV5OR77N8 
     :target: https://codecov.io/gh/zhengp0/xspline
 
+.. image:: https://app.codacy.com/project/badge/Grade/308cc2771871498fbcdaee3440e56ad0
+    :target: https://app.codacy.com/gh/zhengp0/xspline/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+
 
 XSpline
 =======
