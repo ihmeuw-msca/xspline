@@ -1,5 +1,5 @@
 .. image:: https://img.shields.io/pypi/l/xspline
-    :target: https://github.com/zhengp0/xspline/LICENSE
+    :target: https://github.com/zhengp0/xspline/blob/main/LICENSE
 
 .. image:: https://img.shields.io/pypi/v/xspline
     :target: https://pypi.org/project/xspline
