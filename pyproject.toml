@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xspline"
-version = "1.0.0"
+version = "0.1.0"
 description = "Advanced spline package that provides b-spline bases, their derivatives and integrals"
 readme = "REDME.rst"
 requires-python = ">=3.10"
@@ -12,7 +12,7 @@ license = { file = "LICENSE" }
 authors = [
     { name = "IHME Math Sciences", email = "ihme.math.sciences@gmail.com" },
 ]
-dependencies = ["numpy"]
+dependencies = ["numpy>=1.25.1"]
 
 [project.optional-dependencies]
 test = ["pytest"]
@@ -25,4 +25,4 @@ github = "https://github.com/zhengp0/xspline"
 project = "xspline"
 author = "IHME Math Sciences"
 copyright = "2023, IHME Math Sciences"
-version = "1.0.0"
+version = "0.1.0"

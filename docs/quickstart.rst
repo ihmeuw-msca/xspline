@@ -1,41 +1,6 @@
-.. image:: https://img.shields.io/pypi/l/xspline
-    :target: https://github.com/zhengp0/xspline/LICENSE
-
-.. image:: https://img.shields.io/pypi/v/xspline
-    :target: https://pypi.org/project/xspline
-
-.. image:: https://img.shields.io/github/actions/workflow/status/zhengp0/xspline/python-build.yml?branch=main
-    :target: https://github.com/zhengp0/xspline/actions
-
-.. image:: https://img.shields.io/badge/docs-here-green
-    :target: https://zhengp0.github.io/xspline
-
-
-XSpline
-=======
-
-Advanced spline package that provides b-spline bases, their derivatives and integrals.
-
-
-Installation
-------------
-
-XSpline requires python 3.10 or higher. XSpline only depends on ``numpy>=1.25.1``.
-It can be installed via
-
-.. code:: bash
-
-    pip install xspline>=0.1.0
-
-For developers, you can clone the repository and install the package in the
-development mode.
-
-.. code::
-
-    git clone https://github.com/zhengp0/xspline.git
-    cd xspline
-    pip install -e ".[test,docs]"
-
+==========
+Quickstart
+==========
 
 Usage
 -----
@@ -65,7 +30,7 @@ coefficients for the spline bases.
     ax[0].plot(x, y)
     ax[1].plot(x, design_mat)
 
-.. image:: docs/images/readme_usage_0.png
+.. image:: images/readme_usage_0.png
 
 XSpline can be used to obtain derivatives.
 
@@ -77,7 +42,7 @@ XSpline can be used to obtain derivatives.
     ax[0].plot(x, dy)
     ax[1].plot(x, ddesign_mat)
 
-.. image:: docs/images/readme_usage_1.png
+.. image:: images/readme_usage_1.png
 
 XSpline can be used to obtain definite integrals.
 
@@ -89,7 +54,7 @@ XSpline can be used to obtain definite integrals.
     ax[0].plot(x, iy)
     ax[1].plot(x, idesign_mat)
 
-.. image:: docs/images/readme_usage_2.png
+.. image:: images/readme_usage_2.png
 
 XSpline can extrapolate with different polynomial options
 
@@ -121,4 +86,4 @@ XSpline can extrapolate with different polynomial options
             color="grey",
         )
 
-.. image:: docs/images/readme_usage_3.png
+.. image:: images/readme_usage_3.png

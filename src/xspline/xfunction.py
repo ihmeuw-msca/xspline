@@ -193,40 +193,40 @@ class BasisXFunction(XFunction):
     ----------
     basis_funs
         A set of instances of ``XFunction`` as basis functions.
-    coefs
+    coef
         Coefficients for the linearly combine the basis functions.
 
     """
 
-    coefs = property(attrgetter("_coefs"))
+    coef = property(attrgetter("_coef"))
 
     def __init__(
-        self, basis_funs: tuple[XFunction, ...], coefs: NDArray | None = None
+        self, basis_funs: tuple[XFunction, ...], coef: NDArray | None = None
     ) -> None:
         if not all(isinstance(fun, XFunction) for fun in basis_funs):
-            raise TypeError("basis functions must all be instances of " "`XFunction`")
+            raise TypeError("basis functions must all be instances of 'XFunction'")
         self.basis_funs = tuple(basis_funs)
-        self.coefs = coefs
+        self.coef = coef
 
         def fun(x: NDArray, order: int = 0) -> NDArray:
-            if self.coefs is None:
+            if self.coef is None:
                 raise ValueError(
-                    "please provide the coefficients for the basis " "functions"
+                    "please provide the coefficients for the basis functions"
                 )
             design_mat = self.get_design_mat(x, order=order, check_args=False)
-            return design_mat.dot(self.coefs)
+            return design_mat.dot(self.coef)
 
         super().__init__(fun)
 
-    @coefs.setter
-    def coefs(self, coefs: NDArray | None) -> None:
-        if coefs is not None:
-            coefs = np.asarray(coefs, dtype=float).ravel()
-            if coefs.size != len(self):
+    @coef.setter
+    def coef(self, coef: NDArray | None) -> None:
+        if coef is not None:
+            coef = np.asarray(coef, dtype=float).ravel()
+            if coef.size != len(self):
                 raise ValueError(
-                    "number of coeffcients does not match number " "of basis functions"
+                    "number of coeffcients does not match number of basis functions"
                 )
-        self._coefs = coefs
+        self._coef = coef
 
     def get_design_mat(
         self, x: NDArray, order: int = 0, check_args: bool = True

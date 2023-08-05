@@ -16,10 +16,10 @@ def test_len(xfun):
     assert len(xfun) == 2
 
 
-def test_coefs_error(xfun):
-    coefs = [1, 2, 3]
+def test_coef_error(xfun):
+    coef = [1, 2, 3]
     with pytest.raises(ValueError):
-        xfun.coefs = coefs
+        xfun.coef = coef
 
 
 @pytest.mark.parametrize("order", [-1, 0, 1])
@@ -31,7 +31,7 @@ def test_get_design_mat(xfun, order):
 
 @pytest.mark.parametrize("order", [-1, 0, 1])
 def test_fun(xfun, order):
-    xfun.coefs = [1, 1]
+    xfun.coef = [1, 1]
     x = np.linspace(-0.5, 3.0, 101)
     result = xfun(x, order=order)
     assert result.shape == x.shape
