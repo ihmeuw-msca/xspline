@@ -71,7 +71,7 @@ coefficients for the spline bases.
     ax[0].plot(x, y)
     ax[1].plot(x, design_mat)
 
-.. image:: docs/images/readme_usage_0.png
+.. image:: https://raw.githubusercontent.com/zhengp0/xspline/main/docs/images/readme_usage_0.png
 
 XSpline can be used to obtain derivatives.
 
@@ -83,7 +83,7 @@ XSpline can be used to obtain derivatives.
     ax[0].plot(x, dy)
     ax[1].plot(x, ddesign_mat)
 
-.. image:: docs/images/readme_usage_1.png
+.. image:: https://raw.githubusercontent.com/zhengp0/xspline/main/docs/images/readme_usage_1.png
 
 XSpline can be used to obtain definite integrals.
 
@@ -95,7 +95,7 @@ XSpline can be used to obtain definite integrals.
     ax[0].plot(x, iy)
     ax[1].plot(x, idesign_mat)
 
-.. image:: docs/images/readme_usage_2.png
+.. image:: https://raw.githubusercontent.com/zhengp0/xspline/main/docs/images/readme_usage_2.png
 
 XSpline can extrapolate with different polynomial options
 
@@ -127,4 +127,4 @@ XSpline can extrapolate with different polynomial options
             color="grey",
         )
 
-.. image:: docs/images/readme_usage_3.png
+.. image:: https://raw.githubusercontent.com/zhengp0/xspline/main/docs/images/readme_usage_3.png
