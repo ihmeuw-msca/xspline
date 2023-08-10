@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Advanced spline package that provides b-spline bases, their derivatives and integrals"
 readme = "README.rst"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = { text = "BSD 2-Clause" }
 authors = [
     { name = "IHME Math Sciences", email = "ihme.math.sciences@gmail.com" },
 ]
