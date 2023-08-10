@@ -7,7 +7,7 @@ Usage
 
 You can use XSpline as a univariate function or use it to get design matrix.
 
-.. code:: python
+.. code-block:: python
     
     import numpy as np
     import matplotlib.pyplot as plt
@@ -20,7 +20,7 @@ You can use XSpline as a univariate function or use it to get design matrix.
 One is to use XSpline as a univariate function. In this case, user must provide
 coefficients for the spline bases.
 
-.. code:: python
+.. code-block:: python
 
     np.random.seed(123)
     spline.coef = np.random.randn(len(spline))
@@ -34,7 +34,7 @@ coefficients for the spline bases.
 
 XSpline can be used to obtain derivatives.
 
-.. code:: python
+.. code-block:: python
 
     dy, ddesign_mat = spline(x, order=1), spline.get_design_mat(x, order=1)
 
@@ -46,7 +46,7 @@ XSpline can be used to obtain derivatives.
 
 XSpline can be used to obtain definite integrals.
 
-.. code:: python
+.. code-block:: python
 
     iy, idesign_mat = spline(x, order=-1), spline.get_design_mat(x, order=-1)
 
@@ -58,7 +58,7 @@ XSpline can be used to obtain definite integrals.
 
 XSpline can extrapolate with different polynomial options
 
-.. code:: python
+.. code-block:: python
 
     np.random.seed(123)
     # constant extrapolation one the left and linear extrapolation on the right
