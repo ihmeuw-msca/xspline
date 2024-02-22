@@ -61,11 +61,11 @@ This functionality is essential to risk modeling. For example, data reported by 
 - Peng to write 
 
 More information about the structure of the library can be found in [documentation](https://zhengp0.github.io/xspline/api_reference/), 
-while the mathematical use cases are extensively discussed in [@zheng2021trimmed] in the context of fitting risks. 
+while the mathematical use cases are extensively discussed in [@zheng2021trimmed] and [@zheng2022burden] in the context of fitting risks. 
 
 
 # Ongoing Research and Dissemination
 
-Cite more papers that use xspline. 
+The `xspline` package is widely used in all spline modeling done at IHME. In paricular, the new functionality described above enabled a new set of dose-response analyses recently published by the institue, including analyses of chewing tobacco [@gil2024health], education [@balaj2024effects], second-hand smoke [@flor2024health], intimate partner violence [@spencer2023health], smoking [@dai2022health], blood pressure [@razo2022effects], vegetable consumption [@stanaway2022health], and red meat consumption [@lescinsky2022health]. The results of all of these analyses are now publicly available at https://vizhub.healthdata.org/burden-of-proof/.  
 
 # References
