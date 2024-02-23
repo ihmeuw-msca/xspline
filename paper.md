@@ -1,5 +1,5 @@
 ---
-title: 'pysr3: A Python Package for Sparse Relaxed Regularized Regression'
+title: 'xspline: A Python Package for Flexible Spline Modeling'
 
 tags:
   - Python
@@ -13,6 +13,9 @@ authors:
   - name: Peng Zheng
     orcid: 0000-0003-3313-215X
     affiliation: 1
+- name: Kelsey Maass 
+    orcid: 0000-0002-9534-8901
+    affiliation: 1    
   - name: Aleksandr Aravkin
     orcid: 0000-0002-1875-1801
     affiliation: "1, 2"
@@ -23,7 +26,7 @@ affiliations:
  - name: Department of Applied Mathematics, University of Washington
    index: 2
 
-date: 08.21.2023
+date: 02.22.2024
 bibliography: paper.bib
 
 ---
