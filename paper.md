@@ -31,6 +31,8 @@ bibliography: paper.bib
 
 ---
 
+# `xspline`: A Python Package for Flexible Spline Modeling
+
 ## Summary
 
 Splines are a fundamental tool for describing and estimating nonlinear relationships [@de1978practical]. They allow nonlinear functions to be represented as linear combinations of spline basis elements. Researchers in physical, biological, and health sciences rely on spline models in conjunction with statistical software packages to fit and describe a vast range of nonlinear relationships.
@@ -62,7 +64,26 @@ This functionality is essential to risk modeling. For example, data reported by 
 
 ## Core idea and structure of `xspline`
 
-- Peng to write
+The main idea of `xspline` is to provide a python class that allows user to
+interact with basis splines, their derivatives and integrals and extrapolation
+options more easily.
+
+The computation of splines is based on B-spline or basis spline from
+[@de1978practical]. Upon this, we derived the derivatives and definite integrals
+from the recursive relationship between the splines.
+
+To support the spline basis computation, we also created modules that provide
+convenient interface with indicator and polynomial function and their arbitrary
+order of derivatives and definite integrals. We boundle all those useful
+functions into a main interface class called `XFunction` which allow user call
+the function with specified order, where positive order represent derivatives
+and negative order represent definite integrals.
+
+At end very end, we allow user to specify the way they want to extrapolate by
+matching the smoothness at the end knots.
+
+With all of the above features, we created a easy to use and very useful spline
+package for statistical model building. For more examples please check [here](https://ihmeuw-msca.github.io/xspline/quickstart.html).
 
 More information about the structure of the library can be found in [documentation](https://ihmeuw-msca.github.io/xspline/api_reference/), 
 while the mathematical use cases are extensively discussed in [@zheng2021trimmed] and [@zheng2022burden] in the context of fitting risks.
