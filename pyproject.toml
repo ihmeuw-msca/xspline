@@ -19,10 +19,10 @@ test = ["pytest", "pytest-cov"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "furo"]
 
 [project.urls]
-github = "https://github.com/zhengp0/xspline"
+github = "https://github.com/ihmeuw-msca/xspline"
 
 [tool.sphinx]
 project = "xspline"
 author = "IHME Math Sciences"
-copyright = "2023, IHME Math Sciences"
+copyright = "2024, IHME Math Sciences"
 version = "0.1.0"
