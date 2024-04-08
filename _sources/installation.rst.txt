@@ -15,6 +15,6 @@ development mode.
 
 .. code::
 
-    git clone https://github.com/zhengp0/xspline.git
+    git clone https://github.com/ihmeuw-msca/xspline.git
     cd xspline
     pip install -e ".[test,docs]"

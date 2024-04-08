@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
         <title>xspline.poly - xspline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -225,7 +225,9 @@
 <span class="kn">from</span> <span class="nn">xspline.xfunction</span> <span class="kn">import</span> <span class="n">BundleXFunction</span><span class="p">,</span> <span class="n">XFunction</span>
 
 
-<div class="viewcode-block" id="poly_val"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_val">[docs]</a><span class="k">def</span> <span class="nf">poly_val</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+<div class="viewcode-block" id="poly_val">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_val">[docs]</a>
+<span class="k">def</span> <span class="nf">poly_val</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polynomial value function.</span>
 
 <span class="sd">    Parameters</span>
@@ -244,7 +246,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="poly_der"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_der">[docs]</a><span class="k">def</span> <span class="nf">poly_der</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="poly_der">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_der">[docs]</a>
+<span class="k">def</span> <span class="nf">poly_der</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polynomial derivative function.</span>
 
 <span class="sd">    Parameters</span>
@@ -265,7 +270,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyder</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">order</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="poly_int"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_int">[docs]</a><span class="k">def</span> <span class="nf">poly_int</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
+
+<div class="viewcode-block" id="poly_int">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.poly_int">[docs]</a>
+<span class="k">def</span> <span class="nf">poly_int</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">PolyParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polynomial definite integral function.</span>
 
 <span class="sd">    Parameters</span>
@@ -287,7 +295,10 @@
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">polyval</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyint</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="o">-</span><span class="n">order</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Poly"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.Poly">[docs]</a><span class="k">class</span> <span class="nc">Poly</span><span class="p">(</span><span class="n">BundleXFunction</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Poly">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.Poly">[docs]</a>
+<span class="k">class</span> <span class="nc">Poly</span><span class="p">(</span><span class="n">BundleXFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polynomial function. A simple wrapper for the numpy poly functions.</span>
 
 <span class="sd">    Parameters</span>
@@ -313,7 +324,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">poly_val</span><span class="p">,</span> <span class="n">poly_der</span><span class="p">,</span> <span class="n">poly_int</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_poly_params"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.get_poly_params">[docs]</a><span class="k">def</span> <span class="nf">get_poly_params</span><span class="p">(</span><span class="n">fun</span><span class="p">:</span> <span class="n">XFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="get_poly_params">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.get_poly_params">[docs]</a>
+<span class="k">def</span> <span class="nf">get_poly_params</span><span class="p">(</span><span class="n">fun</span><span class="p">:</span> <span class="n">XFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Solve polynomial (taylor) coefficients provided the ``XFunction``.</span>
 
 <span class="sd">    Parameters</span>
@@ -341,7 +355,10 @@
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">rhs</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="get_poly_fun"><a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.get_poly_fun">[docs]</a><span class="k">def</span> <span class="nf">get_poly_fun</span><span class="p">(</span><span class="n">fun</span><span class="p">:</span> <span class="n">XFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Poly</span><span class="p">:</span>
+
+<div class="viewcode-block" id="get_poly_fun">
+<a class="viewcode-back" href="../../api_reference/xspline.poly.html#xspline.poly.get_poly_fun">[docs]</a>
+<span class="k">def</span> <span class="nf">get_poly_fun</span><span class="p">(</span><span class="n">fun</span><span class="p">:</span> <span class="n">XFunction</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Poly</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the approximation polynomial function.</span>
 
 <span class="sd">    Parameters</span>
@@ -361,6 +378,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">params</span> <span class="o">=</span> <span class="n">get_poly_params</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">degree</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">Poly</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -373,7 +391,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, IHME Math Sciences
+                Copyright &#169; 2024, IHME Math Sciences
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -393,9 +411,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

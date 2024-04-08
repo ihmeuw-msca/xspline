@@ -1,11 +1,11 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="xspline.xspl" href="xspline.xspl.html" /><link rel="prev" title="xspline.poly" href="xspline.poly.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
         <title>xspline.xfunction - xspline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
@@ -219,10 +219,10 @@
         </div>
         <article role="main">
           <section id="module-xspline.xfunction">
-<span id="xspline-xfunction"></span><h1>xspline.xfunction<a class="headerlink" href="#module-xspline.xfunction" title="Permalink to this heading">#</a></h1>
+<span id="xspline-xfunction"></span><h1>xspline.xfunction<a class="headerlink" href="#module-xspline.xfunction" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="xspline.xfunction.XFunction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">XFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#XFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.XFunction" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">XFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fun</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#XFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.XFunction" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Function interface that provide easy access to function value,
 derivatives and definite integrals.</p>
@@ -236,7 +236,7 @@ derivatives and definite integrals.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="xspline.xfunction.XFunction.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#XFunction.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.XFunction.append" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#XFunction.append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.XFunction.append" title="Link to this definition">#</a></dt>
 <dd><p>Splice with another instance of <code class="docutils literal notranslate"><span class="pre">XFunction</span></code> to create a new
 <code class="docutils literal notranslate"><span class="pre">XFunction</span></code>.</p>
 <dl class="field-list simple">
@@ -257,7 +257,7 @@ function and after the the <code class="docutils literal notranslate"><span clas
 
 <dl class="py class">
 <dt class="sig sig-object py" id="xspline.xfunction.BundleXFunction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">BundleXFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der_fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_fun</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BundleXFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BundleXFunction" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">BundleXFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">der_fun</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">int_fun</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BundleXFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BundleXFunction" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#xspline.xfunction.XFunction" title="xspline.xfunction.XFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">XFunction</span></code></a></p>
 <p>This is one implementation of the <code class="docutils literal notranslate"><span class="pre">XFunction</span></code>, it takes the value,
 derivative and definite integral function and bundle them together as a
@@ -277,7 +277,7 @@ the definitely integral function.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="xspline.xfunction.BasisXFunction">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">BasisXFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis_funs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BasisXFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BasisXFunction" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">xspline.xfunction.</span></span><span class="sig-name descname"><span class="pre">BasisXFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">basis_funs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BasisXFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BasisXFunction" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#xspline.xfunction.XFunction" title="xspline.xfunction.XFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">XFunction</span></code></a></p>
 <p>This is one implementation of <code class="docutils literal notranslate"><span class="pre">XFunction</span></code> by taking in a set of
 instances of <code class="docutils literal notranslate"><span class="pre">XFunction</span></code> as basis functions. And the linear combination
@@ -292,7 +292,7 @@ coefficients to provide function value, derivative and definite integral.</p>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="xspline.xfunction.BasisXFunction.coef">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coef</span></span><a class="headerlink" href="#xspline.xfunction.BasisXFunction.coef" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coef</span></span><a class="headerlink" href="#xspline.xfunction.BasisXFunction.coef" title="Link to this definition">#</a></dt>
 <dd><p>attrgetter(attr, …) –&gt; attrgetter object</p>
 <p>Return a callable object that fetches the given attribute(s) from its operand.
 After f = attrgetter(‘name’), the call f(r) returns r.name.
@@ -303,7 +303,7 @@ After h = attrgetter(‘name.first’, ‘name.last’), the call h(r) returns
 
 <dl class="py method">
 <dt class="sig sig-object py" id="xspline.xfunction.BasisXFunction.get_design_mat">
-<span class="sig-name descname"><span class="pre">get_design_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BasisXFunction.get_design_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BasisXFunction.get_design_mat" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_design_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/xspline/xfunction.html#BasisXFunction.get_design_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#xspline.xfunction.BasisXFunction.get_design_mat" title="Link to this definition">#</a></dt>
 <dd><p>Provide design matrix from the set of basis functions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -356,7 +356,7 @@ basis functions.</p>
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, IHME Math Sciences
+                Copyright &#169; 2024, IHME Math Sciences
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -404,9 +404,9 @@ basis functions.</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b3ba4146"></script>
+</div><script src="../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
-    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

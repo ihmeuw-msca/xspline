@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
         <title>xspline.bspl - xspline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -225,7 +225,9 @@
 <span class="kn">from</span> <span class="nn">xspline.xfunction</span> <span class="kn">import</span> <span class="n">BundleXFunction</span>
 
 
-<div class="viewcode-block" id="cache_bspl"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.cache_bspl">[docs]</a><span class="k">def</span> <span class="nf">cache_bspl</span><span class="p">(</span><span class="n">function</span><span class="p">:</span> <span class="n">RawFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawFunction</span><span class="p">:</span>
+<div class="viewcode-block" id="cache_bspl">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.cache_bspl">[docs]</a>
+<span class="k">def</span> <span class="nf">cache_bspl</span><span class="p">(</span><span class="n">function</span><span class="p">:</span> <span class="n">RawFunction</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RawFunction</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Cache implementation for bspline basis functions, to avoid repetitively</span>
 <span class="sd">    evaluate functions.</span>
 
@@ -257,7 +259,10 @@
     <span class="k">return</span> <span class="n">wrapper_function</span></div>
 
 
-<div class="viewcode-block" id="bspl_val"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_val">[docs]</a><span class="nd">@cache_bspl</span>
+
+<div class="viewcode-block" id="bspl_val">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_val">[docs]</a>
+<span class="nd">@cache_bspl</span>
 <span class="k">def</span> <span class="nf">bspl_val</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">BsplParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Value of the bspline function.</span>
 
@@ -301,7 +306,10 @@
     <span class="k">return</span> <span class="n">val</span></div>
 
 
-<div class="viewcode-block" id="bspl_der"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_der">[docs]</a><span class="nd">@cache_bspl</span>
+
+<div class="viewcode-block" id="bspl_der">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_der">[docs]</a>
+<span class="nd">@cache_bspl</span>
 <span class="k">def</span> <span class="nf">bspl_der</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">BsplParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Derivative of the bspline function.</span>
 
@@ -345,7 +353,10 @@
     <span class="k">return</span> <span class="n">val</span></div>
 
 
-<div class="viewcode-block" id="bspl_int"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_int">[docs]</a><span class="nd">@cache_bspl</span>
+
+<div class="viewcode-block" id="bspl_int">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.bspl_int">[docs]</a>
+<span class="nd">@cache_bspl</span>
 <span class="k">def</span> <span class="nf">bspl_int</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">BsplParams</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Definite integral of the bspline function.</span>
 
@@ -394,7 +405,10 @@
     <span class="k">return</span> <span class="n">val</span></div>
 
 
-<div class="viewcode-block" id="clear_bspl_cache"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.clear_bspl_cache">[docs]</a><span class="k">def</span> <span class="nf">clear_bspl_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<div class="viewcode-block" id="clear_bspl_cache">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.clear_bspl_cache">[docs]</a>
+<span class="k">def</span> <span class="nf">clear_bspl_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clear all cache of the value, derivative and definite integral for</span>
 <span class="sd">    bspline function.</span>
 
@@ -404,7 +418,10 @@
     <span class="n">bspl_int</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="Bspl"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.Bspl">[docs]</a><span class="k">class</span> <span class="nc">Bspl</span><span class="p">(</span><span class="n">BundleXFunction</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Bspl">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.Bspl">[docs]</a>
+<span class="k">class</span> <span class="nc">Bspl</span><span class="p">(</span><span class="n">BundleXFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Basis spline function.</span>
 
 <span class="sd">    Parameters</span>
@@ -431,7 +448,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">bspl_val</span><span class="p">,</span> <span class="n">bspl_der</span><span class="p">,</span> <span class="n">bspl_int</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_bspl_funs"><a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.get_bspl_funs">[docs]</a><span class="k">def</span> <span class="nf">get_bspl_funs</span><span class="p">(</span><span class="n">knots</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Bspl</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="get_bspl_funs">
+<a class="viewcode-back" href="../../api_reference/xspline.bspl.html#xspline.bspl.get_bspl_funs">[docs]</a>
+<span class="k">def</span> <span class="nf">get_bspl_funs</span><span class="p">(</span><span class="n">knots</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">degree</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Bspl</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create the bspline basis functions give knots and degree.</span>
 
 <span class="sd">    Parameters</span>
@@ -448,6 +468,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Bspl</span><span class="p">((</span><span class="n">knots</span><span class="p">,</span> <span class="n">degree</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">degree</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">knots</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span></div>
+
 </pre></div>
         </article>
       </div>
@@ -460,7 +481,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, IHME Math Sciences
+                Copyright &#169; 2024, IHME Math Sciences
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -480,9 +501,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

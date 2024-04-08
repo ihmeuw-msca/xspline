@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <!-- Generated with Sphinx 7.1.2 and Furo 2023.07.26 -->
+    <!-- Generated with Sphinx 7.2.6 and Furo 2024.01.29 -->
         <title>xspline.xspl - xspline 0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
@@ -225,7 +225,9 @@
 <span class="kn">from</span> <span class="nn">xspline.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 
 
-<div class="viewcode-block" id="XSpline"><a class="viewcode-back" href="../../api_reference/xspline.xspl.html#xspline.xspl.XSpline">[docs]</a><span class="k">class</span> <span class="nc">XSpline</span><span class="p">(</span><span class="n">BasisXFunction</span><span class="p">):</span>
+<div class="viewcode-block" id="XSpline">
+<a class="viewcode-back" href="../../api_reference/xspline.xspl.html#xspline.xspl.XSpline">[docs]</a>
+<span class="k">class</span> <span class="nc">XSpline</span><span class="p">(</span><span class="n">BasisXFunction</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Main class for xspline functions.</span>
 
 <span class="sd">    Parameters</span>
@@ -273,7 +275,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ldegree</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rdegree</span> <span class="o">=</span> <span class="n">ldegree</span><span class="p">,</span> <span class="n">rdegree</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">funs</span><span class="p">,</span> <span class="n">coef</span><span class="o">=</span><span class="n">coef</span><span class="p">)</span>
 
-<div class="viewcode-block" id="XSpline.get_design_mat"><a class="viewcode-back" href="../../api_reference/xspline.xspl.html#xspline.xspl.XSpline.get_design_mat">[docs]</a>    <span class="k">def</span> <span class="nf">get_design_mat</span><span class="p">(</span>
+<div class="viewcode-block" id="XSpline.get_design_mat">
+<a class="viewcode-back" href="../../api_reference/xspline.xspl.html#xspline.xspl.XSpline.get_design_mat">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_design_mat</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">check_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create design matrix from spline basis functions.</span>
@@ -295,7 +299,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">design_mat</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_design_mat</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">check_args</span><span class="p">)</span>
         <span class="n">clear_bspl_cache</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">design_mat</span></div></div>
+        <span class="k">return</span> <span class="n">design_mat</span></div>
+</div>
+
 </pre></div>
         </article>
       </div>
@@ -308,7 +314,7 @@
         <div class="bottom-of-page">
           <div class="left-details">
             <div class="copyright">
-                Copyright &#169; 2023, IHME Math Sciences
+                Copyright &#169; 2024, IHME Math Sciences
             </div>
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -328,9 +334,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=b3ba4146"></script>
+</div><script src="../../_static/documentation_options.js?v=5929fcd5"></script>
     <script src="../../_static/doctools.js?v=888ff710"></script>
-    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>
