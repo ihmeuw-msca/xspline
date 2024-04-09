@@ -10,10 +10,10 @@
 .. image:: https://img.shields.io/badge/docs-here-green
     :target: https://ihmeuw-msca.github.io/xspline
 
-.. image:: https://codecov.io/gh/ihmeuw-msca/xspline/branch/main/graph/badge.svg?token=WUV5OR77N8 
+.. image:: https://img.shields.io/codecov/c/github/ihmeuw-msca/xspline
     :target: https://codecov.io/gh/ihmeuw-msca/xspline
 
-.. image:: https://app.codacy.com/project/badge/Grade/308cc2771871498fbcdaee3440e56ad0
+.. image:: https://img.shields.io/codacy/grade/f1646d62d6764e77a59d6c71df262ed4
     :target: https://app.codacy.com/gh/ihmeuw-msca/xspline/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
 
 
