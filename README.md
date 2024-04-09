@@ -1,4 +1,4 @@
-[![license](https://img.shields.io/github/license/ihmeuw-msca/xspline)](https://github.com/ihmeuw-msca/xspline/blob/main/LICENSE)
+[![license](https://img.shields.io/pypi/l/xspline)](https://github.com/ihmeuw-msca/xspline/blob/main/LICENSE)
 [![version](https://img.shields.io/pypi/v/xspline)](https://pypi.org/project/xspline)
 [![build](https://img.shields.io/github/actions/workflow/status/ihmeuw-msca/xspline/python-build.yml?branch=main)](https://github.com/ihmeuw-msca/xspline/actions)
 [![docs](https://img.shields.io/badge/docs-here-green)](https://ihmeuw-msca.github.io/xspline)
