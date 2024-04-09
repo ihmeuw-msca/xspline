@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xspline"
-version = "0.1.0"
+version = "0.1.1"
 description = "Advanced spline package that provides b-spline bases, their derivatives and integrals"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -20,9 +20,3 @@ docs = ["sphinx", "sphinx-autodoc-typehints", "furo"]
 
 [project.urls]
 github = "https://github.com/ihmeuw-msca/xspline"
-
-[tool.sphinx]
-project = "xspline"
-author = "IHME Math Sciences"
-copyright = "2024, IHME Math Sciences"
-version = "0.1.0"
