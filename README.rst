@@ -1,4 +1,4 @@
-.. image:: https://img.shields.io/pypi/l/xspline
+.. image:: https://img.shields.io/github/license/ihmeuw-msca/xspline
     :target: https://github.com/ihmeuw-msca/xspline/blob/main/LICENSE
 
 .. image:: https://img.shields.io/pypi/v/xspline
