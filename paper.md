@@ -66,25 +66,28 @@ The main idea of `xspline` is to provide a python class that allows user to
 interact with basis splines, their derivatives and integrals and extrapolation
 options more easily.
 
-The computation of splines is based on B-spline or basis spline from
-[@de1978practical]. Upon this, we derived the derivatives and definite integrals
-from the recursive relationship between the splines.
+The computation of splines is based on basis splines (B-splines), see
+[@de1978practical] for a canonical reference. Using this reference, we derived recursive relationships to 
+compute both derivatives and definite integrals from recursive splie relationships.
 
-To support the spline basis computation, we also created modules that provide
-convenient interface with indicator and polynomial function and their arbitrary
-order of derivatives and definite integrals. We boundle all those useful
-functions into a main interface class called `XFunction` which allow user call
-the function with specified order, where positive order represent derivatives
-and negative order represent definite integrals.
+To support the spline basis computation, we also created modules that provide a 
+convenient interface with indicator and polynomial functions, and their
+derivatives and definite integrals of any order. All of these useful functions are 
+bundled into a main interface class called `XFunction`, which allows the user to call
+the function with a specified order, where positive order represents derivatives
+and negative order represents definite integrals.
 
-At end very end, we allow user to specify the way they want to extrapolate by
+We also allow user to specify the way they want to extrapolate by
 matching the smoothness at the end knots.
 
-With all of the above features, we created a easy to use and very useful spline
-package for statistical model building. For more examples please check [here](https://ihmeuw-msca.github.io/xspline/quickstart.html).
+With all of the above features, we created a easy to use spline
+package for statistical model building, which has been widely used in 
+global health statistical analysis, see references below. 
+For more examples please check [here](https://ihmeuw-msca.github.io/xspline/quickstart.html).
 
 More information about the structure of the library can be found in [documentation](https://ihmeuw-msca.github.io/xspline/api_reference/), 
-while the mathematical use cases are extensively discussed in [@zheng2021trimmed] and [@zheng2022burden] in the context of fitting risks.
+while the mathematical use cases are extensively discussed in [@zheng2021trimmed] and [@zheng2022burden] in the context of fitting nonlinear dose-response 
+relationships.
 
 
 # Ongoing Research and Dissemination
