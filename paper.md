@@ -78,7 +78,9 @@ the function with a specified order, where positive order represents derivatives
 and negative order represents definite integrals.
 
 We also allow user to specify the way they want to extrapolate by
-matching the smoothness at the end knots.
+matching the smoothness at the end knots. This is achieved by a class method
+of `XFunction` called `append` that will slice two instances of `XFunction`
+together.
 
 With all of the above features, we created a easy to use spline
 package for statistical model building, which has been widely used in 
