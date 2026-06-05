@@ -1,4 +1,5 @@
 # utility functions for the bsplinex class
+import math
 import numpy as np
 
 
@@ -154,7 +155,7 @@ def constant_if(a, x, order, c):
         else:
             return 0.0
 
-    return c*(x - a)**order/np.math.factorial(order)
+    return c*(x - a)**order/math.factorial(order)
 
 
 def linear_if(a, x, order, z, fz, dfz):
@@ -239,7 +240,7 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     val = integrate_across_pieces(b, x, order, funcs[1:], knots[1:])
 
     for j in range(order):
-        val += funcs[0](a, b, order - j)*(x - b)**j / np.math.factorial(j)
+        val += funcs[0](a, b, order - j)*(x - b)**j / math.factorial(j)
 
     return val
 
