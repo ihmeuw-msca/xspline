@@ -1,4 +1,6 @@
 # utility functions for the bsplinex class
+import functools
+import math
 import numpy as np
 
 
@@ -154,7 +156,7 @@ def constant_if(a, x, order, c):
         else:
             return 0.0
 
-    return c*(x - a)**order/np.math.factorial(order)
+    return c*(x - a)**order/math.factorial(order)
 
 
 def linear_if(a, x, order, z, fz, dfz):
@@ -192,8 +194,8 @@ def linear_if(a, x, order, z, fz, dfz):
     fa = fz + dfz*(a - z)
     dfa = dfz
 
-    return dfa*(x - a)**(order + 1)/np.math.factorial(order + 1) + \
-        fa*(x - a)**order/np.math.factorial(order)
+    return dfa*(x - a)**(order + 1)/math.factorial(order + 1) + \
+        fa*(x - a)**order/math.factorial(order)
 
 
 def integrate_across_pieces(a, x, order, funcs, knots):
@@ -239,7 +241,7 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     val = integrate_across_pieces(b, x, order, funcs[1:], knots[1:])
 
     for j in range(order):
-        val += funcs[0](a, b, order - j)*(x - b)**j / np.math.factorial(j)
+        val += funcs[0](a, b, order - j)*(x - b)**j / math.factorial(j)
 
     return val
 
@@ -445,5 +447,4 @@ def outer_flatten(*args):
         numpy.ndarray:
         1D numpy array that store the flattened outer product.
     """
-    result = np.prod(np.ix_(*args))
-    return result.reshape(result.size,)
+    return functools.reduce(np.multiply.outer, args).ravel()

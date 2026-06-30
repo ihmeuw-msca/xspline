@@ -169,8 +169,11 @@ def test_utils_option_to_list(option, size):
                          [(np.arange(2), np.arange(3)),
                           (np.arange(2), np.arange(3), np.arange(4))])
 def test_utils_outer_flatten(args):
-    result = np.prod(np.ix_(*args))
-    result = result.reshape(result.size,)
+    if len(args) < 2:
+        raise ValueError("Must have more than 2 arguments for outer_flatten.")
+    result = np.outer(args[0], args[1]).ravel()
+    for arg in args[2:]:
+        result = np.outer(result, arg).ravel()
     my_result = utils.outer_flatten(*args)
 
     assert np.linalg.norm(my_result - result) < 1e-10
