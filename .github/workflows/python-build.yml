@@ -12,7 +12,9 @@ jobs:
       with:
         python-version: "3.11"
     - name: Install dependencies
-      run: python -m pip install .[dev] --upgrade pip
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install . --group dev
     - name: Test with pytest
       run: pytest
     - name: Build package distribution
