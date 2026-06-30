@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xspline"
+version = "0.0.7"
+description = "xspline: Advanced spline tools"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+authors = [
+    { name = "IHME Math Sciences", email = "ihme.math.sciences@gmail.com" },
+]
+dependencies = ["numpy"]
+
+[project.urls]
+Homepage = "https://github.com/ihmeuw-msca/xspline"
+
+[dependency-groups]
+test = ["pytest", "pytest-mock"]
+docs = []
+dev = [{ include-group = "test" }, { include-group = "docs" }]
