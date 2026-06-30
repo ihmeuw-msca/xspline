@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-    core
-    ~~~~
+core
+~~~~
 
-    core module contains main functions and classes.
+core module contains main functions and classes.
 """
+
 import numpy as np
 from . import utils
 
@@ -101,20 +102,18 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
         b_effect = bspline_domain(knots, degree, idx)
         y = utils.indicator_f(x, b)
         z = utils.linear_rf(x, b_effect)
-        return y*(z**degree)
+        return y * (z**degree)
 
     if idx == num_splines - 1:
         b_effect = bspline_domain(knots, degree, idx)
         y = utils.indicator_f(x, b, r_close=True)
         z = utils.linear_lf(x, b_effect)
-        return y*(z**degree)
+        return y * (z**degree)
 
-    lf = bspline_fun(x, knots, degree - 1, idx - 1,
-                     l_extra=l_extra, r_extra=r_extra)
+    lf = bspline_fun(x, knots, degree - 1, idx - 1, l_extra=l_extra, r_extra=r_extra)
     lf *= utils.linear_lf(x, bspline_domain(knots, degree - 1, idx - 1))
 
-    rf = bspline_fun(x, knots, degree - 1, idx,
-                     l_extra=l_extra, r_extra=r_extra)
+    rf = bspline_fun(x, knots, degree - 1, idx, l_extra=l_extra, r_extra=r_extra)
     rf *= utils.linear_rf(x, bspline_domain(knots, degree - 1, idx))
 
     return lf + rf
@@ -160,8 +159,7 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
         idx = num_splines - 1
 
     if order == 0:
-        return bspline_fun(x, knots, degree, idx,
-                           l_extra=l_extra, r_extra=r_extra)
+        return bspline_fun(x, knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
 
     if order > degree:
         if np.isscalar(x):
@@ -174,22 +172,40 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
     else:
         b = bspline_domain(knots, degree - 1, idx - 1)
         d = b[1] - b[0]
-        f = (x - b[0])/d
-        rdf = f*bspline_dfun(x, knots, degree - 1, order, idx - 1,
-                             l_extra=l_extra, r_extra=r_extra)
-        rdf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx - 1,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        f = (x - b[0]) / d
+        rdf = f * bspline_dfun(
+            x, knots, degree - 1, order, idx - 1, l_extra=l_extra, r_extra=r_extra
+        )
+        rdf += (
+            order
+            * bspline_dfun(
+                x,
+                knots,
+                degree - 1,
+                order - 1,
+                idx - 1,
+                l_extra=l_extra,
+                r_extra=r_extra,
+            )
+            / d
+        )
 
     if idx == num_splines - 1:
         ldf = 0.0
     else:
         b = bspline_domain(knots, degree - 1, idx)
         d = b[0] - b[1]
-        f = (x - b[1])/d
-        ldf = f*bspline_dfun(x, knots, degree - 1, order, idx,
-                             l_extra=l_extra, r_extra=r_extra)
-        ldf += order*bspline_dfun(x, knots, degree - 1, order - 1, idx,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        f = (x - b[1]) / d
+        ldf = f * bspline_dfun(
+            x, knots, degree - 1, order, idx, l_extra=l_extra, r_extra=r_extra
+        )
+        ldf += (
+            order
+            * bspline_dfun(
+                x, knots, degree - 1, order - 1, idx, l_extra=l_extra, r_extra=r_extra
+            )
+            / d
+        )
 
     return ldf + rdf
 
@@ -237,8 +253,7 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
         idx = num_splines - 1
 
     if order == 0:
-        return bspline_fun(x, knots, degree, idx,
-                           l_extra=l_extra, r_extra=r_extra)
+        return bspline_fun(x, knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
 
     if degree == 0:
         b = bspline_domain(knots, degree, idx, l_extra=l_extra, r_extra=r_extra)
@@ -250,10 +265,23 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
         b = bspline_domain(knots, degree - 1, idx - 1)
         d = b[1] - b[0]
         f = (x - b[0]) / d
-        rif = f*bspline_ifun(a, x, knots, degree - 1, order, idx - 1,
-                             l_extra=l_extra, r_extra=r_extra)
-        rif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx - 1,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        rif = f * bspline_ifun(
+            a, x, knots, degree - 1, order, idx - 1, l_extra=l_extra, r_extra=r_extra
+        )
+        rif -= (
+            order
+            * bspline_ifun(
+                a,
+                x,
+                knots,
+                degree - 1,
+                order + 1,
+                idx - 1,
+                l_extra=l_extra,
+                r_extra=r_extra,
+            )
+            / d
+        )
 
     if idx == num_splines - 1:
         lif = 0.0
@@ -261,24 +289,38 @@ def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
         b = bspline_domain(knots, degree - 1, idx)
         d = b[0] - b[1]
         f = (x - b[1]) / d
-        lif = f*bspline_ifun(a, x, knots, degree - 1, order, idx,
-                             l_extra=l_extra, r_extra=r_extra)
-        lif -= order*bspline_ifun(a, x, knots, degree - 1, order + 1, idx,
-                                  l_extra=l_extra, r_extra=r_extra)/d
+        lif = f * bspline_ifun(
+            a, x, knots, degree - 1, order, idx, l_extra=l_extra, r_extra=r_extra
+        )
+        lif -= (
+            order
+            * bspline_ifun(
+                a,
+                x,
+                knots,
+                degree - 1,
+                order + 1,
+                idx,
+                l_extra=l_extra,
+                r_extra=r_extra,
+            )
+            / d
+        )
 
     return lif + rif
 
 
 class XSpline:
-    """XSpline main class of the package.
-    """
+    """XSpline main class of the package."""
 
-    def __init__(self,
-                 knots,
-                 degree,
-                 l_linear=False,
-                 r_linear=False,
-                 include_first_basis: bool = True):
+    def __init__(
+        self,
+        knots,
+        degree,
+        l_linear=False,
+        r_linear=False,
+        include_first_basis: bool = True,
+    ):
         r"""Constructor of the XSpline class.
 
         knots (numpy.ndarray):
@@ -314,14 +356,15 @@ class XSpline:
         assert isinstance(self.degree, int) and self.degree >= 0
 
         # create inner knots
-        self.inner_knots = self.knots[int_l_linear:
-                                      self.num_knots - int_r_linear]
+        self.inner_knots = self.knots[int_l_linear : self.num_knots - int_r_linear]
         self.lb = self.knots[0]
         self.ub = self.knots[-1]
         self.inner_lb = self.inner_knots[0]
         self.inner_ub = self.inner_knots[-1]
 
-        self.num_spline_bases = self.inner_knots.size - 1 + self.degree - self.basis_start
+        self.num_spline_bases = (
+            self.inner_knots.size - 1 + self.degree - self.basis_start
+        )
 
     def domain(self, idx, l_extra=False, r_extra=False):
         """Return the support of the XSpline.
@@ -343,11 +386,9 @@ class XSpline:
             1D array with two elements represents that left and right end of the
             support of the spline basis.
         """
-        inner_domain = bspline_domain(self.inner_knots,
-                                      self.degree,
-                                      idx,
-                                      l_extra=l_extra,
-                                      r_extra=r_extra)
+        inner_domain = bspline_domain(
+            self.inner_knots, self.degree, idx, l_extra=l_extra, r_extra=r_extra
+        )
         lb = inner_domain[0]
         ub = inner_domain[1]
 
@@ -380,12 +421,9 @@ class XSpline:
             Function values of the corresponding spline bases.
         """
         if not self.l_linear and not self.r_linear:
-            return bspline_fun(x,
-                               self.inner_knots,
-                               self.degree,
-                               idx,
-                               l_extra=l_extra,
-                               r_extra=r_extra)
+            return bspline_fun(
+                x, self.inner_knots, self.degree, idx, l_extra=l_extra, r_extra=r_extra
+            )
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -396,40 +434,38 @@ class XSpline:
 
         if self.l_linear:
             l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
-            m_idx &= (x >= self.inner_lb)
+            m_idx &= x >= self.inner_lb
 
-            inner_lb_yun = bspline_fun(self.inner_lb,
-                                       self.inner_knots,
-                                       self.degree,
-                                       idx)
-            inner_lb_dfun = bspline_dfun(self.inner_lb,
-                                         self.inner_knots,
-                                         self.degree,
-                                         1, idx)
+            inner_lb_yun = bspline_fun(
+                self.inner_lb, self.inner_knots, self.degree, idx
+            )
+            inner_lb_dfun = bspline_dfun(
+                self.inner_lb, self.inner_knots, self.degree, 1, idx
+            )
 
             f[l_idx] = inner_lb_yun + inner_lb_dfun * (x[l_idx] - self.inner_lb)
 
         if self.r_linear:
             u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
-            m_idx &= (x <= self.inner_ub)
+            m_idx &= x <= self.inner_ub
 
-            inner_ub_yun = bspline_fun(self.inner_ub,
-                                       self.inner_knots,
-                                       self.degree,
-                                       idx)
-            inner_ub_dfun = bspline_dfun(self.inner_ub,
-                                         self.inner_knots,
-                                         self.degree,
-                                         1, idx)
+            inner_ub_yun = bspline_fun(
+                self.inner_ub, self.inner_knots, self.degree, idx
+            )
+            inner_ub_dfun = bspline_dfun(
+                self.inner_ub, self.inner_knots, self.degree, 1, idx
+            )
 
             f[u_idx] = inner_ub_yun + inner_ub_dfun * (x[u_idx] - self.inner_ub)
 
-        f[m_idx] = bspline_fun(x[m_idx],
-                               self.inner_knots,
-                               self.degree,
-                               idx,
-                               l_extra=l_extra,
-                               r_extra=r_extra)
+        f[m_idx] = bspline_fun(
+            x[m_idx],
+            self.inner_knots,
+            self.degree,
+            idx,
+            l_extra=l_extra,
+            r_extra=r_extra,
+        )
 
         if x_is_scalar:
             return f[0]
@@ -466,13 +502,9 @@ class XSpline:
             return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
 
         if (not self.l_linear) and (not self.r_linear):
-            return bspline_dfun(x,
-                                self.knots,
-                                self.degree,
-                                order,
-                                idx,
-                                l_extra=l_extra,
-                                r_extra=r_extra)
+            return bspline_dfun(
+                x, self.knots, self.degree, order, idx, l_extra=l_extra, r_extra=r_extra
+            )
 
         x_is_scalar = np.isscalar(x)
         if x_is_scalar:
@@ -483,33 +515,33 @@ class XSpline:
 
         if self.l_linear:
             l_idx = (x < self.inner_lb) & ((x >= self.lb) | l_extra)
-            m_idx &= (x >= self.inner_lb)
+            m_idx &= x >= self.inner_lb
 
             if order == 1:
-                inner_lb_dy = bspline_dfun(self.inner_lb,
-                                           self.inner_knots,
-                                           self.degree,
-                                           order, idx)
+                inner_lb_dy = bspline_dfun(
+                    self.inner_lb, self.inner_knots, self.degree, order, idx
+                )
                 dy[l_idx] = np.repeat(inner_lb_dy, np.sum(l_idx))
 
         if self.r_linear:
             u_idx = (x > self.inner_ub) & ((x <= self.ub) | r_extra)
-            m_idx &= (x <= self.inner_ub)
+            m_idx &= x <= self.inner_ub
 
             if order == 1:
-                inner_ub_dy = bspline_dfun(self.inner_ub,
-                                           self.inner_knots,
-                                           self.degree,
-                                           order, idx)
+                inner_ub_dy = bspline_dfun(
+                    self.inner_ub, self.inner_knots, self.degree, order, idx
+                )
                 dy[u_idx] = np.repeat(inner_ub_dy, np.sum(u_idx))
 
-        dy[m_idx] = bspline_dfun(x[m_idx],
-                                 self.inner_knots,
-                                 self.degree,
-                                 order,
-                                 idx,
-                                 l_extra=l_extra,
-                                 r_extra=r_extra)
+        dy[m_idx] = bspline_dfun(
+            x[m_idx],
+            self.inner_knots,
+            self.degree,
+            order,
+            idx,
+            l_extra=l_extra,
+            r_extra=r_extra,
+        )
 
         if x_is_scalar:
             return dy[0]
@@ -551,49 +583,43 @@ class XSpline:
             return self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
 
         if (not self.l_linear) and (not self.r_linear):
-            return bspline_ifun(a, x,
-                                self.knots,
-                                self.degree,
-                                order,
-                                idx,
-                                l_extra=l_extra,
-                                r_extra=r_extra)
+            return bspline_ifun(
+                a,
+                x,
+                self.knots,
+                self.degree,
+                order,
+                idx,
+                l_extra=l_extra,
+                r_extra=r_extra,
+            )
         # verify the inputs
         assert np.all(a <= x)
 
         # function and derivative values at inner lb and inner rb
-        inner_lb_y = bspline_fun(self.inner_lb,
-                                 self.inner_knots,
-                                 self.degree,
-                                 idx)
-        inner_ub_y = bspline_fun(self.inner_ub,
-                                 self.inner_knots,
-                                 self.degree,
-                                 idx)
-        inner_lb_dy = bspline_dfun(self.inner_lb,
-                                   self.inner_knots,
-                                   self.degree,
-                                   1, idx)
-        inner_ub_dy = bspline_dfun(self.inner_ub,
-                                   self.inner_knots,
-                                   self.degree,
-                                   1, idx)
+        inner_lb_y = bspline_fun(self.inner_lb, self.inner_knots, self.degree, idx)
+        inner_ub_y = bspline_fun(self.inner_ub, self.inner_knots, self.degree, idx)
+        inner_lb_dy = bspline_dfun(self.inner_lb, self.inner_knots, self.degree, 1, idx)
+        inner_ub_dy = bspline_dfun(self.inner_ub, self.inner_knots, self.degree, 1, idx)
 
         # there are in total 5 pieces functions
         def l_piece(a, x, order):
-            return utils.linear_if(a, x, order,
-                                   self.inner_lb, inner_lb_y, inner_lb_dy)
+            return utils.linear_if(a, x, order, self.inner_lb, inner_lb_y, inner_lb_dy)
 
         def m_piece(a, x, order):
-            return bspline_ifun(a, x,
-                                self.inner_knots,
-                                self.degree,
-                                order, idx,
-                                l_extra=l_extra, r_extra=r_extra)
+            return bspline_ifun(
+                a,
+                x,
+                self.inner_knots,
+                self.degree,
+                order,
+                idx,
+                l_extra=l_extra,
+                r_extra=r_extra,
+            )
 
         def r_piece(a, x, order):
-            return utils.linear_if(a, x, order,
-                                   self.inner_ub, inner_ub_y, inner_ub_dy)
+            return utils.linear_if(a, x, order, self.inner_ub, inner_ub_y, inner_ub_dy)
 
         def zero_piece(a, x, order):
             if np.isscalar(a) and np.isscalar(x):
@@ -649,10 +675,14 @@ class XSpline:
             numpy.ndarray:
             Return design matrix.
         """
-        mat = np.vstack([
-            self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
-        ]).T
+        mat = np.vstack(
+            [
+                self.fun(x, idx, l_extra=l_extra, r_extra=r_extra)
+                for idx in range(
+                    self.basis_start, self.num_spline_bases + self.basis_start
+                )
+            ]
+        ).T
         return mat
 
     def design_dmat(self, x, order, l_extra=False, r_extra=False):
@@ -677,10 +707,14 @@ class XSpline:
             numpy.ndarray:
             Return design matrix.
         """
-        dmat = np.vstack([
-            self.dfun(x, order, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
-        ]).T
+        dmat = np.vstack(
+            [
+                self.dfun(x, order, idx, l_extra=l_extra, r_extra=r_extra)
+                for idx in range(
+                    self.basis_start, self.num_spline_bases + self.basis_start
+                )
+            ]
+        ).T
         return dmat
 
     def design_imat(self, a, x, order, l_extra=False, r_extra=False):
@@ -710,10 +744,14 @@ class XSpline:
             numpy.ndarray:
             Return design matrix.
         """
-        imat = np.vstack([
-            self.ifun(a, x, order, idx, l_extra=l_extra, r_extra=r_extra)
-            for idx in range(self.basis_start, self.num_spline_bases + self.basis_start)
-        ]).T
+        imat = np.vstack(
+            [
+                self.ifun(a, x, order, idx, l_extra=l_extra, r_extra=r_extra)
+                for idx in range(
+                    self.basis_start, self.num_spline_bases + self.basis_start
+                )
+            ]
+        ).T
         return imat
 
     def last_dmat(self):
@@ -727,24 +765,26 @@ class XSpline:
         dmat = self.design_dmat(self.inner_knots[:-1], self.degree)
 
         if self.l_linear:
-            dmat = np.vstack((self.design_dmat(np.array([self.inner_lb]), 1),
-                              dmat))
+            dmat = np.vstack((self.design_dmat(np.array([self.inner_lb]), 1), dmat))
 
         if self.r_linear:
-            dmat = np.vstack((dmat,
-                              self.design_dmat(np.array([self.inner_ub]), 1)))
+            dmat = np.vstack((dmat, self.design_dmat(np.array([self.inner_ub]), 1)))
 
         return dmat
 
 
 class NDXSpline:
-    """Multi-dimensional xspline.
-    """
+    """Multi-dimensional xspline."""
 
-    def __init__(self, ndim, knots_list, degree_list,
-                 l_linear_list=None,
-                 r_linear_list=None,
-                 include_first_basis_list=True):
+    def __init__(
+        self,
+        ndim,
+        knots_list,
+        degree_list,
+        l_linear_list=None,
+        r_linear_list=None,
+        include_first_basis_list=True,
+    ):
         """Constructor of ndXSpline class
 
         Args:
@@ -766,31 +806,36 @@ class NDXSpline:
         self.degree_list = degree_list
         self.l_linear_list = utils.option_to_list(l_linear_list, self.ndim)
         self.r_linear_list = utils.option_to_list(r_linear_list, self.ndim)
-        self.include_first_basis_list = utils.option_to_list(include_first_basis_list, self.ndim)
+        self.include_first_basis_list = utils.option_to_list(
+            include_first_basis_list, self.ndim
+        )
 
         self.spline_list = [
-            XSpline(self.knots_list[i], self.degree_list[i],
-                    l_linear=self.l_linear_list[i],
-                    r_linear=self.r_linear_list[i],
-                    include_first_basis=self.include_first_basis_list[i])
+            XSpline(
+                self.knots_list[i],
+                self.degree_list[i],
+                l_linear=self.l_linear_list[i],
+                r_linear=self.r_linear_list[i],
+                include_first_basis=self.include_first_basis_list[i],
+            )
             for i in range(self.ndim)
         ]
 
-        self.num_knots_list = np.array([
-            spline.num_knots for spline in self.spline_list])
-        self.num_intervals_list = np.array([
-            spline.num_intervals for spline in self.spline_list])
-        self.num_spline_bases_list = np.array([
-            spline.num_spline_bases for spline in self.spline_list])
+        self.num_knots_list = np.array(
+            [spline.num_knots for spline in self.spline_list]
+        )
+        self.num_intervals_list = np.array(
+            [spline.num_intervals for spline in self.spline_list]
+        )
+        self.num_spline_bases_list = np.array(
+            [spline.num_spline_bases for spline in self.spline_list]
+        )
 
         self.num_knots = self.num_knots_list.prod()
         self.num_intervals = self.num_intervals_list.prod()
         self.num_spline_bases = self.num_spline_bases_list.prod()
 
-    def design_mat(self, x_list,
-                   is_grid=True,
-                   l_extra_list=None,
-                   r_extra_list=None):
+    def design_mat(self, x_list, is_grid=True, l_extra_list=None, r_extra_list=None):
         """Design matrix of the spline basis.
 
         Args:
@@ -819,35 +864,33 @@ class NDXSpline:
         assert len(l_extra_list) == self.ndim
         assert len(r_extra_list) == self.ndim
 
-        mat_list = [spline.design_mat(x_list[i],
-                                      l_extra=l_extra_list[i],
-                                      r_extra=r_extra_list[i])
-                    for i, spline in enumerate(self.spline_list)]
+        mat_list = [
+            spline.design_mat(
+                x_list[i], l_extra=l_extra_list[i], r_extra=r_extra_list[i]
+            )
+            for i, spline in enumerate(self.spline_list)
+        ]
 
         if is_grid:
             mat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [mat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [mat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 mat.append(utils.outer_flatten(*bases_list))
         else:
             num_points = x_list[0].size
-            assert np.all([x_list[i].size == num_points
-                           for i in range(self.ndim)])
+            assert np.all([x_list[i].size == num_points for i in range(self.ndim)])
             mat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [mat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [mat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 mat.append(np.prod(bases_list, axis=0))
 
         return np.ascontiguousarray(np.vstack(mat).T)
 
-    def design_dmat(self, x_list, n_list,
-                    is_grid=True,
-                    l_extra_list=None,
-                    r_extra_list=None):
+    def design_dmat(
+        self, x_list, n_list, is_grid=True, l_extra_list=None, r_extra_list=None
+    ):
         """Design matrix of the derivatives of spline basis.
 
         Args:
@@ -880,35 +923,33 @@ class NDXSpline:
         assert len(l_extra_list) == self.ndim
         assert len(r_extra_list) == self.ndim
 
-        dmat_list = [spline.design_dmat(x_list[i], n_list[i],
-                                        l_extra=l_extra_list[i],
-                                        r_extra=r_extra_list[i])
-                     for i, spline in enumerate(self.spline_list)]
+        dmat_list = [
+            spline.design_dmat(
+                x_list[i], n_list[i], l_extra=l_extra_list[i], r_extra=r_extra_list[i]
+            )
+            for i, spline in enumerate(self.spline_list)
+        ]
 
         if is_grid:
             dmat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [dmat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [dmat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 dmat.append(utils.outer_flatten(*bases_list))
         else:
             num_points = x_list[0].size
-            assert np.all([x_list[i].size == num_points
-                           for i in range(self.ndim)])
+            assert np.all([x_list[i].size == num_points for i in range(self.ndim)])
             dmat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [dmat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [dmat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 dmat.append(np.prod(bases_list, axis=0))
 
         return np.ascontiguousarray(np.vstack(dmat).T)
 
-    def design_imat(self, a_list, x_list, n_list,
-                    is_grid=True,
-                    l_extra_list=None,
-                    r_extra_list=None):
+    def design_imat(
+        self, a_list, x_list, n_list, is_grid=True, l_extra_list=None, r_extra_list=None
+    ):
         """Design matrix of the spline basis.
 
         Args:
@@ -944,27 +985,30 @@ class NDXSpline:
         assert len(l_extra_list) == self.ndim
         assert len(r_extra_list) == self.ndim
 
-        imat_list = [spline.design_imat(a_list[i], x_list[i], n_list[i],
-                                        l_extra=l_extra_list[i],
-                                        r_extra=r_extra_list[i])
-                     for i, spline in enumerate(self.spline_list)]
+        imat_list = [
+            spline.design_imat(
+                a_list[i],
+                x_list[i],
+                n_list[i],
+                l_extra=l_extra_list[i],
+                r_extra=r_extra_list[i],
+            )
+            for i, spline in enumerate(self.spline_list)
+        ]
 
         if is_grid:
             imat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [imat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [imat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 imat.append(utils.outer_flatten(*bases_list))
         else:
             num_points = x_list[0].size
-            assert np.all([x_list[i].size == num_points
-                           for i in range(self.ndim)])
+            assert np.all([x_list[i].size == num_points for i in range(self.ndim)])
             imat = []
             for i in range(self.num_spline_bases):
                 index_list = utils.order_to_index(i, self.num_spline_bases_list)
-                bases_list = [imat_list[j][:, index_list[j]]
-                              for j in range(self.ndim)]
+                bases_list = [imat_list[j][:, index_list[j]] for j in range(self.ndim)]
                 imat.append(np.prod(bases_list, axis=0))
 
         return np.ascontiguousarray(np.vstack(imat).T)
@@ -981,8 +1025,7 @@ class NDXSpline:
         mat = []
         for i in range(self.num_spline_bases):
             index_list = utils.order_to_index(i, self.num_spline_bases_list)
-            bases_list = [mat_list[j][:, index_list[j]]
-                          for j in range(self.ndim)]
+            bases_list = [mat_list[j][:, index_list[j]] for j in range(self.ndim)]
             mat.append(utils.outer_flatten(*bases_list))
 
         return np.ascontiguousarray(np.vstack(mat).T)

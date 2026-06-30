@@ -28,14 +28,14 @@ def indicator_f(x, b, l_close=True, r_close=False):
         the interval and 1 means the it is in the interval.
     """
     if l_close:
-        lb = (x >= b[0])
+        lb = x >= b[0]
     else:
-        lb = (x > b[0])
+        lb = x > b[0]
 
     if r_close:
-        rb = (x <= b[1])
+        rb = x <= b[1]
     else:
-        rb = (x < b[1])
+        rb = x < b[1]
 
     if np.isscalar(x):
         return float(lb & rb)
@@ -68,7 +68,7 @@ def linear_f(x, z, fz, dfz):
         base point(s) ``z``. The result has the same shape with ``x`` when
         ``z`` is scalar or same shape with ``z`` when ``x`` is scalar.
     """
-    return fz + dfz*(x - z)
+    return fz + dfz * (x - z)
 
 
 def linear_lf(x, b):
@@ -88,7 +88,7 @@ def linear_lf(x, b):
         Return function value(s) at ``x``. The result has the same shape with
         ``x``.
     """
-    return (x - b[0])/(b[1] - b[0])
+    return (x - b[0]) / (b[1] - b[0])
 
 
 def linear_rf(x, b):
@@ -108,7 +108,7 @@ def linear_rf(x, b):
         Return function value(s) at ``x``. The result has the same shape with
         ``x``.
     """
-    return (x - b[1])/(b[0] - b[1])
+    return (x - b[1]) / (b[0] - b[1])
 
 
 def constant_if(a, x, order, c):
@@ -156,7 +156,7 @@ def constant_if(a, x, order, c):
         else:
             return 0.0
 
-    return c*(x - a)**order/math.factorial(order)
+    return c * (x - a) ** order / math.factorial(order)
 
 
 def linear_if(a, x, order, z, fz, dfz):
@@ -191,11 +191,12 @@ def linear_if(a, x, order, z, fz, dfz):
         float | numpy.ndarray:
         Integration value(s) of the constant function.
     """
-    fa = fz + dfz*(a - z)
+    fa = fz + dfz * (a - z)
     dfa = dfz
 
-    return dfa*(x - a)**(order + 1)/math.factorial(order + 1) + \
-        fa*(x - a)**order/math.factorial(order)
+    return dfa * (x - a) ** (order + 1) / math.factorial(order + 1) + fa * (
+        x - a
+    ) ** order / math.factorial(order)
 
 
 def integrate_across_pieces(a, x, order, funcs, knots):
@@ -231,7 +232,9 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     if len(funcs) == 1:
         return funcs[0](a, x, order)
     else:
-        assert np.all(a < knots[0]) and np.all(x > knots[-1]), f"{a} should be in [{knots[0]}, {knots[-1]}]."
+        assert np.all(a < knots[0]) and np.all(x > knots[-1]), (
+            f"{a} should be in [{knots[0]}, {knots[-1]}]."
+        )
 
     if np.isscalar(a):
         b = knots[0]
@@ -241,7 +244,7 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     val = integrate_across_pieces(b, x, order, funcs[1:], knots[1:])
 
     for j in range(order):
-        val += funcs[0](a, b, order - j)*(x - b)**j / math.factorial(j)
+        val += funcs[0](a, b, order - j) * (x - b) ** j / math.factorial(j)
 
     return val
 
@@ -293,26 +296,26 @@ def pieces_if(a, x, order, funcs, knots):
     num_knots = len(knots)
 
     # different cases
-    a_ind = [a < knots[0]] +\
-            [(a >= knots[i]) & (a < knots[i + 1])
-             for i in range(num_knots - 1)] +\
-            [a >= knots[-1]]
+    a_ind = (
+        [a < knots[0]]
+        + [(a >= knots[i]) & (a < knots[i + 1]) for i in range(num_knots - 1)]
+        + [a >= knots[-1]]
+    )
 
-    x_ind = [x <= knots[0]] +\
-            [(x > knots[i]) & (x <= knots[i + 1])
-             for i in range(num_knots - 1)] +\
-            [x > knots[-1]]
+    x_ind = (
+        [x <= knots[0]]
+        + [(x > knots[i]) & (x <= knots[i + 1]) for i in range(num_knots - 1)]
+        + [x > knots[-1]]
+    )
 
     int_f = np.zeros(a.size)
     for ia in range(len(funcs)):
         for ix in range(ia, len(funcs)):
             case_id = a_ind[ia] & x_ind[ix]
             if np.any(case_id):
-                int_f[case_id] = integrate_across_pieces(a[case_id],
-                                                         x[case_id],
-                                                         order,
-                                                         funcs[ia:ix + 1],
-                                                         knots[ia:ix])
+                int_f[case_id] = integrate_across_pieces(
+                    a[case_id], x[case_id], order, funcs[ia : ix + 1], knots[ia:ix]
+                )
 
     if result_is_scalar:
         return int_f[0]
@@ -353,10 +356,17 @@ def indicator_if(a, x, order, b, l_close=True, r_close=False):
     if order == 0:
         return indicator_f(x, b, l_close=l_close, r_close=r_close)
     else:
-        return pieces_if(a, x, order,
-                         [lambda *params: constant_if(*params, 0.0),
-                          lambda *params: constant_if(*params, 1.0),
-                          lambda *params: constant_if(*params, 0.0)], b)
+        return pieces_if(
+            a,
+            x,
+            order,
+            [
+                lambda *params: constant_if(*params, 0.0),
+                lambda *params: constant_if(*params, 1.0),
+                lambda *params: constant_if(*params, 0.0),
+            ],
+            b,
+        )
 
 
 def seq_diff_mat(size):
@@ -398,7 +408,7 @@ def order_to_index(order, shape):
         tuple:
         The index element in the array.
     """
-    assert hasattr(shape, '__iter__')
+    assert hasattr(shape, "__iter__")
     assert isinstance(order, int)
     assert 0 <= order < np.prod(shape)
 
@@ -409,7 +419,7 @@ def order_to_index(order, shape):
     for j in range(ndim):
         quotient = order // n[j]
         index.append(quotient)
-        order -= quotient*n[j]
+        order -= quotient * n[j]
 
     return tuple(index)
 
@@ -431,9 +441,9 @@ def option_to_list(opt, size):
     assert isinstance(size, int)
     assert size > 0
     if not opt:
-        return [False]*size
+        return [False] * size
     else:
-        return [True]*size
+        return [True] * size
 
 
 def outer_flatten(*args):

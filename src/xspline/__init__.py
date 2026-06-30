@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-    xspline
-    ~~~~~~~
+xspline
+~~~~~~~
 
-    xspline package
+xspline package
 """
+
 from .core import *
 from . import utils
