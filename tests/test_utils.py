@@ -167,10 +167,21 @@ def test_utils_order_to_index(order, shape):
 @pytest.mark.parametrize("option", [True, False, None])
 @pytest.mark.parametrize("size", [2, 3])
 def test_utils_option_to_list(option, size):
-    result = not option
+    expected = bool(option)
     my_result = utils.option_to_list(option, size)
-    assert len(my_result) == size
-    assert all([~(my_result[i] ^ result) for i in range(size)])
+    assert my_result == [expected] * size
+
+
+@pytest.mark.parametrize("size", [2, 3])
+def test_utils_option_to_list_with_list(size):
+    option = [i % 2 == 0 for i in range(size)]
+    my_result = utils.option_to_list(option, size)
+    assert my_result == option
+
+
+def test_utils_option_to_list_wrong_length():
+    with pytest.raises(AssertionError):
+        utils.option_to_list([True, False], 3)
 
 
 @pytest.mark.parametrize(
