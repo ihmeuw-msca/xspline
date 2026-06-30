@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-    test
-    ~~~~~~~~~
-
-    unit tests for xspline.core
-"""
 import numpy as np
 import pytest
+
 from xspline import core
 
 
@@ -16,9 +10,9 @@ from xspline import core
 @pytest.mark.parametrize("l_extra", [False, True])
 @pytest.mark.parametrize("r_extra", [False, True])
 def test_bspline_domain(knots, degree, idx, l_extra, r_extra):
-    my_domain = core.bspline_domain(knots, degree, idx,
-                                    l_extra=l_extra,
-                                    r_extra=r_extra)
+    my_domain = core.bspline_domain(
+        knots, degree, idx, l_extra=l_extra, r_extra=r_extra
+    )
     if idx == 0:
         tr_domain = knots[:2].copy()
         if l_extra:
@@ -64,13 +58,13 @@ def test_bspline_domain_r_extra(knots, degree):
 def test_bspline_fun(x, knots, degree, idx):
     my_y = core.bspline_fun(x, knots, degree, idx)
     if idx == 0:
-        tr_y = np.maximum((knots[1] - x)/knots[1], 0.0)
+        tr_y = np.maximum((knots[1] - x) / knots[1], 0.0)
     else:
         tr_y = np.zeros(x.size)
         idx1 = (x >= knots[0]) & (x < knots[1])
         idx2 = (x >= knots[1]) & (x < knots[2])
-        tr_y[idx1] = x[idx1]/knots[1]
-        tr_y[idx2] = (knots[2] - x[idx2])/(knots[2] - knots[1])
+        tr_y[idx1] = x[idx1] / knots[1]
+        tr_y[idx2] = (knots[2] - x[idx2]) / (knots[2] - knots[1])
 
     assert np.linalg.norm(tr_y - my_y) < 1e-10
 
@@ -114,10 +108,10 @@ def test_bspline_dfun(x, knots, degree, order, idx):
     idx1 = (x >= knots[0]) & (x < knots[1])
     idx2 = (x >= knots[1]) & (x < knots[2])
     if idx == 0:
-        tr_dy[idx1] = -1.0/knots[1]
+        tr_dy[idx1] = -1.0 / knots[1]
     else:
-        tr_dy[idx1] = 1.0/knots[1]
-        tr_dy[idx2] = -1.0/(knots[2] - knots[1])
+        tr_dy[idx1] = 1.0 / knots[1]
+        tr_dy[idx2] = -1.0 / (knots[2] - knots[1])
 
     assert np.linalg.norm(tr_dy - my_dy) < 1e-10
 
@@ -129,10 +123,9 @@ def test_bspline_dfun_l_extra(x, knots, l_extra):
     degree = 1
     idx = 0
     order = 1
-    my_dy = core.bspline_dfun(x, knots, degree, order, idx,
-                              l_extra=l_extra)
+    my_dy = core.bspline_dfun(x, knots, degree, order, idx, l_extra=l_extra)
     if l_extra:
-        tr_dy = -1.0/knots[1]
+        tr_dy = -1.0 / knots[1]
     else:
         tr_dy = 0.0
 
@@ -146,10 +139,9 @@ def test_bspline_dfun_r_extra(x, knots, r_extra):
     degree = 1
     idx = -1
     order = 1
-    my_dy = core.bspline_dfun(x, knots, degree, order, idx,
-                              r_extra=r_extra)
+    my_dy = core.bspline_dfun(x, knots, degree, order, idx, r_extra=r_extra)
     if r_extra:
-        tr_dy = 1.0/(knots[-1] - knots[-2])
+        tr_dy = 1.0 / (knots[-1] - knots[-2])
     else:
         tr_dy = 0.0
     assert np.linalg.norm(my_dy - tr_dy) < 1e-10
@@ -165,7 +157,7 @@ def test_bspline_ifun(x, knots, degree, order, idx):
     tr_iy = np.zeros(x.size)
     idx1 = (x >= knots[0]) & (x <= knots[1])
 
-    tr_iy[idx1] = x[idx1] - 0.5/knots[1]*x[idx1]**2
+    tr_iy[idx1] = x[idx1] - 0.5 / knots[1] * x[idx1] ** 2
     tr_iy[~idx1] = tr_iy[idx1][-1]
 
     assert np.linalg.norm(tr_iy - my_iy) < 1e-10
@@ -178,8 +170,7 @@ def test_bspline_ifun_l_extra(x, knots, l_extra):
     degree = 0
     idx = 0
     order = 1
-    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx,
-                              l_extra=l_extra)
+    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx, l_extra=l_extra)
     if l_extra:
         tr_iy = x - x[0]
     else:
@@ -195,8 +186,7 @@ def test_bspline_ifun_r_extra(x, knots, r_extra):
     degree = 0
     idx = -1
     order = 1
-    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx,
-                              r_extra=r_extra)
+    my_iy = core.bspline_ifun(x[0], x, knots, degree, order, idx, r_extra=r_extra)
     if r_extra:
         tr_iy = x - x[0]
     else:
