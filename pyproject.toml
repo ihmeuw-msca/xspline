@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xspline"
-version = "0.0.7"
+version = "0.0.8"
 description = "xspline: Advanced spline tools"
 readme = "README.md"
 requires-python = ">=3.11"
