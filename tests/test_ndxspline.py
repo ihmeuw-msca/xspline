@@ -8,6 +8,7 @@ Test XSpline class.
 
 import numpy as np
 import pytest
+
 from xspline import NDXSpline
 
 

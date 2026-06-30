@@ -8,6 +8,7 @@ unit tests for xspline.core
 
 import numpy as np
 import pytest
+
 from xspline import core
 
 

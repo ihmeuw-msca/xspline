@@ -1,6 +1,7 @@
 # utility functions for the bsplinex class
 import functools
 import math
+
 import numpy as np
 
 

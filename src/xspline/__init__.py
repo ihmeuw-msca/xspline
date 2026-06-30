@@ -6,5 +6,5 @@ xspline
 xspline package
 """
 
-from .core import *
 from . import utils
+from .core import *
