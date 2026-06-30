@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-test_xspline
-~~~~~~~~~~~~
-
-Test XSpline class.
-"""
-
 import numpy as np
 import pytest
 
@@ -106,7 +98,7 @@ def test_ifun(knots, degree, order, idx, l_linear, r_linear, l_extra, r_extra):
         x = np.linspace(xs.knots[0] - 1.0, xs.knots[1], 101)
     else:
         x = np.linspace(xs.knots[-2], xs.knots[-1], 101)
-    my_iy = xs.ifun(x[0], x, order, idx, l_extra=l_extra, r_extra=r_extra)
+    _ = xs.ifun(x[0], x, order, idx, l_extra=l_extra, r_extra=r_extra)
 
     domain = xs.domain(idx, l_extra=l_extra, r_extra=r_extra)
     lb = domain[0]

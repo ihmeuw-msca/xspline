@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-test_xspline
-~~~~~~~~~~~~
-
-Test XSpline class.
-"""
-
 import numpy as np
 import pytest
 

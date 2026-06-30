@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-test_utils
-~~~~~~~~~~
-
-unit tests for xspline.utils
-"""
-
 import numpy as np
 import pytest
 

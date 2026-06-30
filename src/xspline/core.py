@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-core
-~~~~
-
-core module contains main functions and classes.
-"""
-
 import numpy as np
 
 from . import utils
