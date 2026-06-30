@@ -1,10 +1,17 @@
 import functools
 import math
+from collections.abc import Callable
 
 import numpy as np
+import numpy.typing as npt
 
 
-def indicator_f(x, b, l_close=True, r_close=False):
+def indicator_f(
+    x: float | npt.NDArray,
+    b: npt.NDArray,
+    l_close: bool = True,
+    r_close: bool = False,
+) -> float | npt.NDArray:
     """Indicator function for provided interval.
 
     Parameters
@@ -42,7 +49,12 @@ def indicator_f(x, b, l_close=True, r_close=False):
         return (lb & rb).astype(np.double)
 
 
-def linear_f(x, z, fz, dfz):
+def linear_f(
+    x: float | npt.NDArray,
+    z: float | npt.NDArray,
+    fz: float | npt.NDArray,
+    dfz: float | npt.NDArray,
+) -> float | npt.NDArray:
     """Linear function construct by reference point(s).
 
     Parameters
@@ -69,7 +81,7 @@ def linear_f(x, z, fz, dfz):
     return fz + dfz * (x - z)
 
 
-def linear_lf(x, b):
+def linear_lf(x: float | npt.NDArray, b: npt.NDArray) -> float | npt.NDArray:
     """Linear function constructed by linearly interpolate 0 and 1 from left
     end point to right end point.
 
@@ -90,7 +102,7 @@ def linear_lf(x, b):
     return (x - b[0]) / (b[1] - b[0])
 
 
-def linear_rf(x, b):
+def linear_rf(x: float | npt.NDArray, b: npt.NDArray) -> float | npt.NDArray:
     """Linear function constructed by linearly interpolate 0 and 1 from right
     end point to left end point.
 
@@ -111,7 +123,12 @@ def linear_rf(x, b):
     return (x - b[1]) / (b[0] - b[1])
 
 
-def constant_if(a, x, order, c):
+def constant_if(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    order: int,
+    c: float,
+) -> float | npt.NDArray:
     """Integration of constant function.
 
     Parameters
@@ -158,7 +175,14 @@ def constant_if(a, x, order, c):
     return c * (x - a) ** order / math.factorial(order)
 
 
-def linear_if(a, x, order, z, fz, dfz):
+def linear_if(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    order: int,
+    z: float | npt.NDArray,
+    fz: float | npt.NDArray,
+    dfz: float | npt.NDArray,
+) -> float | npt.NDArray:
     """Integrate linear function constructed by the reference point(s).
 
     Parameters
@@ -195,7 +219,13 @@ def linear_if(a, x, order, z, fz, dfz):
     ) ** order / math.factorial(order)
 
 
-def integrate_across_pieces(a, x, order, funcs, knots):
+def integrate_across_pieces(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    order: int,
+    funcs: list[Callable[..., float | npt.NDArray]],
+    knots: npt.NDArray,
+) -> float | npt.NDArray:
     """Integrate Across piecewise functions.
 
     Parameters
@@ -243,7 +273,13 @@ def integrate_across_pieces(a, x, order, funcs, knots):
     return val
 
 
-def pieces_if(a, x, order, funcs, knots):
+def pieces_if(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    order: int,
+    funcs: list[Callable[..., float | npt.NDArray]],
+    knots: npt.NDArray,
+) -> float | npt.NDArray:
     """Integrate pieces of the functions.
 
     Parameters
@@ -315,7 +351,14 @@ def pieces_if(a, x, order, funcs, knots):
         return int_f
 
 
-def indicator_if(a, x, order, b, l_close=True, r_close=False):
+def indicator_if(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    order: int,
+    b: npt.NDArray,
+    l_close: bool = True,
+    r_close: bool = False,
+) -> float | npt.NDArray:
     """Integrate indicator function.
 
     Parameters
@@ -358,7 +401,7 @@ def indicator_if(a, x, order, b, l_close=True, r_close=False):
         )
 
 
-def seq_diff_mat(size):
+def seq_diff_mat(size: int) -> npt.NDArray:
     """Compute sequencial difference matrix.
 
     Parameters
@@ -384,7 +427,7 @@ def seq_diff_mat(size):
     return mat
 
 
-def order_to_index(order, shape):
+def order_to_index(order: int, shape: tuple[int, ...] | npt.NDArray) -> tuple[int, ...]:
     """Compute the index of the element in a high dimensional array provided
     the order of the element.
 
@@ -416,13 +459,15 @@ def order_to_index(order, shape):
     return tuple(index)
 
 
-def option_to_list(opt, size):
+def option_to_list(opt: bool | list[bool] | None, size: int) -> list[bool]:
     """Convert default option to list of options.
 
     Parameters
     ----------
     opt
-        A single option in the form of bool or None.
+        Option(s) in the form of a single bool, ``None``, or a list of bool
+        with length ``size``. ``None`` is treated as ``False`` and a single
+        bool is broadcast to every dimension.
     size
         Positive integer indicate the size of the option list.
 
@@ -433,13 +478,16 @@ def option_to_list(opt, size):
     """
     assert isinstance(size, int)
     assert size > 0
-    if not opt:
+    if opt is None:
         return [False] * size
-    else:
-        return [True] * size
+    if isinstance(opt, bool):
+        return [opt] * size
+    opt = list(opt)
+    assert len(opt) == size
+    return opt
 
 
-def outer_flatten(*args):
+def outer_flatten(*args: npt.NDArray) -> npt.NDArray:
     """Outer product of multiple vectors and then flatten the result.
 
     Parameters

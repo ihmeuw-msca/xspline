@@ -1,9 +1,16 @@
 import numpy as np
+import numpy.typing as npt
 
 from . import utils
 
 
-def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
+def bspline_domain(
+    knots: npt.NDArray,
+    degree: int,
+    idx: int,
+    l_extra: bool = False,
+    r_extra: bool = False,
+) -> npt.NDArray:
     """Compute the support for the spline basis, knots degree and the index of
     the basis.
 
@@ -47,7 +54,14 @@ def bspline_domain(knots, degree, idx, l_extra=False, r_extra=False):
     return np.array([lb, ub])
 
 
-def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
+def bspline_fun(
+    x: float | npt.NDArray,
+    knots: npt.NDArray,
+    degree: int,
+    idx: int,
+    l_extra: bool = False,
+    r_extra: bool = False,
+) -> float | npt.NDArray:
     """Compute the spline basis.
 
     Parameters
@@ -107,7 +121,15 @@ def bspline_fun(x, knots, degree, idx, l_extra=False, r_extra=False):
     return lf + rf
 
 
-def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
+def bspline_dfun(
+    x: float | npt.NDArray,
+    knots: npt.NDArray,
+    degree: int,
+    order: int,
+    idx: int,
+    l_extra: bool = False,
+    r_extra: bool = False,
+) -> float | npt.NDArray:
     """Compute the derivative of the spline basis.
 
     Parameters
@@ -194,7 +216,16 @@ def bspline_dfun(x, knots, degree, order, idx, l_extra=False, r_extra=False):
     return ldf + rdf
 
 
-def bspline_ifun(a, x, knots, degree, order, idx, l_extra=False, r_extra=False):
+def bspline_ifun(
+    a: float | npt.NDArray,
+    x: float | npt.NDArray,
+    knots: npt.NDArray,
+    degree: int,
+    order: int,
+    idx: int,
+    l_extra: bool = False,
+    r_extra: bool = False,
+) -> float | npt.NDArray:
     """Compute the integral of the spline basis.
 
     Parameters
@@ -337,12 +368,12 @@ class XSpline:
 
     def __init__(
         self,
-        knots,
-        degree,
-        l_linear=False,
-        r_linear=False,
+        knots: npt.ArrayLike,
+        degree: int,
+        l_linear: bool = False,
+        r_linear: bool = False,
         include_first_basis: bool = True,
-    ):
+    ) -> None:
         """Constructor of the XSpline class."""
         # pre-process the knots vector
         knots = list(set(knots))
@@ -375,7 +406,9 @@ class XSpline:
             self.inner_knots.size - 1 + self.degree - self.basis_start
         )
 
-    def domain(self, idx, l_extra=False, r_extra=False):
+    def domain(
+        self, idx: int, l_extra: bool = False, r_extra: bool = False
+    ) -> npt.NDArray:
         """Return the support of the XSpline.
 
         Parameters
@@ -407,7 +440,13 @@ class XSpline:
 
         return np.array([lb, ub])
 
-    def fun(self, x, idx, l_extra=False, r_extra=False):
+    def fun(
+        self,
+        x: float | npt.NDArray,
+        idx: int,
+        l_extra: bool = False,
+        r_extra: bool = False,
+    ) -> float | npt.NDArray:
         """Compute the spline basis.
 
         Parameters
@@ -481,7 +520,14 @@ class XSpline:
         else:
             return f
 
-    def dfun(self, x, order, idx, l_extra=False, r_extra=False):
+    def dfun(
+        self,
+        x: float | npt.NDArray,
+        order: int,
+        idx: int,
+        l_extra: bool = False,
+        r_extra: bool = False,
+    ) -> float | npt.NDArray:
         """Compute the derivative of the spline basis.
 
         Parameters
@@ -555,7 +601,15 @@ class XSpline:
         else:
             return dy
 
-    def ifun(self, a, x, order, idx, l_extra=False, r_extra=False):
+    def ifun(
+        self,
+        a: float | npt.NDArray,
+        x: float | npt.NDArray,
+        order: int,
+        idx: int,
+        l_extra: bool = False,
+        r_extra: bool = False,
+    ) -> float | npt.NDArray:
         """Compute the integral of the spline basis.
 
         Parameters
@@ -607,10 +661,14 @@ class XSpline:
         inner_ub_dy = bspline_dfun(self.inner_ub, self.inner_knots, self.degree, 1, idx)
 
         # there are in total 5 pieces functions
-        def l_piece(a, x, order):
+        def l_piece(
+            a: float | npt.NDArray, x: float | npt.NDArray, order: int
+        ) -> float | npt.NDArray:
             return utils.linear_if(a, x, order, self.inner_lb, inner_lb_y, inner_lb_dy)
 
-        def m_piece(a, x, order):
+        def m_piece(
+            a: float | npt.NDArray, x: float | npt.NDArray, order: int
+        ) -> float | npt.NDArray:
             return bspline_ifun(
                 a,
                 x,
@@ -622,10 +680,14 @@ class XSpline:
                 r_extra=r_extra,
             )
 
-        def r_piece(a, x, order):
+        def r_piece(
+            a: float | npt.NDArray, x: float | npt.NDArray, order: int
+        ) -> float | npt.NDArray:
             return utils.linear_if(a, x, order, self.inner_ub, inner_ub_y, inner_ub_dy)
 
-        def zero_piece(a, x, order):
+        def zero_piece(
+            a: float | npt.NDArray, x: float | npt.NDArray, order: int
+        ) -> float | npt.NDArray:
             if np.isscalar(a) and np.isscalar(x):
                 return 0.0
             elif np.isscalar(a):
@@ -660,7 +722,9 @@ class XSpline:
 
         return utils.pieces_if(a, x, order, funcs, knots)
 
-    def design_mat(self, x, l_extra=False, r_extra=False):
+    def design_mat(
+        self, x: float | npt.NDArray, l_extra: bool = False, r_extra: bool = False
+    ) -> npt.NDArray:
         """Compute the design matrix of spline basis.
 
         Parameters
@@ -689,7 +753,13 @@ class XSpline:
         ).T
         return mat
 
-    def design_dmat(self, x, order, l_extra=False, r_extra=False):
+    def design_dmat(
+        self,
+        x: float | npt.NDArray,
+        order: int,
+        l_extra: bool = False,
+        r_extra: bool = False,
+    ) -> npt.NDArray:
         """Compute the design matrix of spline basis derivatives.
 
         Parameters
@@ -720,7 +790,14 @@ class XSpline:
         ).T
         return dmat
 
-    def design_imat(self, a, x, order, l_extra=False, r_extra=False):
+    def design_imat(
+        self,
+        a: float | npt.NDArray,
+        x: float | npt.NDArray,
+        order: int,
+        l_extra: bool = False,
+        r_extra: bool = False,
+    ) -> npt.NDArray:
         """Compute the design matrix of the integrals of the spline bases.
 
         Parameters
@@ -755,7 +832,7 @@ class XSpline:
         ).T
         return imat
 
-    def last_dmat(self):
+    def last_dmat(self) -> npt.NDArray:
         """Compute highest order of derivative in domain.
 
         Returns
@@ -825,13 +902,13 @@ class NDXSpline:
 
     def __init__(
         self,
-        ndim,
-        knots_list,
-        degree_list,
-        l_linear_list=None,
-        r_linear_list=None,
-        include_first_basis_list=True,
-    ):
+        ndim: int,
+        knots_list: list[npt.ArrayLike],
+        degree_list: list[int],
+        l_linear_list: bool | list[bool] | None = None,
+        r_linear_list: bool | list[bool] | None = None,
+        include_first_basis_list: bool | list[bool] | None = True,
+    ) -> None:
         """Constructor of ndXSpline class."""
         self.ndim = ndim
         self.knots_list = knots_list
@@ -867,7 +944,13 @@ class NDXSpline:
         self.num_intervals = self.num_intervals_list.prod()
         self.num_spline_bases = self.num_spline_bases_list.prod()
 
-    def design_mat(self, x_list, is_grid=True, l_extra_list=None, r_extra_list=None):
+    def design_mat(
+        self,
+        x_list: list[npt.NDArray],
+        is_grid: bool = True,
+        l_extra_list: bool | list[bool] | None = None,
+        r_extra_list: bool | list[bool] | None = None,
+    ) -> npt.NDArray:
         """Design matrix of the spline basis.
 
         Parameters
@@ -921,8 +1004,13 @@ class NDXSpline:
         return np.ascontiguousarray(np.vstack(mat).T)
 
     def design_dmat(
-        self, x_list, n_list, is_grid=True, l_extra_list=None, r_extra_list=None
-    ):
+        self,
+        x_list: list[npt.NDArray],
+        n_list: list[int],
+        is_grid: bool = True,
+        l_extra_list: bool | list[bool] | None = None,
+        r_extra_list: bool | list[bool] | None = None,
+    ) -> npt.NDArray:
         """Design matrix of the derivatives of spline basis.
 
         Parameters
@@ -980,8 +1068,14 @@ class NDXSpline:
         return np.ascontiguousarray(np.vstack(dmat).T)
 
     def design_imat(
-        self, a_list, x_list, n_list, is_grid=True, l_extra_list=None, r_extra_list=None
-    ):
+        self,
+        a_list: list[npt.NDArray],
+        x_list: list[npt.NDArray],
+        n_list: list[int],
+        is_grid: bool = True,
+        l_extra_list: bool | list[bool] | None = None,
+        r_extra_list: bool | list[bool] | None = None,
+    ) -> npt.NDArray:
         """Design matrix of the spline basis.
 
         Parameters
@@ -1045,7 +1139,7 @@ class NDXSpline:
 
         return np.ascontiguousarray(np.vstack(imat).T)
 
-    def last_dmat(self):
+    def last_dmat(self) -> npt.NDArray:
         """Highest order of derivative matrix.
 
         Returns
