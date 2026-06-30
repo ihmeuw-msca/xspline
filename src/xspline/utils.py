@@ -193,8 +193,8 @@ def linear_if(a, x, order, z, fz, dfz):
     fa = fz + dfz*(a - z)
     dfa = dfz
 
-    return dfa*(x - a)**(order + 1)/np.math.factorial(order + 1) + \
-        fa*(x - a)**order/np.math.factorial(order)
+    return dfa*(x - a)**(order + 1)/math.factorial(order + 1) + \
+        fa*(x - a)**order/math.factorial(order)
 
 
 def integrate_across_pieces(a, x, order, funcs, knots):
