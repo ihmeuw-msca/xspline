@@ -1,25 +1,25 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "xspline"
 version = "0.1.1"
 description = "Advanced spline package that provides b-spline bases, their derivatives and integrals"
-readme = "README.rst"
-requires-python = ">=3.10"
-license = { text = "BSD-2-Clause" }
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
 authors = [
     { name = "IHME Math Sciences", email = "ihme.math.sciences@gmail.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: BSD License",
     "Natural Language :: English",
 ]
 dependencies = ["numpy>=1.25.1"]
 
-[project.optional-dependencies]
+[dependency-groups]
 test = ["pytest", "pytest-cov"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "furo"]
 
